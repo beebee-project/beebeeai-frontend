@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BeeBee AI</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="header-group">
+      <!-- 로고 자리 -->
+      <div class="header-logo-container">
+        <div class="logo-image">
+          <img src="image/Logo.png" alt="BeeBee AI Logo" />
+        </div>
+        <div class="logo-text">BeeBee AI</div>
+      </div>
+
+      <!-- 카테고리 -->
+      <div class="header-nav">
+        <a href="#" onclick="showExcelDemo()">엑셀/구글시트</a>
+        <a href="#" onclick="showSqlDemo()">SQL쿼리</a>
+        <a href="#" onclick="showNotionDemo()">Notion함수</a>
+      </div>
+
+      <div class="menu-icon">☰</div>
+    </div>
+
+    <div id="popup-overlay" class="popup-overlay">
+      <div class="popup-menu">
+        <span id="popup-close" class="popup-close">✕</span>
+        <h2>BeeBee AI</h2>
+        <a href="#" onclick="showExcelDemo()">엑셀/구글시트</a>
+        <a href="#" onclick="showSqlDemo()">SQL쿼리</a>
+        <a href="#" onclick="showNotionDemo()">Notion함수</a>
+      </div>
+    </div>
+
+    <!-- 중앙 문구 영역 -->
+    <div class="center-text-group">
+      <div class="center-title">무엇을 계산하고 싶으신가요?</div>
+      <div class="center-subtitle">
+        실시간으로 마법을 경험해보세요. 질문을 입력하면 수식으로 자동
+        변환됩니다.
+      </div>
+    </div>
+
+    <!-- 엑셀 데모 그룹 컨테이너 -->
+    <div class="excel-demo-group">
+      <div class="excel-input-group">
+        <div class="excel-input-header-group">
+          <div class="excel-input-title">
+            <span>🟡</span>
+            <span>말로 수식을 입력해 보세요</span>
+          </div>
+          <button class="excel-edit-button">수정</button>
+        </div>
+        <textarea
+          class="excel-input-field"
+          placeholder="예: A열이 90보다 크면 B열 값 출력하기"
+        ></textarea>
+      </div>
+      <div class="excel-output-group">
+        <div class="excel-output-header-group">
+          <div class="excel-output-title">
+            <span>생성된 수식:</span>
+          </div>
+          <div class="excel-button-group">
+            <button class="excel-preview-button">생성</button>
+            <button class="excel-copy-button">복사</button>
+          </div>
+        </div>
+        <div class="excel-preview-output">
+          <!-- 생성버튼 클릭 시 수식이 표시될 공간 -->
+          <p id="excel-formula-output">여기에 수식이 표시됩니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- sql 데모 그룹 컨테이너 -->
+    <div class="sql-demo-group">
+      <div class="sql-input-group">
+        <div class="sql-input-header-group">
+          <div class="sql-input-title">
+            <span>🟡</span>
+            <span>말로 쿼리를 입력해 보세요</span>
+          </div>
+          <button class="sql-edit-button">수정</button>
+        </div>
+        <textarea
+          class="sql-input-field"
+          placeholder="예: 최근 일주일간 회원 가입 수를 알려줘"
+        ></textarea>
+      </div>
+      <div class="sql-output-group">
+        <div class="sql-output-header-group">
+          <div class="sql-output-title">
+            <span>생성된 쿼리:</span>
+          </div>
+          <div class="sql-button-group">
+            <button class="sql-preview-button">생성</button>
+            <button class="sql-copy-button">복사</button>
+          </div>
+        </div>
+        <div class="sql-preview-output">
+          <!-- 생성버튼 클릭 시 수식이 표시될 공간 -->
+          <p id="sql-formula-output">여기에 수식이 표시됩니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 노션 데모 그룹 컨테이너 -->
+    <div class="notion-demo-group">
+      <div class="notion-input-group">
+        <div class="notion-input-header-group">
+          <div class="notion-input-title">
+            <span>🟡</span>
+            <span>말로 함수를 입력해 보세요</span>
+          </div>
+          <button class="notion-edit-button">수정</button>
+        </div>
+        <textarea
+          class="notion-input-field"
+          placeholder="예: 가격이 10000원 이상이면 '고가', 아니면 '일반'으로 분류해줘"
+        ></textarea>
+      </div>
+      <div class="notion-output-group">
+        <div class="notion-output-header-group">
+          <div class="excel-output-title">
+            <span>생성된 함수:</span>
+          </div>
+          <div class="notion-button-group">
+            <button class="notion-preview-button">생성</button>
+            <button class="notion-copy-button">복사</button>
+          </div>
+        </div>
+        <div class="notion-preview-output">
+          <!-- 생성버튼 클릭 시 수식이 표시될 공간 -->
+          <p id="notion-formula-output">여기에 수식이 표시됩니다.</p>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
