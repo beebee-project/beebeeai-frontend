@@ -2,7 +2,7 @@
 // 1. 공통 유틸리티 함수 (전역)
 // ==========================
 
-// 텍스트 영역의 내용을 기반으로 높이를 자동 조절합니다.
+// 텍스트 영역의 내용을 기반으로 높이를 자동 조절.
 function autoResizeTextarea(textarea) {
   if (textarea) {
     // 요소가 존재하는지 확인
@@ -15,7 +15,7 @@ function autoResizeTextarea(textarea) {
 // 2. API 호출 함수 (전역)
 // ==========================
 
-// 백엔드 API에 요청을 보냅니다.
+// 백엔드 API에 요청.
 async function requestFormula(prompt, type) {
   try {
     const response = await fetch("https://backend.beebeeai.kr/", {
@@ -100,17 +100,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // ======================================
   // 3.2. 초기 화면 설정 (글귀만 보이도록)
   // ======================================
-  // 페이지 로드 시에는 중앙 텍스트 그룹 (글귀)만 표시하고, 다른 데모 그룹은 숨깁니다.
+  // 페이지 로드 시에는 중앙 텍스트 그룹 (글귀)만 표시하고, 다른 데모 그룹은 숨김.
   hideAllDemoGroups(); // 일단 모든 데모 그룹 숨김 (centerTextGroup도 포함됨)
   if (centerTextGroup) {
     // centerTextGroup 요소가 존재하는지 확인
     centerTextGroup.style.display = "flex"; // '글귀'만 보이도록 설정
   }
-  updateActiveNavLink(""); // 초기에는 어떤 내비게이션 링크도 'active' 상태가 아니도록 합니다.
+  updateActiveNavLink(""); // 초기에는 어떤 내비게이션 링크도 'active' 상태가 아니도록 한다.
 
   // ======================================
   // 3.3. 상단 내비게이션 링크 이벤트 연결
-  // (HTML의 onclick 속성은 반드시 제거되어야 합니다!)
   // ======================================
   navLinks.forEach((link) => {
     link.addEventListener("click", (event) => {
