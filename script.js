@@ -57,7 +57,7 @@ function updateActiveNavLink(currentText) {
 async function requestFormula(prompt, type) {
   // type 인자를 필수로 받도록 변경
   try {
-    const response = await fetch("http://localhost:3000/api/generate-formula", {
+    const response = await fetch("https://backend.beebeeai.kr/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt, type }),
