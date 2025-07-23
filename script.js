@@ -135,20 +135,40 @@ document.addEventListener("DOMContentLoaded", () => {
   excelEditButton?.addEventListener("click", async () => {
     const userInput = excelInputField.value.trim();
     if (!userInput) return;
-    const refinedText = await requestFormula(userInput, "edit"); // 'edit' 타입으로 텍스트 정제 요청
-    excelInputField.value = refinedText;
-    autoResizeTextarea(excelInputField);
+    try {
+      // requestFormula 호출에 try-catch 추가
+      const responseData = await requestFormula(userInput, "edit");
+      // 응답 데이터에서 실제 텍스트가 있는 필드를 명시적으로 지정
+      const refinedText =
+        responseData && responseData.formula ? responseData.formula : ""; // undefined 방지
+      excelInputField.value = refinedText; // .value 사용
+      autoResizeTextarea(excelInputField);
+    } catch (error) {
+      console.error("수정 중 오류:", error);
+      excelInputField.value = "오류 발생: " + error.message;
+    }
   });
 
   // Excel 생성 버튼
   excelGenerateButton?.addEventListener("click", async () => {
     const userInput = excelInputField.value.trim();
     if (!userInput) {
-      excelOutputField.textContent = "수식을 입력해 주세요.";
+      excelOutputField.value = "수식을 입력해 주세요."; // .value 사용
       return;
     }
-    const formula = await requestFormula(userInput, "generate_excel"); // 'generate_excel' 타입으로 수식 생성 요청
-    excelOutputField.textContent = formula;
+    try {
+      // requestFormula 호출에 try-catch 추가
+      const responseData = await requestFormula(userInput, "generate_excel");
+      // 응답 데이터에서 실제 수식이 있는 필드를 명시적으로 지정
+      const formula =
+        responseData && responseData.formula
+          ? responseData.formula
+          : "오류 또는 수식 없음"; // undefined 방지
+      excelOutputField.value = formula; // .value 사용
+    } catch (error) {
+      console.error("수식 생성 중 오류:", error);
+      excelOutputField.value = "오류 발생: " + error.message; // .value 사용
+    }
   });
 
   // Excel 복사 버튼
