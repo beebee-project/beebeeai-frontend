@@ -1,10 +1,22 @@
 // ==========================
-// 2. API 호출 함수
+// 1. 공통 유틸리티 함수 (전역)
+// ==========================
+
+// 텍스트 영역의 내용을 기반으로 높이를 자동 조절합니다.
+function autoResizeTextarea(textarea) {
+  if (textarea) {
+    // 요소가 존재하는지 확인
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+  }
+}
+
+// ==========================
+// 2. API 호출 함수 (전역)
 // ==========================
 
 // 백엔드 API에 요청을 보냅니다.
 async function requestFormula(prompt, type) {
-  // type 인자를 필수로 받도록 변경
   try {
     const response = await fetch("https://backend.beebeeai.kr/", {
       method: "POST",
@@ -12,7 +24,6 @@ async function requestFormula(prompt, type) {
       body: JSON.stringify({ prompt, type }),
     });
 
-    // HTTP 상태 코드가 2xx 범위가 아니면 에러로 처리
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
@@ -23,10 +34,7 @@ async function requestFormula(prompt, type) {
     }
 
     const data = await response.json();
-    // !!! 이 부분을 수정합니다: 백엔드가 'formula'를 반환하므로 'data.formula'를 반환합니다. !!!
-    // 또한, 백엔드가 응답하는 필드명에 따라 'result'가 될 수도 있으니,
-    // 백엔드의 실제 응답 필드명을 확인하여 여기에 입력해야 합니다.
-    // 현재 백엔드는 `{"formula": "..."}` 를 보내므로, `data.formula`를 사용합니다.
+    // 백엔드가 `{"formula": "..."}`를 보내므로 `data.formula`를 반환합니다.
     return data.formula; // 수정된 부분
   } catch (error) {
     console.error("API 호출 중 오류 발생:", error);
@@ -35,17 +43,101 @@ async function requestFormula(prompt, type) {
   }
 }
 
-// ... (다른 유틸리티 함수들) ...
-
+// ==========================
+// 3. DOMContentLoaded 이벤트 리스너 (모든 DOM 조작 및 이벤트 연결)
+// ==========================
 document.addEventListener("DOMContentLoaded", () => {
-  // ... (다른 DOMContentLoaded 내부 코드) ...
+  // 데모 그룹 요소들 (초기화 시 숨김)
+  const excelDemoGroup = document.querySelector(".excel-demo-group");
+  const sqlDemoGroup = document.querySelector(".sql-demo-group");
+  const notionDemoGroup = document.querySelector(".notion-demo-group");
+  const centerTextGroup = document.querySelector(".center-text-group");
 
-  // ==========================
-  // 4. Excel 데모 그룹 버튼 기능 연결
-  // ==========================
+  // 상단 내비게이션 링크 요소들
+  const navLinks = document.querySelectorAll(".header-nav a");
+
+  // 모바일 메뉴 요소들
+  const menuIcon = document.querySelector(".menu-icon");
+  const popupOverlay = document.getElementById("popup-overlay");
+  const popupClose = document.getElementById("popup-close");
+
+  // ======================================
+  // 3.1. 데모 그룹 전환 함수 (DOMContentLoaded 내부 정의)
+  // ======================================
+  function hideAllDemoGroups() {
+    centerTextGroup.style.display = "none";
+    excelDemoGroup.style.display = "none";
+    sqlDemoGroup.style.display = "none";
+    notionDemoGroup.style.display = "none";
+  }
+
+  function updateActiveNavLink(currentText) {
+    navLinks.forEach((link) => {
+      if (link.textContent.trim() === currentText) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+  }
+
+  // 초기 로딩 시 엑셀 데모 표시 및 활성 링크 설정
+  hideAllDemoGroups();
+  excelDemoGroup.style.display = "flex"; // 초기에는 Excel 데모만 표시
+  updateActiveNavLink("엑셀/구글시트");
+
+  // ======================================
+  // 3.2. 상단 내비게이션 링크 이벤트 연결
+  // ======================================
+  navLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault(); // 기본 링크 동작 방지
+      const linkText = event.target.textContent.trim();
+
+      hideAllDemoGroups(); // 모든 데모 그룹 숨김
+      updateActiveNavLink(linkText); // 활성 링크 업데이트
+
+      if (linkText === "엑셀/구글시트") {
+        excelDemoGroup.style.display = "flex";
+      } else if (linkText === "SQL쿼리") {
+        sqlDemoGroup.style.display = "flex";
+      } else if (linkText === "Notion함수") {
+        notionDemoGroup.style.display = "flex";
+      }
+      // 모바일 팝업 메뉴도 닫기 (있다면)
+      if (popupOverlay) popupOverlay.style.display = "none";
+    });
+  });
+
+  // ======================================
+  // 3.3. 텍스트 영역 자동 크기 조절 기능 연결
+  // ======================================
+  const textareas = document.querySelectorAll("textarea"); // 모든 textarea에 적용
+  textareas.forEach((textarea) => {
+    textarea.addEventListener("input", () => autoResizeTextarea(textarea));
+  });
+
+  // ======================================
+  // 3.4. 모바일 메뉴 (팝업) 기능 연결
+  // ======================================
+  menuIcon?.addEventListener("click", () => {
+    popupOverlay.style.display = "flex";
+  });
+
+  popupClose?.addEventListener("click", () => {
+    popupOverlay.style.display = "none";
+  });
+
+  popupOverlay?.addEventListener("click", (e) => {
+    if (e.target === popupOverlay) {
+      popupOverlay.style.display = "none";
+    }
+  });
+
+  // ======================================
+  // 3.5. Excel 데모 그룹 버튼 기능 연결
+  // ======================================
   const excelInputField = document.querySelector(".excel-input-field");
-  // excelOutputField가 <textarea>나 <input>이라면 .value를 사용해야 합니다.
-  // HTML에서 해당 요소의 태그를 확인하세요.
   const excelOutputField = document.getElementById("excel-formula-output");
   const excelEditButton = document.querySelector(".excel-edit-button");
   const excelGenerateButton = document.querySelector(".excel-preview-button");
@@ -56,8 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const userInput = excelInputField.value.trim();
     if (!userInput) return;
     try {
-      const responseText = await requestFormula(userInput, "edit"); // requestFormula에서 'formula'를 반환할 것이므로, 이를 텍스트로 사용
-      excelInputField.value = responseText; // .value 사용
+      const responseText = await requestFormula(userInput, "edit");
+      excelInputField.value = responseText;
       autoResizeTextarea(excelInputField);
     } catch (error) {
       console.error("수정 중 오류:", error);
@@ -69,70 +161,75 @@ document.addEventListener("DOMContentLoaded", () => {
   excelGenerateButton?.addEventListener("click", async () => {
     const userInput = excelInputField.value.trim();
     if (!userInput) {
-      excelOutputField.value = "수식을 입력해 주세요."; // .value 사용 (수정)
+      excelOutputField.value = "수식을 입력해 주세요.";
       return;
     }
     try {
-      const formulaText = await requestFormula(userInput, "generate_excel"); // requestFormula에서 'formula'를 반환할 것임
-      excelOutputField.value = formulaText; // .value 사용 (수정)
+      const formulaText = await requestFormula(userInput, "generate_excel");
+      excelOutputField.value = formulaText;
     } catch (error) {
       console.error("수식 생성 중 오류:", error);
-      excelOutputField.value = "오류 발생: " + error.message; // .value 사용
+      excelOutputField.value = "오류 발생: " + error.message;
     }
   });
 
-  // ... (SQL 및 Notion 부분도 동일하게 .textContent 대신 .value로 변경하세요) ...
-  // SQL 생성 버튼
-  sqlGenerateButton?.addEventListener("click", async () => {
-    const userInput = sqlInputField.value.trim();
-    if (!userInput) {
-      sqlOutputField.value = "쿼리를 입력해 주세요."; // .value 사용 (수정)
-      return;
-    }
-    try {
-      const queryText = await requestFormula(userInput, "generate_sql");
-      sqlOutputField.value = queryText; // .value 사용 (수정)
-    } catch (error) {
-      console.error("쿼리 생성 중 오류:", error);
-      sqlOutputField.value = "오류 발생: " + error.message;
-    }
-  });
-
-  // Notion 생성 버튼
-  notionGenerateButton?.addEventListener("click", async () => {
-    const userInput = notionInputField.value.trim();
-    if (!userInput) {
-      notionOutputField.value = "함수를 입력해 주세요."; // .value 사용 (수정)
-      return;
-    }
-    try {
-      const funcText = await requestFormula(userInput, "generate_notion");
-      notionOutputField.value = funcText; // .value 사용 (수정)
-    } catch (error) {
-      console.error("함수 생성 중 오류:", error);
-      notionOutputField.value = "오류 발생: " + error.message;
-    }
-  });
-
-  // ... (Excel 복사, SQL 복사, Notion 복사 버튼도 .textContent 대신 .value를 사용해야 합니다.)
   // Excel 복사 버튼
   excelCopyButton?.addEventListener("click", () => {
-    const formulaText = excelOutputField.value; // .value 사용 (수정)
+    const formulaText = excelOutputField.value; // .value 사용
     if (
       !formulaText ||
       formulaText === "수식을 입력해 주세요." ||
       formulaText === "오류 발생: API 호출 실패"
     )
-      return; // 오류 메시지도 복사 안 되게
+      return;
     navigator.clipboard
       .writeText(formulaText)
       .then(() => alert("수식이 복사되었습니다!"))
       .catch((err) => console.error("복사 실패:", err));
   });
 
+  // ======================================
+  // 3.6. SQL 데모 그룹 버튼 기능 연결
+  // ======================================
+  const sqlInputField = document.querySelector(".sql-input-field");
+  const sqlOutputField = document.getElementById("sql-formula-output");
+  const sqlEditButton = document.querySelector(".sql-edit-button");
+  const sqlGenerateButton = document.querySelector(".sql-preview-button");
+  const sqlCopyButton = document.querySelector(".sql-copy-button");
+
+  // SQL 수정 버튼
+  sqlEditButton?.addEventListener("click", async () => {
+    const userInput = sqlInputField.value.trim();
+    if (!userInput) return;
+    try {
+      const responseText = await requestFormula(userInput, "edit");
+      sqlInputField.value = responseText;
+      autoResizeTextarea(sqlInputField);
+    } catch (error) {
+      console.error("수정 중 오류:", error);
+      sqlInputField.value = "오류 발생: " + error.message;
+    }
+  });
+
+  // SQL 생성 버튼
+  sqlGenerateButton?.addEventListener("click", async () => {
+    const userInput = sqlInputField.value.trim();
+    if (!userInput) {
+      sqlOutputField.value = "쿼리를 입력해 주세요."; // .value 사용
+      return;
+    }
+    try {
+      const queryText = await requestFormula(userInput, "generate_sql");
+      sqlOutputField.value = queryText;
+    } catch (error) {
+      console.error("쿼리 생성 중 오류:", error);
+      sqlOutputField.value = "오류 발생: " + error.message;
+    }
+  });
+
   // SQL 복사 버튼
   sqlCopyButton?.addEventListener("click", () => {
-    const queryText = sqlOutputField.value; // .value 사용 (수정)
+    const queryText = sqlOutputField.value; // .value 사용
     if (
       !queryText ||
       queryText === "쿼리를 입력해 주세요." ||
@@ -145,9 +242,48 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((err) => console.error("복사 실패:", err));
   });
 
+  // ======================================
+  // 3.7. Notion 데모 그룹 버튼 기능 연결
+  // ======================================
+  const notionInputField = document.querySelector(".notion-input-field");
+  const notionOutputField = document.getElementById("notion-formula-output");
+  const notionEditButton = document.querySelector(".notion-edit-button");
+  const notionGenerateButton = document.querySelector(".notion-preview-button");
+  const notionCopyButton = document.querySelector(".notion-copy-button");
+
+  // Notion 수정 버튼
+  notionEditButton?.addEventListener("click", async () => {
+    const userInput = notionInputField.value.trim();
+    if (!userInput) return;
+    try {
+      const responseText = await requestFormula(userInput, "edit");
+      notionInputField.value = responseText;
+      autoResizeTextarea(notionInputField);
+    } catch (error) {
+      console.error("수정 중 오류:", error);
+      notionInputField.value = "오류 발생: " + error.message;
+    }
+  });
+
+  // Notion 생성 버튼
+  notionGenerateButton?.addEventListener("click", async () => {
+    const userInput = notionInputField.value.trim();
+    if (!userInput) {
+      notionOutputField.value = "함수를 입력해 주세요."; // .value 사용
+      return;
+    }
+    try {
+      const funcText = await requestFormula(userInput, "generate_notion");
+      notionOutputField.value = funcText;
+    } catch (error) {
+      console.error("함수 생성 중 오류:", error);
+      notionOutputField.value = "오류 발생: " + error.message;
+    }
+  });
+
   // Notion 복사 버튼
   notionCopyButton?.addEventListener("click", () => {
-    const funcText = notionOutputField.value; // .value 사용 (수정)
+    const funcText = notionOutputField.value; // .value 사용
     if (
       !funcText ||
       funcText === "함수를 입력해 주세요." ||
