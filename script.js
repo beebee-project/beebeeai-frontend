@@ -2,10 +2,9 @@
 // 1. 공통 유틸리티 함수 (전역)
 // ==========================
 
-// 텍스트 영역의 내용을 기반으로 높이를 자동 조절.
+// 텍스트 영역의 내용을 기반으로 높이를 자동 조절합니다.
 function autoResizeTextarea(textarea) {
   if (textarea) {
-    // 요소가 존재하는지 확인
     textarea.style.height = "auto";
     textarea.style.height = textarea.scrollHeight + "px";
   }
@@ -36,7 +35,6 @@ async function requestFormula(prompt, type) {
     const data = await response.json();
     return data.formula; // 백엔드가 'formula'를 반환하므로 'data.formula' 사용
   } catch (error) {
-    // Syntax fix: 'error' without '=>'
     console.error("API 호출 중 오류 발생:", error);
     alert(`오류: ${error.message}`); // 사용자에게 오류 메시지 알림
     return "API 호출 실패"; // 오류 발생 시 undefined 대신 오류 메시지 반환
@@ -92,7 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
       excelDemoGroup.style.display = "flex";
     } else if (linkText === "SQL쿼리") {
       sqlDemoGroup.style.display = "flex";
-    } else if (linkText === "Notion함수") {
+    } else if (linkText === "Notion수식") {
+      // HTML 내비게이션 텍스트에 맞춰 Notion수식으로 변경 (이전 Notion함수 -> Notion수식)
       notionDemoGroup.style.display = "flex";
     }
   }
@@ -110,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ======================================
   // 3.3. 상단 내비게이션 링크 이벤트 연결
+  // (HTML의 onclick 속성은 반드시 제거되어야 합니다!)
   // ======================================
   navLinks.forEach((link) => {
     link.addEventListener("click", (event) => {
@@ -159,24 +159,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // ======================================
   const excelInputField = document.querySelector(".excel-input-field");
   const excelOutputField = document.getElementById("excel-formula-output"); // <p> 태그이므로 .textContent 사용
-  const excelEditButton = document.querySelector(".excel-edit-button");
+  // const excelEditButton = document.querySelector(".excel-edit-button"); // '수정' 버튼 제거
   const excelGenerateButton = document.querySelector(".excel-preview-button");
   const excelCopyButton = document.querySelector(".excel-copy-button");
 
-  // Excel 수정 버튼
-  excelEditButton?.addEventListener("click", async () => {
-    const userInput = excelInputField.value.trim();
-    if (!userInput) return;
-    try {
-      const responseText = await requestFormula(userInput, "edit"); // 'edit' 타입으로 텍스트 정제 요청
-      excelInputField.value = responseText; // .value 사용
-      autoResizeTextarea(excelInputField);
-    } catch (error) {
-      // Syntax fix: 'error' without '=>'
-      console.error("수정 중 오류:", error);
-      excelInputField.value = "오류 발생: " + error.message;
-    }
-  });
+  // Excel 수정 버튼 (제거됨)
+  // excelEditButton?.addEventListener("click", async () => { /* ... */ });
 
   // Excel 생성 버튼
   excelGenerateButton?.addEventListener("click", async () => {
@@ -189,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const formulaText = await requestFormula(userInput, "generate_excel");
       excelOutputField.textContent = formulaText; // <p> 태그이므로 .textContent 사용
     } catch (error) {
-      // Syntax fix: 'error' without '=>'
       console.error("수식 생성 중 오류:", error);
       excelOutputField.textContent = "오류 발생: " + error.message;
     }
@@ -215,24 +202,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // ======================================
   const sqlInputField = document.querySelector(".sql-input-field");
   const sqlOutputField = document.getElementById("sql-formula-output"); // <p> 태그로 가정
-  const sqlEditButton = document.querySelector(".sql-edit-button");
+  // const sqlEditButton = document.querySelector(".sql-edit-button"); // '수정' 버튼 제거
   const sqlGenerateButton = document.querySelector(".sql-preview-button");
   const sqlCopyButton = document.querySelector(".sql-copy-button");
 
-  // SQL 수정 버튼
-  sqlEditButton?.addEventListener("click", async () => {
-    const userInput = sqlInputField.value.trim();
-    if (!userInput) return;
-    try {
-      const responseText = await requestFormula(userInput, "edit");
-      sqlInputField.value = responseText;
-      autoResizeTextarea(sqlInputField);
-    } catch (error) {
-      // Syntax fix: 'error' without '=>'
-      console.error("수정 중 오류:", error);
-      sqlInputField.value = "오류 발생: " + error.message;
-    }
-  });
+  // SQL 수정 버튼 (제거됨)
+  // sqlEditButton?.addEventListener("click", async () => { /* ... */ });
 
   // SQL 생성 버튼
   sqlGenerateButton?.addEventListener("click", async () => {
@@ -245,7 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const queryText = await requestFormula(userInput, "generate_sql");
       sqlOutputField.textContent = queryText; // <p> 태그이므로 .textContent 사용
     } catch (error) {
-      // Syntax fix: 'error' without '=>'
       console.error("쿼리 생성 중 오류:", error);
       sqlOutputField.textContent = "오류 발생: " + error.message;
     }
@@ -271,37 +245,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // ======================================
   const notionInputField = document.querySelector(".notion-input-field");
   const notionOutputField = document.getElementById("notion-formula-output"); // <p> 태그로 가정
-  const notionEditButton = document.querySelector(".notion-edit-button");
+  // const notionEditButton = document.querySelector(".notion-edit-button"); // '수정' 버튼 제거
   const notionGenerateButton = document.querySelector(".notion-preview-button");
   const notionCopyButton = document.querySelector(".notion-copy-button");
 
-  // Notion 수정 버튼
-  notionEditButton?.addEventListener("click", async () => {
-    const userInput = notionInputField.value.trim();
-    if (!userInput) return;
-    try {
-      const responseText = await requestFormula(userInput, "edit");
-      notionInputField.value = responseText;
-      autoResizeTextarea(notionInputField);
-    } catch (error) {
-      // Syntax fix: 'error' without '=>'
-      console.error("수정 중 오류:", error);
-      notionInputField.value = "오류 발생: " + error.message;
-    }
-  });
+  // Notion 수정 버튼 (제거됨)
+  // notionEditButton?.addEventListener("click", async () => { /* ... */ });
 
   // Notion 생성 버튼
   notionGenerateButton?.addEventListener("click", async () => {
     const userInput = notionInputField.value.trim();
     if (!userInput) {
-      notionOutputField.textContent = "함수를 입력해 주세요."; // <p> 태그이므로 .textContent 사용
+      notionOutputField.textContent = "수식을 입력해 주세요."; // <p> 태그이므로 .textContent 사용
       return;
     }
     try {
       const funcText = await requestFormula(userInput, "generate_notion");
       notionOutputField.textContent = funcText; // <p> 태그이므로 .textContent 사용
     } catch (error) {
-      // Syntax fix: 'error' without '=>'
       console.error("함수 생성 중 오류:", error);
       notionOutputField.textContent = "오류 발생: " + error.message;
     }
@@ -312,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const funcText = notionOutputField.textContent; // <p> 태그이므로 .textContent 사용
     if (
       !funcText ||
-      funcText === "함수를 입력해 주세요." ||
+      funcText === "수식을 입력해 주세요." ||
       funcText === "오류 발생: API 호출 실패"
     )
       return;

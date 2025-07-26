@@ -183,13 +183,10 @@
   gap: 5px;
 }
 
-.sql-edit-button,
 .sql-preview-button,
 .sql-copy-button,
-.notion-edit-button,
 .notion-preview-button,
 .notion-copy-button,
-.excel-edit-button,
 .excel-preview-button,
 .excel-copy-button {
   width: 60px;
@@ -201,11 +198,8 @@
   cursor: pointer;
 }
 
-.sql-edit-button:hover,
 .sql-copy-button:hover,
-.notion-edit-button:hover,
 .notion-copy-button:hover,
-.excel-edit-button:hover,
 .excel-copy-button:hover {
   background-color: #e0e0e0;
 }
