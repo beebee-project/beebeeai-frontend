@@ -3,24 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BeeBee AI</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      xintegrity="sha512-..."
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
   </head>
-
   <body>
+    <!-- 헤더 영역 -->
     <div class="header-group">
-      <div class="header-logo-container">
-        <div class="logo-image">
-          <img src="image/Logo.png" alt="BeeBee AI Logo" />
+      <a href="index.html">
+        <div class="header-logo-container">
+          <div class="logo-image">
+            <img src="image/Logo.png" alt="BeeBeeAI Logo" />
+          </div>
+          <div class="logo-text">BeeBee AI</div>
         </div>
-        <div class="logo-text">BeeBee AI</div>
-      </div>
+      </a>
 
-      <!-- 카테고리 -->
       <nav class="header-nav">
-        <a href="#">엑셀/구글시트</a>
-        <a href="#">SQL쿼리</a>
-        <a href="#">Notion수식</a>
+        <a href="#">가이드</a>
+        <!-- <a href="#" id="desktop-pricing-link">가격</a> -->
+        <a href="#" id="desktop-login-link">로그인</a>
       </nav>
 
       <div class="menu-icon">☰</div>
@@ -28,115 +49,268 @@
       <div id="popup-overlay" class="popup-overlay">
         <div class="popup-menu">
           <span id="popup-close" class="popup-close">X</span>
-          <h2>BeeBee AI</h2>
-          <a href="#">엑셀/구글시트</a>
-          <a href="#">SQL쿼리</a>
-          <a href="#">Notion수식</a>
+          <h2>BeeBeeAI</h2>
+          <a href="#">가이드</a>
+          <!-- <a href="#" id="mobile-pricing-link">가격</a> -->
+          <a href="#" id="mobile-login-link">로그인</a>
         </div>
       </div>
     </div>
 
-    <!-- 중앙 문구 영역 -->
-    <div class="center-text-group">
-      <div class="center-title">무엇을 계산하고 싶으신가요?</div>
-      <div class="center-subtitle">
-        실시간으로 마법을 경험해보세요. 질문을 입력하면 수식으로 자동
-        변환됩니다.
-      </div>
-    </div>
-
-    <!-- 엑셀 데모 그룹 컨테이너 -->
-    <div class="excel-demo-group">
-      <div class="excel-input-group">
-        <div class="excel-input-header-group">
-          <div class="excel-input-title">
-            <span>🟡</span>
-            <span>말로 수식을 입력해 보세요</span>
+    <!-- 파일 업로드 팝업 오버레이 -->
+    <div id="upload-popup-overlay" class="popup-overlay">
+      <div class="upload-popup">
+        <div class="upload-options-top">
+          <button id="upload-button" class="upload-button">파일 업로드</button>
+          <div class="upload-options-group">
+            <select id="file-type-select">
+              <option value="all">전체</option>
+              <option value="xlsx">xlsx</option>
+              <option value="csv">CSV</option>
+              <option value="sql">SQL</option>
+            </select>
           </div>
         </div>
-        <textarea
-          class="excel-input-field"
-          placeholder="예: A열이 90보다 크면 B열 값 출력하기"
-        ></textarea>
-      </div>
-      <div class="excel-output-group">
-        <div class="excel-output-header-group">
-          <div class="excel-output-title">
-            <span>생성된 수식:</span>
-          </div>
-          <div class="excel-button-group">
-            <button class="excel-preview-button">생성</button>
-            <button class="excel-copy-button">복사</button>
-          </div>
+        <div class="upload-area">
+          <svg
+            class="upload-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            viewbox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-4H8l4-4 4 4h-3v4z"
+            />
+          </svg>
+          <p>시작하려면 파일을 추가하세요</p>
+          <input
+            type="file"
+            id="upload-file-input"
+            style="display: none"
+            accept=".xlsx, .csv, .sql"
+          />
         </div>
-        <div class="excel-preview-output">
-          <!-- 생성버튼 클릭 시 수식이 표시될 공간 -->
-          <p id="excel-formula-output">여기에 수식이 표시됩니다.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- sql 데모 그룹 컨테이너 -->
-    <div class="sql-demo-group">
-      <div class="sql-input-group">
-        <div class="sql-input-header-group">
-          <div class="sql-input-title">
-            <span>🟡</span>
-            <span>말로 쿼리를 입력해 보세요</span>
-          </div>
-        </div>
-        <textarea
-          class="sql-input-field"
-          placeholder="예: 최근 일주일간 회원 가입 수를 알려줘"
-        ></textarea>
-      </div>
-      <div class="sql-output-group">
-        <div class="sql-output-header-group">
-          <div class="sql-output-title">
-            <span>생성된 쿼리:</span>
-          </div>
-          <div class="sql-button-group">
-            <button class="sql-preview-button">생성</button>
-            <button class="sql-copy-button">복사</button>
-          </div>
-        </div>
-        <div class="sql-preview-output">
-          <!-- 생성버튼 클릭 시 수식이 표시될 공간 -->
-          <p id="sql-formula-output">여기에 수식이 표시됩니다.</p>
+        <div class="popup-actions">
+          <button id="cancel-upload-btn" class="cancel-upload-btn">
+            돌아가기
+          </button>
+          <button id="start-upload-btn" class="start-upload-btn" disabled>
+            시작하기
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- 노션 데모 그룹 컨테이너 -->
-    <div class="notion-demo-group">
-      <div class="notion-input-group">
-        <div class="notion-input-header-group">
-          <div class="notion-input-title">
-            <span>🟡</span>
-            <span>말로 수식을 입력해 보세요</span>
-          </div>
+    <!-- 로그인/회원가입 팝업 오버레이 -->
+    <div class="modal-overlay" id="login-modal-overlay">
+      <div class="login-modal-content">
+        <button class="close-button" id="login-close-btn">X</button>
+        <div class="tab-group">
+          <button class="tab-button active" id="login-tab">로그인</button>
+          <button class="tab-button" id="signup-tab">회원가입</button>
         </div>
-        <textarea
-          class="notion-input-field"
-          placeholder="예: 가격이 10000원 이상이면 '고가', 아니면 '일반'으로 분류해줘"
-        ></textarea>
-      </div>
-      <div class="notion-output-group">
-        <div class="notion-output-header-group">
-          <div class="excel-output-title">
-            <span>생성된 수식:</span>
+        <form id="auth-form">
+          <div class="form-group">
+            <label for="email">이메일</label>
+            <input type="email" id="email" name="email" required />
           </div>
-          <div class="notion-button-group">
-            <button class="notion-preview-button">생성</button>
-            <button class="notion-copy-button">복사</button>
+          <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" name="password" required />
+            <p
+              id="password-hint"
+              style="
+                font-size: 12px;
+                color: #888;
+                margin-top: 5px;
+                display: none;
+              "
+            >
+              영어, 숫자, 특수문자 포함 8자리 이상
+            </p>
           </div>
-        </div>
-        <div class="notion-preview-output">
-          <!-- 생성버튼 클릭 시 수식이 표시될 공간 -->
-          <p id="notion-formula-output">여기에 수식이 표시됩니다.</p>
-        </div>
+          <div
+            id="forgot-password-link"
+            style="text-align: right; margin-top: 10px"
+          >
+            <a
+              href="forgot-password.html"
+              style="font-size: 14px; color: #555; text-decoration: none"
+              >비밀번호를 잊으셨나요?</a
+            >
+          </div>
+          <button type="submit" class="main-action-button" id="main-action-btn">
+            로그인
+          </button>
+        </form>
+        <button class="gsi-material-button" id="google-btn">
+          <div class="gsi-material-button-state"></div>
+          <div class="gsi-material-button-content-wrapper">
+            <div class="gsi-material-button-icon">
+              <svg
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 48 48"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                style="display: block"
+              >
+                <path
+                  fill="#EA4335"
+                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                ></path>
+                <path
+                  fill="#4285F4"
+                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                ></path>
+                <path
+                  fill="#FBBC05"
+                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                ></path>
+                <path
+                  fill="#34A853"
+                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                ></path>
+                <path fill="none" d="M0 0h48v48H0z"></path>
+              </svg>
+            </div>
+            <span class="gsi-material-button-contents"
+              >Continue with Google</span
+            >
+            <span style="display: none">Continue with Google</span>
+          </div>
+        </button>
+        <a href="#" id="naver-btn" class="naver-login-button">
+          <img src="image/naver.png" alt="네이버 로그인" />
+        </a>
       </div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- 가격 팝업 오버레이 -->
+    <!-- <div class="modal-overlay" id="pricing-modal-overlay">
+      <div class="pricing-modal-content">
+        <button class="close-button" id="pricing-close-btn">X</button>
+        <div class="pricing-card">
+          <h2 class="plan-title">
+            <span style="color: #ffc800">BeeBee AI</span> - PRO
+          </h2>
+          <div class="plan-price">₩9000<span>/월</span></div>
+          <p class="plan-description">
+            복잡한 수식은 BeeBee AI에게 맡기고, 업무 시간을 단축하세요.
+          </p>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> 월 5000개의 수식 생성</li>
+            <li><i class="fas fa-check"></i> 파일 업로드 5개</li>
+            <li><i class="fas fa-check"></i> 서식 생성</li>
+            <li><i class="fas fa-check"></i> STD 매핑</li>
+          </ul>
+          <button class="cta-button pro-button">PRO 시작하기</button>
+        </div>
+      </div>
+    </div> -->
+
+    <aside class="sidebar-container" id="mainSidebar">
+      <div class="sidebar-header">
+        <button
+          class="sidebar-toggle-btn"
+          aria-label="사이드바 축소/확대"
+          title="사이드바 닫기"
+        >
+          <span class="hamburger-icon">&#9776;</span>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <ul class="sidebar-menu-list">
+          <li>
+            <a
+              href="#"
+              id="formula-converter-btn"
+              class="sidebar-menu-item"
+              data-target="chat-content"
+            >
+              수식 변환기
+            </a>
+          </li>
+          <!-- <li>
+            <a href="#" class="sidebar-menu-item" data-target="Form-content"
+              >서식 생성기</a
+            >
+          </li> -->
+          <!-- <li>
+            <a href="#" class="sidebar-menu-item" data-target="data-content"
+              >엑셀 <-> 데이터</a
+            >
+          </li> -->
+        </ul>
+      </nav>
+      <!-- <div class="usage-card" id="usageCard" aria-live="polite">
+        <div class="usage-card__header">
+          <span class="usage-card__plan-badge" id="planBadge">FREE</span>
+          <span class="usage-card__plan-name" id="planName">무료 플랜</span>
+        </div>
+
+        <div class="usage-row">
+          <span class="usage-label">수식 생성</span>
+          <span class="usage-count"
+            ><b id="formulaCount">0</b>/<span id="formulaLimit">20</span></span
+          >
+        </div>
+
+        <div class="usage-row">
+          <span class="usage-label">파일 업로드</span>
+          <span class="usage-count"
+            ><b id="uploadCount">0</b>/<span id="uploadLimit">1</span></span
+          >
+        </div>
+
+        <div class="usage-card__footer" id="resetHint">
+          월 사용량은 매월 1일에 재설정됩니다.
+        </div>
+      </div> -->
+    </aside>
+
+    <main>
+      <!-- 수식 변환기 콘텐츠 섹션 -->
+      <div id="chat-content" class="main-content-section">
+        <div class="conversion-type-selector">
+          <label for="conversion-type-select">변환 타입:</label>
+          <select id="conversion-type-select">
+            <option value="">-- 선택 --</option>
+            <option value="Excel/Google Sheets">Excel/Google Sheets</option>
+            <option value="SQL">SQL</option>
+          </select>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-area">
+          <div class="input-field-wrapper">
+            <textarea
+              id="user-input"
+              placeholder="BeeBee AI에게 물어보기"
+            ></textarea>
+            <div class="input-actions">
+              <button
+                class="attach-button"
+                id="attach-button"
+                aria-label="파일 업로드"
+                title="파일 업로드"
+              >
+                +
+              </button>
+              <button class="send-button" id="send-button">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <input
+          type="file"
+          id="file-input"
+          style="display: none"
+          accept=".xlsx, .csv, .sql"
+        />
+      </div>
+    </main>
+    <footer></footer>
+    <script src="index.js"></script>
+    <script src="price.js"></script>
   </body>
 </html>
