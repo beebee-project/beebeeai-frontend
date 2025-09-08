@@ -463,33 +463,6 @@ async function handleFileUpload(file) {
   }
 }
 
-// async function handleFileDownload(originalName) {
-//   const token = localStorage.getItem("token");
-//   if (!token) return alert("로그인이 필요합니다.");
-//   try {
-//     const response = await fetch(
-//       `http://localhost:3001/api/files/download/${encodeURIComponent(
-//         originalName
-//       )}`,
-//       {
-//         headers: { Authorization: `Bearer ${token}` },
-//       }
-//     );
-//     if (!response.ok) throw new Error("다운로드 실패");
-//     const blob = await response.blob();
-//     const url = window.URL.createObjectURL(blob);
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = originalName;
-//     document.body.appendChild(a);
-//     a.click();
-//     a.remove();
-//     window.URL.revokeObjectURL(url);
-//   } catch (error) {
-//     alert(error.message);
-//   }
-// }
-
 async function handleFileDelete(originalName) {
   const token = localStorage.getItem("token");
   if (!token) return alert("로그인이 필요합니다.");

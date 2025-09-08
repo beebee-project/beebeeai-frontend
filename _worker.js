@@ -2,13 +2,16 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // 프록시: 프론트는 항상 /api/* 로만 호출
     if (url.pathname.startsWith("/api/")) {
-      url.hostname = env.API_HOST || "api.beebeeai.kr"; // Pages > Variables 에 설정
-      return fetch(new Request(url.toString(), request));
+      url.hostname = "gtfe4k03o0.execute-api.ap-northeast-2.amazonaws.com";
+      url.pathname = "/prod" + url.pathname;
+      return fetch(url.toString(), {
+        method: request.method,
+        headers: request.headers,
+        body: request.body,
+      });
     }
 
-    // 정적 자산 서빙
     return env.ASSETS.fetch(request);
   },
 };
