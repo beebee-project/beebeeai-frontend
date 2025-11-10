@@ -7,6 +7,7 @@
 body {
   margin: 0;
   font-family: "Pretendard", sans-serif;
+  background-color: #272522;
   color: #333;
   line-height: 1.6;
 }
@@ -23,8 +24,6 @@ a {
   align-items: center;
   justify-content: space-between;
   background-color: transparent;
-  border: transparent;
-  border-radius: 8px;
 }
 
 .header-logo-container {
@@ -42,7 +41,7 @@ a {
 
 .logo-text {
   font-size: 28px;
-  color: #ffc800;
+  color: #eaeaea;
   font-weight: bold;
 }
 
@@ -55,17 +54,11 @@ a {
 .header-nav a {
   font-size: 15px;
   text-decoration: none;
-  color: #000;
+  color: #eaeaea;
   transition: color 0.3s, font-weight 0.3s;
 }
 
 .header-nav a:hover {
-  color: #ffc800;
-  font-weight: bold;
-}
-
-.header-nav a.active {
-  color: #ffc800;
   font-weight: bold;
 }
 
@@ -106,26 +99,15 @@ a {
   text-align: left;
 }
 
-.popup-menu h2 {
-  margin-bottom: 15px;
-  font-size: 20px;
-}
-
 .popup-menu a {
   display: block;
   margin: 24px 0;
-  color: #ffc800;
+  color: #eaeaea;
   text-decoration: none;
 }
 
 .popup-menu a:hover {
   font-weight: bold;
-}
-
-.popup-close {
-  margin-top: 3px;
-  float: right;
-  cursor: pointer;
 }
 
 @media (max-width: 768px) {
@@ -149,11 +131,13 @@ a {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 930px;
-  height: calc(100vh - 110px - 40px);
+  max-height: calc(100vh - 80px);
+  min-height: 500px;
+  height: auto;
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 15px;
 }
 
@@ -161,15 +145,16 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
-  flex-grow: 1;
+  justify-content: center;
+  flex: 1 1 auto;
+  overflow-y: auto;
   padding-top: 20px;
 }
 
 .upload-area.has-file {
   justify-content: flex-start;
-  padding-top: 20px;
+  align-items: stretch;
 }
 
 .upload-icon {
@@ -215,12 +200,12 @@ a {
   background-color: #e0b300;
 }
 
-/* 버튼 액션 영역 (돌아가기, 시작하기) */
 .popup-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: auto;
+  padding-top: 20px;
 }
 
 .cancel-upload-btn,
@@ -257,23 +242,6 @@ a {
 }
 
 /* 로그인/회원가입 팝업 오버레이 기본 스타일 수정 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-overlay.active {
-  display: flex;
-}
-
 .login-modal-content {
   background-color: #fff;
   border-radius: 8px;
@@ -281,21 +249,6 @@ a {
   padding: 30px;
   width: 90%;
   max-width: 400px;
-}
-
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: white;
-}
-
-.close-button:hover {
-  color: #333333;
 }
 
 .tab-group {
@@ -317,7 +270,7 @@ a {
 
 .tab-button.active {
   color: #333;
-  border-bottom-color: #ffc107; /* Example active tab color */
+  border-bottom-color: #ffc107;
 }
 
 .form-group {
@@ -341,7 +294,7 @@ a {
 }
 
 .main-action-button {
-  background-color: #ffc107; /* Example button color */
+  background-color: #ffc107;
   color: #333;
   border: none;
   padding: 12px 20px;
@@ -364,18 +317,10 @@ a {
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
   padding: 35px;
   text-align: center;
-  width: 320px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   transition: transform 0.3s ease;
-}
-
-.plan-title {
-  font-size: 1.8em;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 10px;
 }
 
 .plan-price {
@@ -403,14 +348,14 @@ a {
   padding: 0;
   text-align: left;
   margin-bottom: 30px;
-  margin-left: 10px; /* 내부 여백 조절 */
+  margin-left: 10px;
 }
 
 .plan-features li {
   font-size: 1em;
   color: #555;
   margin-bottom: 15px;
-  display: flex; /* 아이콘과 텍스트 정렬 */
+  display: flex;
   align-items: center;
 }
 
@@ -428,10 +373,10 @@ a {
   text-decoration: none;
   display: block;
   transition: background-color 0.2s ease, color 0.2s ease;
-  border: 2px solid #ffc800; /* 테두리 일관성 부여 */
+  border: 2px solid #ffc800;
 }
 
-/* Basic 버튼 스타일 (Pro 요금제와 구분되도록) */
+/* Basic 버튼 스타일 */
 .cta-button.basic-button {
   background-color: #ffffff;
   color: #ffc800;
@@ -453,291 +398,145 @@ a {
   border-color: #e0b300;
 }
 
-/* ==================== 사이드바 컨테이너 (.sidebar-container) ==================== */
-.sidebar-container {
-  width: 250px;
-  background-color: #f7f7f7;
-  border-right: 1px solid #e0e0e0;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  height: calc(100vh - 110px);
+/* ==================== 가이드 팝업 스타일 ==================== */
+.guide-overlay {
   position: fixed;
-  top: 110px;
-  z-index: 900;
-  overflow: hidden;
-  transition: width 220ms ease;
-  display: flex;
-  flex-direction: column;
+  inset: 0;
+  z-index: 1100;
+  display: none;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.7);
 }
 
-/* 사이드바 축소 상태 */
-.sidebar-container.collapsed {
-  width: 25px;
-}
-
-/* 접힘: 메뉴/카드 내용 감추기(헤더 토글버튼만 보이게) */
-.sidebar-container.collapsed .sidebar-nav,
-.sidebar-container.collapsed .usage-card {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: 0 !important;
-}
-
-/* 사이드바 헤더 (제목과 토글 버튼 포함) */
-.sidebar-header {
-  padding: 10px 10px 20px 10px;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: relative;
-  transition: padding 0.3s ease-out;
-  height: 60px;
-}
-
-/* 축소 상태일 때 사이드바 헤더 제목 숨김 */
-.sidebar-container.collapsed .sidebar-header {
-  padding: 10px 0px;
-  justify-content: center;
-}
-
-.sidebar-header h3 {
-  font-size: 1.4em;
-  color: #333;
-  font-weight: bold;
-  white-space: nowrap;
-  overflow: hidden;
-  opacity: 1;
-  transition: opacity 0.3s ease-out, width 0.3s ease-out;
-  flex-shrink: 0;
-  width: auto;
-}
-
-/* 축소 상태일 때 헤더 제목 숨김 */
-.sidebar-container.collapsed .sidebar-header h3 {
-  opacity: 0;
-  width: 0;
-  padding: 0;
-  margin: 0;
-}
-
-/* 사이드바 토글 버튼 (햄버거 아이콘) */
-.sidebar-toggle-btn {
-  background-color: #f7f7f7;
-  border: 1px solid #e0e0e0;
-  border-left: none;
-  border-radius: 0 5px 5px 0;
-  cursor: pointer;
-  padding: 8px 5px;
-  color: #555;
-  transition: background-color 0.3s ease;
-  position: absolute;
-  top: 50%;
-  right: 0px;
-  transform: translateY(-50%);
-  z-index: 10;
-  width: 34px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.sidebar-toggle-btn:hover {
-  background-color: #e0e0e0;
-}
-
-/* 햄버거 아이콘 (hamburger-icon) 스타일 */
-.hamburger-icon {
-  font-size: 1.8em;
-  font-weight: bold;
-  color: #555;
+.guide-overlay.active {
   display: block;
-  line-height: 1;
-  transition: transform 0.3s ease-out;
 }
 
-/* 카드 기본 */
-.usage-card {
-  margin: 12px 12px 16px;
-  padding: 14px 16px;
-  background: #f7f7f9;
-  border: 1px solid #ececf1;
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  color: #333;
+/* 강조되는 요소 */
+.guide-highlight {
+  position: relative;
+  z-index: 1200; /* 오버레이보다 위로 */
+  box-shadow: 0 0 0 2px #f6c744, 0 0 16px rgba(0, 0, 0, 0.9);
+  border-radius: 8px;
+}
+
+/* 설명 툴팁 */
+.guide-tooltip {
+  position: fixed;
+  z-index: 1300;
+  background: #ffffff;
+  color: #000000;
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  max-width: 320px;
   font-size: 14px;
-  margin-top: auto;
-  position: sticky;
-  bottom: 38px;
-}
-.usage-card__header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.usage-card__plan-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 12px;
-  background: #fff3bf;
-  color: #8a6d00;
-  border: 1px solid #ffe08a;
-}
-.usage-card__plan-badge.is-pro {
-  background: #fff0d6;
-  color: #8a4b00;
-  border-color: #ffd29b;
-}
-.usage-card__plan-name {
-  font-weight: 700;
+  line-height: 1.4;
 }
 
-.usage-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #efeff3;
-}
-.usage-row:last-of-type {
-  border-bottom: 0;
-}
-.usage-label {
-  color: #555;
-}
-.usage-count {
-  color: #333;
-  min-width: 74px;
-  text-align: right;
-}
-.usage-card__footer {
-  margin-top: 10px;
-  font-size: 12px;
-  color: #777;
+.guide-info-box {
+  position: fixed;
+  z-index: 1300;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 360px;
+  color: #222;
+  font-size: 14px;
+  line-height: 1.5;
+  animation: fadeIn 0.4s ease;
 }
 
-@container (max-width: 180px) {
-  .usage-card * {
+.guide-info-row {
+  display: flex;
+  gap: 12px;
+}
+
+/* 개별 안내 박스 공통 스타일 */
+.guide-info-content {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  color: #222;
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 340px;
+  animation: fadeIn 0.4s ease;
+}
+
+.guide-info-content strong {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from {
     opacity: 0;
-    pointer-events: none;
+    transform: translateY(8px);
   }
-  .usage-card {
-    height: 56px;
-  }
-}
-
-@media (max-width: 768px) {
-  .usage-card {
-    bottom: 12px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* ==================== 사이드바 내비게이션 및 목록 (텍스트 숨김/표시) ==================== */
-.sidebar-nav {
-  padding: 0;
-}
-
-.sidebar-nav,
-.usage-card {
-  transition: opacity 200ms ease 200ms;
-}
-
-.sidebar-menu-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.sidebar-menu-list li {
-  margin-bottom: 5px;
-}
-
-.sidebar-menu-list li a {
-  display: flex;
-  align-items: center;
-  padding: 15px 23px;
-  text-decoration: none;
-  color: #555;
-  font-size: 1.1em;
-  white-space: nowrap;
-  overflow: hidden;
-  transition: background-color 0.2s ease, color 0.2s ease, padding 0.3s ease;
-}
-
-/* 축소 상태일 때 메뉴 항목 패딩 조정 */
-.sidebar-container.collapsed .sidebar-menu-list li a {
-  padding: 15px 0;
+/* ==================== 팝업 공통 스타일 ==================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
   justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-.sidebar-menu-list li a:hover {
-  background-color: #e0e0e0;
-  color: #333;
+.modal-overlay.active {
+  display: flex;
 }
 
-.sidebar-menu-list li a.active {
-  background-color: #e0e0e0;
-  color: #333;
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: white;
 }
 
-/* 아이콘 스타일 */
-.sidebar-menu-list li a .icon {
-  font-size: 1.4em;
-  margin-right: 15px;
-  flex-shrink: 0;
-  transition: margin-right 0.3s ease;
-}
-
-/* 축소 상태일 때 텍스트 숨김 및 아이콘의 마진 제거 */
-.sidebar-container.collapsed .sidebar-menu-list li a .text {
-  width: 0;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, width 0.3s ease, visibility 0.3s ease;
-}
-
-.sidebar-container.collapsed .sidebar-menu-list li a .icon {
-  margin-right: 0;
+.close-button:hover {
+  color: #333333;
 }
 
 /* ==================== 메인 콘텐츠 영역 조정 ==================== */
 main {
-  margin-left: 270px;
-  transition: margin-left 0.3s ease-out;
+  margin: 0 auto;
   position: relative;
-  padding-left: 20px;
-  padding-top: 5px;
-  background-color: #ffffff;
+  padding: 5px;
+  background-color: #272522;
   min-height: calc(100vh - 110px);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
   justify-content: flex-start;
-  width: calc(100% - 270px);
-  max-width: 930px;
-  margin-right: auto;
-}
-
-/* 사이드바 축소 시 메인 콘텐츠 마진 및 너비 조정 */
-main.collapsed-sidebar {
-  margin-left: 45px;
-  width: calc(100% - 45px);
-  max-width: 1155px;
+  max-width: 1200px;
 }
 
 /* ==================== 메인 콘텐츠 섹션 (공통) ==================== */
 .main-content-section {
   display: none;
-  background-color: #fff;
+  background-color: #272522;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
@@ -866,7 +665,6 @@ main.collapsed-sidebar {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
   width: 100%;
   padding: 0 10px;
   box-sizing: border-box;
@@ -874,7 +672,7 @@ main.collapsed-sidebar {
 
 .conversion-type-selector label {
   font-weight: bold;
-  color: #555;
+  color: #eaeaea;
   white-space: nowrap;
 }
 
@@ -883,8 +681,9 @@ main.collapsed-sidebar {
   padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: #3a3733;
   font-size: 1rem;
+  color: #eaeaea;
   cursor: pointer;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -893,6 +692,10 @@ main.collapsed-sidebar {
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 20px;
+}
+
+.conversion-type-selector option {
+  color: #eaeaea;
 }
 
 .conversion-type-selector select:focus {
@@ -929,16 +732,20 @@ main.collapsed-sidebar {
 
 .message-bubble.user {
   align-self: flex-end;
-  background-color: #d1e7f8;
-  color: #202124;
+  background-color: #3d3a36;
+  color: #eaeaea;
   border-bottom-right-radius: 5px;
 }
 
 .message-bubble.ai {
   align-self: flex-start;
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: #33302d;
+  color: #eaeaea;
   border-bottom-left-radius: 5px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  max-width: 90%;
+  padding: 12px 18px;
 }
 
 .chat-input-area {
@@ -946,7 +753,6 @@ main.collapsed-sidebar {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-top: 1px solid #eee;
   flex-shrink: 0;
 }
 
@@ -954,7 +760,6 @@ main.collapsed-sidebar {
   display: flex;
   flex-direction: column;
   width: 100%;
-  background-color: #f7f7f7;
   border-radius: 25px;
   padding: 8px 15px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -973,6 +778,7 @@ main.collapsed-sidebar {
 
 .feedback-container p {
   margin: 0;
+  color: #ffc800;
 }
 
 .feedback-btn {
@@ -1019,7 +825,7 @@ main.collapsed-sidebar {
   background: transparent;
   border: none;
   outline: none;
-  color: #333;
+  color: #eaeaea;
   font-size: 1em;
   resize: none;
   overflow: hidden;
@@ -1137,17 +943,6 @@ main.collapsed-sidebar {
   }
 }
 
-.message-bubble.ai {
-  align-self: flex-start;
-  background-color: #f0f0f0;
-  color: #333;
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  max-width: 90%;
-  padding: 12px 18px;
-}
-
 /* AI 응답 내부의 코드 블록 스타일 */
 .code-block {
   background-color: transparent;
@@ -1162,7 +957,7 @@ main.collapsed-sidebar {
 
 .code-block pre {
   margin: 0;
-  color: #555;
+  color: #eaeaea;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -1172,7 +967,7 @@ main.collapsed-sidebar {
   top: 0px;
   right: -5px;
   background-color: transparent;
-  color: #777;
+  color: #eaeaea;
   border: none;
   cursor: pointer;
   transition: color 0.2s;
@@ -1239,11 +1034,7 @@ main.collapsed-sidebar {
   main {
     padding: 10px;
     align-items: center;
-    width: calc(100% - 45px);
     max-width: none;
-  }
-  main.collapsed-sidebar {
-    margin-left: 35px;
   }
   .main-content-section {
     width: 100%;
@@ -1417,31 +1208,8 @@ main.collapsed-sidebar {
   opacity: 8%;
 }
 
-/* 네이버 로그인 버튼 디자인 */
-.naver-login-button {
-  padding: 0;
-  border: 1px solid #747775;
-  border-radius: 4px;
-  background: none;
-  cursor: pointer;
-}
-
-.naver-login-button img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 3px;
-  transition: opacity 0.2s ease;
-}
-
-.naver-login-button:hover img {
-  opacity: 0.9;
-}
-
 /* --- 소셜 로그인 버튼 공통 스타일 --- */
-.gsi-material-button,
-.naver-login-button {
+.gsi-material-button {
   display: flex;
   align-items: center;
   justify-content: center;

@@ -5,14 +5,14 @@ let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
 
-const API_BASE_URL = "";
+const API_BASE_URL = "https://api.beebeeai.kr";
 
-// --- 페이지 로드 시 실행 ---
+// 페이지 로드 시 실행
 document.addEventListener("DOMContentLoaded", () => {
   // 1. 초기화 함수들 호출
   initializeAuth();
   initializePopups();
-  initializeSidebarAndLayout();
+  initializeLayout();
   initializeChat();
   initializeFileUpload();
 
@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 // 초기화 함수 그룹
 // ==========================================
-
 function initializeAuth() {
   // URL에 토큰이 있는지 확인 (소셜 로그인 콜백 처리)
   const urlParams = new URLSearchParams(window.location.search);
@@ -40,70 +39,106 @@ function initializeAuth() {
 
   // 소셜 로그인 버튼 이벤트
   document.getElementById("google-btn")?.addEventListener("click", () => {
-    window.location.href = `/api/auth/google`;
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
   });
   document.getElementById("naver-btn")?.addEventListener("click", (e) => {
     e.preventDefault();
-    window.location.href = `/api/auth/naver`;
+    window.location.href = `${API_BASE_URL}/api/auth/naver`;
   });
 }
 
 function initializePopups() {
-  // 로그인/회원가입 팝업
+  // 1. 로그인 / 회원가입 팝업
   const loginModalOverlay = document.getElementById("login-modal-overlay");
-  const openLoginModal = (event) => {
-    event.preventDefault();
-    loginModalOverlay?.classList.add("active");
-  };
   const closeLoginModal = () => loginModalOverlay?.classList.remove("active");
 
-  document
-    .getElementById("desktop-login-link")
-    ?.addEventListener("click", openLoginModal);
-  document
-    .getElementById("mobile-login-link")
-    ?.addEventListener("click", openLoginModal);
+  // 로그인 모달 닫기 버튼
   document
     .getElementById("login-close-btn")
     ?.addEventListener("click", closeLoginModal);
+
+  // 오버레이 클릭 시 닫기
   loginModalOverlay?.addEventListener("click", (e) => {
     if (e.target === loginModalOverlay) closeLoginModal();
   });
+
+  // 로그인 / 회원가입 공용 폼 submit
   document
     .getElementById("auth-form")
     ?.addEventListener("submit", handleAuthFormSubmit);
 
-  // 탭 전환 로직
+  // 2. 탭 전환 로직
   const loginTab = document.getElementById("login-tab");
   const signupTab = document.getElementById("signup-tab");
   const mainActionBtn = document.getElementById("main-action-btn");
   const nameGroup = document.querySelector(".form-group:has(#name)");
   const passwordHint = document.getElementById("password-hint");
   const forgotPasswordLink = document.getElementById("forgot-password-link");
+  const passwordInput = document.getElementById("password");
 
   const showLogin = () => {
     loginTab?.classList.add("active");
     signupTab?.classList.remove("active");
+
     if (mainActionBtn) mainActionBtn.textContent = "로그인";
     if (nameGroup) nameGroup.style.display = "none";
-    if (passwordHint) passwordHint.style.display = "none";
+
+    // 로그인 탭에서는 비밀번호 힌트 숨김
+    if (passwordHint) {
+      passwordHint.style.display = "none";
+      passwordHint.style.color = "#888"; // 기본값으로 초기화
+    }
+
     if (forgotPasswordLink) forgotPasswordLink.style.display = "block";
   };
 
   const showSignup = () => {
     signupTab?.classList.add("active");
     loginTab?.classList.remove("active");
+
     if (mainActionBtn) mainActionBtn.textContent = "회원가입";
     if (nameGroup) nameGroup.style.display = "block";
-    if (passwordHint) passwordHint.style.display = "block";
+
+    // 회원가입 탭에서만 비밀번호 힌트 표시
+    if (passwordHint) {
+      passwordHint.style.display = "block";
+      passwordHint.style.color = "#888"; // 기본 색상으로 리셋
+    }
+
     if (forgotPasswordLink) forgotPasswordLink.style.display = "none";
   };
 
   loginTab?.addEventListener("click", showLogin);
   signupTab?.addEventListener("click", showSignup);
-  showLogin(); // 기본값으로 로그인 탭 표시
 
-  // 가격 팝업 초기화
+  // 기본은 로그인 탭
+  showLogin();
+
+  // 3. 비밀번호 유효성 실시간 검사
+  if (passwordInput && passwordHint) {
+    // 영어, 숫자, 특수문자 포함 8자리 이상
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_\-+\[\]{};:'",.<>/?\\|`~]).{8,}$/;
+
+    passwordInput.addEventListener("input", () => {
+      const value = passwordInput.value;
+
+      // 아무것도 입력 안 했을 때는 기본 회색으로 복귀
+      if (value.length === 0) {
+        passwordHint.style.color = "#888";
+        return;
+      }
+
+      // 조건 충족 / 미충족에 따라 색상 변경
+      if (passwordRegex.test(value)) {
+        passwordHint.style.color = "#2ECC71";
+      } else {
+        passwordHint.style.color = "#E74C3C";
+      }
+    });
+  }
+
+  // 4. 구독 팝업
   const pricingModalOverlay = document.getElementById("pricing-modal-overlay");
   const openPricingModal = (event) => {
     event.preventDefault();
@@ -121,80 +156,175 @@ function initializePopups() {
   document
     .getElementById("pricing-close-btn")
     ?.addEventListener("click", closePricingModal);
+
   pricingModalOverlay?.addEventListener("click", (e) => {
     if (e.target === pricingModalOverlay) closePricingModal();
   });
 }
 
-function initializeSidebarAndLayout() {
-  const headerGroup = document.querySelector(".header-group");
-  const sidebarContainer = document.getElementById("mainSidebar");
-  const mainContent = document.querySelector("main");
-  const sidebarToggleBtn = document.querySelector(".sidebar-toggle-btn");
+// 5. 가이드 투어
+const guideModalOverlay = document.getElementById("guide-modal-overlay");
+const guideOverlay = document.getElementById("guide-overlay");
+
+const guideSteps = [
+  {
+    el: document.querySelector(".conversion-type-selector"),
+    text: "1단계: 여기에서 변환할 타입을 선택합니다.",
+  },
+  {
+    el: document.getElementById("attach-button"),
+    text: "2단계: + 버튼을 눌러 파일을 업로드할 수 있습니다.",
+  },
+  {
+    el: document.querySelector(".chat-input-area"),
+    text: "3단계: 이 영역에서 BeeBee AI에게 변환 요청을 입력합니다.",
+  },
+];
+let currentGuideStep = 0;
+
+function clearGuideHighlight() {
+  document
+    .querySelectorAll(".guide-highlight")
+    .forEach((el) => el.classList.remove("guide-highlight"));
+  document.querySelectorAll(".guide-tooltip").forEach((t) => t.remove());
+  document.querySelectorAll(".guide-info-box").forEach((b) => b.remove());
+}
+
+function highlightElement(el, text) {
+  if (!el || !guideOverlay) return;
+
+  clearGuideHighlight();
+  guideOverlay.classList.add("active");
+  el.classList.add("guide-highlight");
+
+  const rect = el.getBoundingClientRect();
+
+  // --------------- 공통 툴팁 생성 ---------------
+  const tooltip = document.createElement("div");
+  tooltip.className = "guide-tooltip";
+  tooltip.textContent = text;
+  document.body.appendChild(tooltip);
+
+  const tooltipRect = tooltip.getBoundingClientRect();
+  let top = rect.bottom + 12;
+  let left = rect.left;
+
+  if (top + tooltipRect.height > window.innerHeight - 16)
+    top = rect.top - tooltipRect.height - 12;
+  if (left + tooltipRect.width > window.innerWidth - 16)
+    left = window.innerWidth - tooltipRect.width - 16;
+
+  tooltip.style.top = `${top}px`;
+  tooltip.style.left = `${left}px`;
+
+  // --------------- 추가 정보 안내 (단계별 조건) ---------------
+  // 단계별 안내 문구
+  let infoHTML = "";
+  let position = "bottom"; // 기본 아래쪽
+  if (currentGuideStep === 1) {
+    infoHTML = `
+      <div class="guide-info-content">
+        <strong>💡 다이렉트 함수</strong><br />
+        파일 업로드 없이도 <b>다이렉트 함수</b>를 통해<br />
+        간단한 수식을 바로 생성할 수 있습니다.<br />
+        ex) <b>A1부터 A10까지의 평균</b>
+      </div>`;
+    position = "bottom";
+  } else if (currentGuideStep === 2) {
+    infoHTML = `
+      <div class="guide-info-row">
+        <div class="guide-info-content">
+          <strong>⚙️ 자동 변환</strong><br />
+          파일을 업로드하면 자동으로 타입이 <b>변환</b>됩니다.
+        </div>
+        <div class="guide-info-content">
+          <strong>📁 업로드 제한</strong><br />
+          파일 업로드는 최대 <b>5개</b> 까지만 가능합니다.
+        </div>
+      </div>`;
+    position = "top";
+  }
+
+  if (infoHTML) {
+    const infoBox = document.createElement("div");
+    infoBox.className = "guide-info-box";
+    infoBox.innerHTML = infoHTML;
+    document.body.appendChild(infoBox);
+
+    const infoRect = infoBox.getBoundingClientRect();
+
+    if (position === "bottom") {
+      infoBox.style.top = `${top + tooltipRect.height + 10}px`;
+    } else {
+      const tooltipTop = parseFloat(tooltip.style.top);
+      const spacing = 14;
+      infoBox.style.top = `${tooltipTop - infoRect.height - spacing}px`;
+    }
+
+    infoBox.style.left = `${left}px`;
+  }
+}
+
+function startGuideTour() {
+  currentGuideStep = 0;
+  guideModalOverlay.classList.add("active");
+  guideOverlay.classList.add("active");
+  nextGuideStep();
+}
+
+function nextGuideStep() {
+  if (currentGuideStep >= guideSteps.length) {
+    endGuideTour();
+    return;
+  }
+  const step = guideSteps[currentGuideStep];
+  currentGuideStep += 1;
+  highlightElement(step.el, step.text);
+}
+
+function endGuideTour() {
+  guideModalOverlay.classList.remove("active");
+  guideOverlay.classList.remove("active");
+  clearGuideHighlight();
+}
+
+// 가이드 메뉴 클릭 시 시작
+document
+  .getElementById("desktop-guide-link")
+  ?.addEventListener("click", (e) => {
+    e.preventDefault();
+    startGuideTour();
+  });
+document.getElementById("mobile-guide-link")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  startGuideTour();
+});
+
+// 클릭으로 다음 단계 진행
+guideOverlay?.addEventListener("click", nextGuideStep);
+
+function initializeLayout() {
   const menuIcon = document.querySelector(".menu-icon");
   const popupOverlay = document.getElementById("popup-overlay");
   const popupClose = document.getElementById("popup-close");
-  const sidebarMenuItems = document.querySelectorAll(".sidebar-menu-item");
 
-  function alignSidebarWithHeader() {
-    if (headerGroup && sidebarContainer) {
-      const headerRect = headerGroup.getBoundingClientRect();
-      const computedStyle = getComputedStyle(headerGroup);
-      const headerPaddingLeft = parseFloat(computedStyle.paddingLeft);
-      const desiredLeft = headerRect.left + headerPaddingLeft;
-      sidebarContainer.style.left = `${desiredLeft}px`;
-    }
-  }
+  if (!menuIcon || !popupOverlay) return;
 
-  function setSidebarStateAndMargin() {
-    if (mainContent && sidebarContainer && sidebarToggleBtn) {
-      const sidebarRect = sidebarContainer.getBoundingClientRect();
-      const sidebarLeft = sidebarRect.left;
-      let sidebarWidth;
-
-      if (sidebarContainer.classList.contains("collapsed")) {
-        sidebarWidth = 25;
-        sidebarToggleBtn.setAttribute("title", "사이드바 열기");
-        mainContent.classList.add("collapsed-sidebar");
-      } else {
-        sidebarWidth = 250;
-        sidebarToggleBtn.setAttribute("title", "사이드바 닫기");
-        mainContent.classList.remove("collapsed-sidebar");
-      }
-      mainContent.style.marginLeft = `${sidebarLeft + sidebarWidth}px`;
-    }
-  }
-
-  if (menuIcon && popupOverlay && popupClose) {
-    menuIcon.addEventListener("click", () =>
-      popupOverlay.classList.add("active")
-    );
-    popupClose.addEventListener("click", () =>
-      popupOverlay.classList.remove("active")
-    );
-    popupOverlay.addEventListener("click", (e) => {
-      if (e.target === popupOverlay) popupOverlay.classList.remove("active");
+  // 모바일 햄버거 메뉴 열기
+  menuIcon.addEventListener("click", () => {
+    popupOverlay.classList.add("active");
+  });
+  // 닫기 버튼
+  if (popupClose) {
+    popupClose.addEventListener("click", () => {
+      popupOverlay.classList.remove("active");
     });
   }
-
-  alignSidebarWithHeader();
-  setSidebarStateAndMargin();
-  window.addEventListener("resize", () => {
-    alignSidebarWithHeader();
-    setSidebarStateAndMargin();
-  });
-
-  sidebarToggleBtn?.addEventListener("click", () => {
-    sidebarContainer.classList.toggle("collapsed");
-    setSidebarStateAndMargin();
-  });
-
-  // 사이드바 메뉴 클릭 이벤트 (SPA 동작)
-  sidebarMenuItems.forEach((item) => {
-    item.addEventListener("click", (e) => {
-      e.preventDefault();
-      // 현재는 chat-content만 존재하므로 이 부분은 추후 확장 가능
-    });
+  // 오버레이 영역 클릭 시 닫기
+  popupOverlay.addEventListener("click", (e) => {
+    if (e.target === popupOverlay) {
+      popupOverlay.classList.remove("active");
+    }
   });
 }
 
@@ -223,17 +353,16 @@ function initializeChat() {
 
   sendButton.addEventListener("click", handleUserInput);
 
+  // 변환 타입 선택 로직
   conversionTypeSelect.addEventListener("change", (e) => {
-    selectedConversionType = e.target.value;
+    selectedConversionType = e.target.value || null;
     if (selectedConversionType) {
-      addMessage(
-        `'${selectedConversionType}' 타입으로 변환을 준비합니다.`,
-        "ai"
-      );
+      addMessage(`'${selectedConversionType}' 타입이 선택되었습니다.`, "ai");
     }
   });
 
-  addMessage("변환할 타입을 선택해주세요: Excel/Google Sheets, SQL", "ai");
+  // 처음 안내 문구
+  addMessage("변환할 타입을 선택해 주세요 : ", "ai");
 }
 
 function initializeFileUpload() {
@@ -249,10 +378,9 @@ function initializeFileUpload() {
 
   const applyAcceptFromFilter = (value) => {
     const map = {
-      all: ".xlsx,.xls,.csv,.sql",
+      all: ".xlsx,.xls,.csv",
       xlsx: ".xlsx,.xls",
       csv: ".csv",
-      sql: ".sql",
     };
     uploadFileInput?.setAttribute("accept", map[value] || map.all);
     hiddenAttachInput?.setAttribute("accept", map[value] || map.all);
@@ -341,7 +469,7 @@ async function handleAuthFormSubmit(event) {
 
   try {
     const endpoint = isSignup ? "/api/auth/signup" : "/api/auth/login";
-    const body = isSignup ? { email, password } : { email, password };
+    const body = { email, password };
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",
@@ -417,7 +545,7 @@ async function loadUserFiles() {
     return;
   }
   try {
-    const response = await fetch(`/api/files`, {
+    const response = await fetch(`${API_BASE_URL}/api/files`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
@@ -443,21 +571,52 @@ async function handleFileUpload(file) {
   const token = localStorage.getItem("token");
   if (!token) return alert("로그인이 필요합니다.");
 
+  // if (uploadedFiles.length >= 5) {
+  //   alert(
+  //     "파일은 최대 5개까지만 업로드할 수 있습니다.\n기존 파일을 삭제한 후 다시 시도해주세요."
+  //   );
+  //   return;
+  // }
+
   const formData = new FormData();
   formData.append("file", file);
 
   try {
-    const response = await fetch(`/api/files/upload`, {
+    const response = await fetch(`${API_BASE_URL}/api/files/upload`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
     const updatedFiles = await response.json();
     if (!response.ok) throw new Error(updatedFiles.message);
-
     uploadedFiles = updatedFiles;
     lastSelectedFile = file.name;
     renderFiles();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function handleFileDownload(originalName) {
+  const token = localStorage.getItem("token");
+  if (!token) return alert("로그인이 필요합니다.");
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/files/download/${encodeURIComponent(originalName)}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (!response.ok) throw new Error("다운로드 실패");
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = originalName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
   } catch (error) {
     alert(error.message);
   }
@@ -469,7 +628,7 @@ async function handleFileDelete(originalName) {
   if (!confirm(`'${originalName}' 파일을 정말 삭제하시겠습니까?`)) return;
   try {
     const response = await fetch(
-      `/api/files/${encodeURIComponent(originalName)}`,
+      `${API_BASE_URL}/api/files/${encodeURIComponent(originalName)}`,
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
@@ -502,7 +661,6 @@ function renderFiles() {
     if (filterVal === "all") return true;
     if (filterVal === "xlsx") return ["xlsx", "xls"].includes(ext);
     if (filterVal === "csv") return ext === "csv";
-    if (filterVal === "sql") return ext === "sql";
     return true;
   });
 
@@ -549,14 +707,12 @@ function updateStartButtonState() {
 function getFileIconClass(fileName) {
   const extension = fileName.split(".").pop().toLowerCase();
   if (["xlsx", "csv", "xls"].includes(extension)) return "fas fa-file-excel";
-  if (extension === "sql") return "fas fa-database";
   return "fas fa-file";
 }
 
 function getConversionTypeFromFileExtension(fileName) {
   const extension = fileName.split(".").pop().toLowerCase();
   if (["xlsx", "csv", "xls"].includes(extension)) return "Excel/Google Sheets";
-  if (extension === "sql") return "SQL";
   return "";
 }
 
@@ -596,7 +752,7 @@ function sendApiRequest(message, fileName, conversionType) {
   userInput.style.height = "24px";
   toggleLoadingState(true);
 
-  fetch(`/api/convert`, {
+  fetch(`${API_BASE_URL}/api/convert`, {
     method: "POST",
     headers,
     body: JSON.stringify(payload),
@@ -720,7 +876,7 @@ function sendFeedback(
   container
 ) {
   container.innerHTML = `<p class="feedback-thanks">피드백 감사합니다!</p>`;
-  fetch(`/api/convert/feedback`, {
+  fetch("${API_BASE_URL}/api/convert/feedback", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

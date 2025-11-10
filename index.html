@@ -39,19 +39,18 @@
       </a>
 
       <nav class="header-nav">
-        <a href="#">가이드</a>
-        <!-- <a href="#" id="desktop-pricing-link">가격</a> -->
+        <a href="#" id="desktop-guide-link">가이드</a>
+        <a href="#" id="desktop-pricing-link">구독</a>
         <a href="#" id="desktop-login-link">로그인</a>
       </nav>
 
       <div class="menu-icon">☰</div>
 
       <div id="popup-overlay" class="popup-overlay">
+        <button class="close-button" id="popup-close">X</button>
         <div class="popup-menu">
-          <span id="popup-close" class="popup-close">X</span>
-          <h2>BeeBeeAI</h2>
-          <a href="#">가이드</a>
-          <!-- <a href="#" id="mobile-pricing-link">가격</a> -->
+          <a href="#" id="mobile-guide-link">가이드</a>
+          <a href="#" id="mobile-pricing-link">구독</a>
           <a href="#" id="mobile-login-link">로그인</a>
         </div>
       </div>
@@ -67,7 +66,6 @@
               <option value="all">전체</option>
               <option value="xlsx">xlsx</option>
               <option value="csv">CSV</option>
-              <option value="sql">SQL</option>
             </select>
           </div>
         </div>
@@ -87,7 +85,7 @@
             type="file"
             id="upload-file-input"
             style="display: none"
-            accept=".xlsx, .csv, .sql"
+            accept=".xlsx, .csv"
           />
         </div>
         <div class="popup-actions">
@@ -179,94 +177,31 @@
             <span style="display: none">Continue with Google</span>
           </div>
         </button>
-        <a href="#" id="naver-btn" class="naver-login-button">
-          <img src="image/naver.png" alt="네이버 로그인" />
-        </a>
       </div>
     </div>
 
-    <!-- 가격 팝업 오버레이 -->
-    <!-- <div class="modal-overlay" id="pricing-modal-overlay">
+    <!-- 구독 팝업 오버레이 -->
+    <div class="modal-overlay" id="pricing-modal-overlay">
       <div class="pricing-modal-content">
         <button class="close-button" id="pricing-close-btn">X</button>
         <div class="pricing-card">
-          <h2 class="plan-title">
-            <span style="color: #ffc800">BeeBee AI</span> - PRO
-          </h2>
-          <div class="plan-price">₩9000<span>/월</span></div>
+          <div class="plan-price">₩4900<span>/월</span></div>
           <p class="plan-description">
             복잡한 수식은 BeeBee AI에게 맡기고, 업무 시간을 단축하세요.
           </p>
           <ul class="plan-features">
-            <li><i class="fas fa-check"></i> 월 5000개의 수식 생성</li>
+            <li><i class="fas fa-check"></i> 무제한 수식 생성</li>
+            <li><i class="fas fa-check"></i> 무제한 매크로 생성</li>
             <li><i class="fas fa-check"></i> 파일 업로드 5개</li>
-            <li><i class="fas fa-check"></i> 서식 생성</li>
-            <li><i class="fas fa-check"></i> STD 매핑</li>
           </ul>
-          <button class="cta-button pro-button">PRO 시작하기</button>
+          <button class="cta-button pro-button">구독하기</button>
         </div>
       </div>
-    </div> -->
+    </div>
 
-    <aside class="sidebar-container" id="mainSidebar">
-      <div class="sidebar-header">
-        <button
-          class="sidebar-toggle-btn"
-          aria-label="사이드바 축소/확대"
-          title="사이드바 닫기"
-        >
-          <span class="hamburger-icon">&#9776;</span>
-        </button>
-      </div>
-      <nav class="sidebar-nav">
-        <ul class="sidebar-menu-list">
-          <li>
-            <a
-              href="#"
-              id="formula-converter-btn"
-              class="sidebar-menu-item"
-              data-target="chat-content"
-            >
-              수식 변환기
-            </a>
-          </li>
-          <!-- <li>
-            <a href="#" class="sidebar-menu-item" data-target="Form-content"
-              >서식 생성기</a
-            >
-          </li> -->
-          <!-- <li>
-            <a href="#" class="sidebar-menu-item" data-target="data-content"
-              >엑셀 <-> 데이터</a
-            >
-          </li> -->
-        </ul>
-      </nav>
-      <!-- <div class="usage-card" id="usageCard" aria-live="polite">
-        <div class="usage-card__header">
-          <span class="usage-card__plan-badge" id="planBadge">FREE</span>
-          <span class="usage-card__plan-name" id="planName">무료 플랜</span>
-        </div>
-
-        <div class="usage-row">
-          <span class="usage-label">수식 생성</span>
-          <span class="usage-count"
-            ><b id="formulaCount">0</b>/<span id="formulaLimit">20</span></span
-          >
-        </div>
-
-        <div class="usage-row">
-          <span class="usage-label">파일 업로드</span>
-          <span class="usage-count"
-            ><b id="uploadCount">0</b>/<span id="uploadLimit">1</span></span
-          >
-        </div>
-
-        <div class="usage-card__footer" id="resetHint">
-          월 사용량은 매월 1일에 재설정됩니다.
-        </div>
-      </div> -->
-    </aside>
+    <!-- 가이드 -->
+    <div class="modal-overlay" id="guide-modal-overlay"></div>
+    <div class="guide-overlay" id="guide-overlay"></div>
 
     <main>
       <!-- 수식 변환기 콘텐츠 섹션 -->
@@ -275,8 +210,12 @@
           <label for="conversion-type-select">변환 타입:</label>
           <select id="conversion-type-select">
             <option value="">-- 선택 --</option>
-            <option value="Excel/Google Sheets">Excel/Google Sheets</option>
-            <option value="SQL">SQL</option>
+            <option value="Excel/Google Sheets">
+              Excel/Google Sheets (수식변환)
+            </option>
+            <option value="Office Scripts/Google Apps Script">
+              Office Scripts/Google Apps Script (매크로 생성)
+            </option>
           </select>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
@@ -305,7 +244,7 @@
           type="file"
           id="file-input"
           style="display: none"
-          accept=".xlsx, .csv, .sql"
+          accept=".xlsx, .csv"
         />
       </div>
     </main>

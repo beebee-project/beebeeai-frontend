@@ -64,6 +64,7 @@
     </div>
 
     <script>
+      const API_BASE_URL = "https://api.beebeeai.kr";
       window.onload = async () => {
         const messageElement = document.getElementById("message");
         const loginLink = document.getElementById("login-link");
@@ -79,7 +80,9 @@
 
         try {
           // 2. 백엔드에 인증 요청을 보냅니다.
-          const response = await fetch(`/api/auth/verify-email/${token}`);
+          const response = await fetch(
+            `${API_BASE_URL}/api/auth/verify-email/${token}`
+          );
           const data = await response.json();
 
           // 3. 결과에 따라 메시지를 표시합니다.
