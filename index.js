@@ -5,7 +5,8 @@ let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
 
-const API_BASE_URL = "https://api.beebeeai.kr";
+const API_BASE_URL =
+  "https://kmus6a1820.execute-api.ap-northeast-2.amazonaws.com/prod";
 
 // 페이지 로드 시 실행
 document.addEventListener("DOMContentLoaded", () => {
