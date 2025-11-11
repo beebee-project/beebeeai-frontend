@@ -878,7 +878,7 @@ function sendFeedback(
   container
 ) {
   container.innerHTML = `<p class="feedback-thanks">피드백 감사합니다!</p>`;
-  fetch("${API_BASE_URL}/api/convert/feedback", {
+  fetch(`${API_BASE_URL}/api/convert/feedback`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
