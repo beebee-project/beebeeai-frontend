@@ -5,7 +5,7 @@ let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
 
-const API_BASE_URL = "https://api.beebeeai.kr";
+const API_BASE_URL = "https://beebeeai-backend-production.up.railway.app";
 
 // 페이지 로드 시 실행
 document.addEventListener("DOMContentLoaded", () => {
