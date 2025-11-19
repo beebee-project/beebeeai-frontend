@@ -1,4 +1,12 @@
+const TOSS_CLIENT_KEY = "YOUR_TOSS_CLIENT_KEY_HERE";
+
+// 같은 도메인에서 API를 쓰면 "" 그대로 두면 되고,
+// API Gateway 등 /prod 같은 prefix가 있으면 "/prod" 로 맞춰줘.
+const API_BASE = "";
+
+// =========================
 // [1] Pro 시작하기 버튼 클릭 핸들러 등록
+// =========================
 function initializePriceButtons() {
   const proStartBtn = document.querySelector(
     "#pricing-modal-overlay .pro-button"
@@ -8,35 +16,87 @@ function initializePriceButtons() {
   });
 }
 
-// [2] 결제 세션 생성 → 스프라이트 결제창 호출
+// =========================
+// [2] 결제 세션 생성 → Toss 결제창 호출
+// =========================
 async function startProPlanCheckout() {
   const token = localStorage.getItem("token");
   if (!token) {
     alert("로그인이 필요합니다.");
+    // 여기서 로그인 모달 열고 싶으면 custom 이벤트 날리면 됨
+    // window.dispatchEvent(new CustomEvent("auth:open"));
     return;
   }
-  const r = await fetch("/api/payments/checkout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ plan: "PRO" }), // 금액은 서버가 결정
-  });
-  if (!r.ok) {
-    alert("결제 생성 실패");
+
+  if (!window.TossPayments) {
+    alert("결제 스크립트 로드에 실패했습니다. 잠시 후 다시 시도해주세요.");
     return;
   }
-  const info = await r.json(); // { provider:'sprite', orderId, checkoutUrl, ... }
 
-  // 성공 후 confirm에 사용할 orderId 임시 저장
-  localStorage.setItem("pending_order_id", info.orderId);
+  try {
+    // 1) 우리 서버에서 결제 세션 생성 (금액/주문명/성공URL/실패URL 등)
+    const r = await fetch(API_BASE + "/api/payments/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ plan: "PRO" }), // 금액은 서버가 결정
+    });
 
-  // 스프라이트 호스티드 체크아웃으로 이동
-  window.location.href = info.checkoutUrl;
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      console.error("checkout error:", err);
+      alert(err.error || "결제 생성에 실패했습니다.");
+      return;
+    }
+
+    // 서버에서 내려주는 세션 정보
+    // { provider:'toss', orderId, amount, currency, orderName, customerName, successUrl, failUrl }
+    const info = await r.json();
+    console.log("checkout session:", info);
+
+    if (info.provider !== "toss") {
+      alert("결제 제공자가 올바르지 않습니다. (toss가 아님)");
+      return;
+    }
+
+    const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+
+    // 2) 토스 결제창 띄우기
+    // v1/payment SDK 기준 requestPayment 사용 :contentReference[oaicite:3]{index=3}
+    await tossPayments
+      .requestPayment("카드", {
+        amount: info.amount,
+        orderId: info.orderId,
+        orderName: info.orderName || "BeeBee AI PRO (월 정기 결제)",
+        customerName: info.customerName || "",
+        // 서버에서 내려준 successUrl / failUrl 사용
+        successUrl:
+          info.successUrl || `${location.origin}?pg=success&provider=toss`,
+        failUrl: info.failUrl || `${location.origin}?pg=fail&provider=toss`,
+      })
+      .catch(function (error) {
+        if (error.code === "USER_CANCEL") {
+          // 사용자가 결제창 닫은 경우
+          console.log("사용자가 결제를 취소했습니다.");
+          return;
+        } else {
+          console.error("Toss requestPayment error:", error);
+          alert("결제창 호출 중 오류가 발생했습니다.");
+        }
+      });
+
+    // requestPayment 호출 이후에는 토스가 알아서 successUrl 또는 failUrl로 이동
+  } catch (e) {
+    console.error("startProPlanCheckout error:", e);
+    alert("결제 생성 중 오류가 발생했습니다.");
+  }
 }
 
-// DOM
+// =========================
+// [3] 사용량 카드 관련 DOM
+// =========================
 const planBadgeEl = document.getElementById("planBadge");
 const planNameEl = document.getElementById("planName");
 const formulaCountEl = document.getElementById("formulaCount");
@@ -49,7 +109,7 @@ const resetHintEl = document.getElementById("resetHint");
 function setUsageCardVisible(visible) {
   const card = document.getElementById("usageCard");
   if (!card) return;
-  card.hidden = !visible; // display: none
+  card.hidden = !visible;
   card.setAttribute("aria-hidden", String(!visible));
 }
 
@@ -58,7 +118,9 @@ function isLoggedIn() {
   return !!localStorage.getItem("token");
 }
 
-// 사용 현황 로드 (기존 함수에 보강)
+// =========================
+// [4] 사용 현황 로드
+// =========================
 async function loadUsage() {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -67,33 +129,34 @@ async function loadUsage() {
   }
 
   try {
-    const res = await fetch(`/api/payments/usage`, {
+    const res = await fetch(API_BASE + `/api/payments/usage`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!res.ok) {
-      // 401 등
       setUsageCardVisible(false);
       return;
     }
 
     const data = await res.json();
-    setUsageCardVisible(true); // 로그인 + 정상 응답일 때만 보이기
-    renderUsageCard(data); // 기존 렌더 함수
+    setUsageCardVisible(true);
+    renderUsageCard(data);
   } catch (e) {
     console.error(e);
     setUsageCardVisible(false);
   }
 }
 
-// 전역 로그인 상태 변경 이벤트(아래 2) 참고)
+// 전역 로그인 상태 변경 이벤트
 window.addEventListener("auth:changed", (e) => {
   const on = !!e.detail?.isLoggedIn;
   setUsageCardVisible(on);
   if (on) loadUsage();
 });
 
-// 2) 카드 UI 업데이트
+// =========================
+// [5] 카드 UI 업데이트
+// =========================
 function renderUsageCard({ plan, usage, limits }) {
   if (!planBadgeEl) return;
 
@@ -114,49 +177,81 @@ function renderUsageCard({ plan, usage, limits }) {
   resetHintEl.textContent = "월 사용량은 매월 1일에 재설정됩니다.";
 }
 
-// 3) 결제 성공 후에도 즉시 갱신
+// =========================
+// [6] Toss 리다이렉트 처리
+// =========================
 async function handleReturnIfNeeded() {
   const p = new URLSearchParams(location.search);
   const pg = p.get("pg");
   const provider = p.get("provider");
 
   // 실패 리다이렉트
-  if (pg === "fail") {
+  if (pg === "fail" && provider === "toss") {
+    const message =
+      p.get("message") || p.get("msg") || "결제가 취소되었거나 실패했습니다.";
+    alert(message);
+
+    // ?pg=... 쿼리 제거
     history.replaceState({}, document.title, location.pathname);
-    alert("결제가 취소/실패되었습니다.");
     return;
   }
 
-  // 성공 리다이렉트 (Sprite)
-  if (pg === "success" && (provider === "sprite" || !p.get("paymentKey"))) {
+  // 성공 리다이렉트 (Toss)
+  const paymentKey = p.get("paymentKey");
+  const orderId = p.get("orderId");
+  const amount = p.get("amount");
+
+  // 토스 성공 시: ?pg=success&provider=toss&paymentKey=...&orderId=...&amount=... 형태 :contentReference[oaicite:4]{index=4}
+  if (
+    pg === "success" &&
+    provider === "toss" &&
+    paymentKey &&
+    orderId &&
+    amount
+  ) {
     const token = localStorage.getItem("token");
-    const orderId = localStorage.getItem("pending_order_id");
-    if (!token || !orderId) return;
-
-    const r = await fetch("/api/payments/confirm", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ provider: "sprite", orderId }),
-    });
-    const data = await r.json();
-
-    // 주소창 정리 & 상태 갱신
-    history.replaceState({}, document.title, location.pathname);
-    localStorage.removeItem("pending_order_id");
-
-    if (!r.ok) {
-      alert(data.error || "결제 승인 실패");
+    if (!token) {
+      alert(
+        "로그인 정보가 만료되었습니다. 다시 로그인 후 결제를 확인해주세요."
+      );
+      history.replaceState({}, document.title, location.pathname);
       return;
     }
-    await loadUsage();
-    alert("PRO 플랜 활성화 완료! 🎉");
+
+    try {
+      const r = await fetch(API_BASE + "/api/payments/confirm", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ paymentKey, orderId, amount }),
+      });
+
+      const data = await r.json();
+
+      // 주소창 쿼리 정리
+      history.replaceState({}, document.title, location.pathname);
+
+      if (!r.ok || !data.ok) {
+        console.error("confirm error:", data);
+        alert(data.error || "결제 승인에 실패했습니다.");
+        return;
+      }
+
+      // 사용량 / 플랜 다시 로드
+      await loadUsage();
+      alert("PRO 플랜 활성화 완료! 🎉");
+    } catch (err) {
+      console.error("confirmPayment error:", err);
+      alert("결제 승인 중 오류가 발생했습니다.");
+    }
   }
 }
 
-// 최초 로드
+// =========================
+// [7] 최초 로드
+// =========================
 document.addEventListener("DOMContentLoaded", () => {
   initializePriceButtons();
   setUsageCardVisible(isLoggedIn());
