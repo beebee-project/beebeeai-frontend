@@ -116,7 +116,17 @@
           </div>
           <div class="form-group">
             <label for="password">비밀번호</label>
-            <input type="password" id="password" name="password" required />
+            <div class="password-wrapper">
+              <input type="password" id="password" name="password" required />
+              <button
+                type="button"
+                id="password-toggle"
+                class="password-toggle"
+                aria-label="비밀번호 표시"
+              >
+                👁
+              </button>
+            </div>
             <p
               id="password-hint"
               style="

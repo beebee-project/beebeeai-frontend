@@ -75,6 +75,7 @@ function initializePopups() {
   const passwordHint = document.getElementById("password-hint");
   const forgotPasswordLink = document.getElementById("forgot-password-link");
   const passwordInput = document.getElementById("password");
+  const passwordToggleBtn = document.getElementById("password-toggle");
 
   const showLogin = () => {
     loginTab?.classList.add("active");
@@ -113,6 +114,22 @@ function initializePopups() {
 
   // 기본은 로그인 탭
   showLogin();
+
+  // 2-1. 비밀번호 보기/숨기기 토글
+  if (passwordInput && passwordToggleBtn) {
+    passwordToggleBtn.addEventListener("click", () => {
+      const isHidden = passwordInput.type === "password";
+      passwordInput.type = isHidden ? "text" : "password";
+
+      // 아이콘/상태 변경
+      passwordToggleBtn.textContent = isHidden ? "🙈" : "👁";
+      passwordToggleBtn.classList.toggle("active", isHidden);
+      passwordToggleBtn.setAttribute(
+        "aria-label",
+        isHidden ? "비밀번호 숨기기" : "비밀번호 표시"
+      );
+    });
+  }
 
   // 3. 비밀번호 유효성 실시간 검사
   if (passwordInput && passwordHint) {
