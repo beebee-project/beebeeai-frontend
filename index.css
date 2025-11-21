@@ -1251,3 +1251,113 @@ main {
   margin-top: 10px;
   box-sizing: border-box;
 }
+
+/* 푸터 */
+.site-footer {
+  border-top: 1px solid #2c2c2e;
+  background: #000;
+  color: #a0a0a0;
+  padding: 24px 16px 32px;
+  font-size: 12px;
+}
+
+.footer-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-company span,
+.footer-meta span {
+  display: block;
+}
+
+.footer-logo {
+  font-weight: 600;
+  color: #ffc800; /* BeeBee 노랑 포인트 색으로 변경 가능 */
+  margin-bottom: 4px;
+}
+
+.footer-copy {
+  max-width: 1080px;
+  margin: 12px auto 0;
+  font-size: 11px;
+  color: #707070;
+}
+
+/* 데스크톱에서 좌/우 배치 */
+@media (min-width: 768px) {
+  .footer-inner {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+/* 정책 페이지 공통 스타일 */
+.policy-hero {
+  text-align: center;
+  padding: 80px 20px 40px;
+}
+
+.policy-hero h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+  color: #ffc800;
+}
+
+.policy-hero p {
+  color: #ffffff;
+}
+
+/* 본문 컨테이너 */
+.policy-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #ffffff;
+  line-height: 1.7;
+}
+
+/* 섹션 블록 */
+.policy-section {
+  margin-bottom: 60px;
+}
+
+.policy-section h2 {
+  margin-top: 30px;
+  margin-bottom: 16px;
+  font-size: 22px;
+  color: #ffc800;
+}
+
+.policy-section h3 {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+/* 리스트 */
+.policy-section ul {
+  padding-left: 20px;
+}
+
+.policy-section li {
+  margin-bottom: 4px;
+}
+
+/* 링크 스타일 */
+.policy-section a {
+  color: #ffd84d;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.policy-section a:hover {
+  color: #ffe694;
+  text-decoration-color: #ffe694;
+}
