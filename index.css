@@ -319,15 +319,15 @@ a {
 }
 
 .password-toggle:hover {
-  color: #f1c40f;
+  color: #ffc800;
 }
 
 .password-toggle.active {
-  color: #f1c40f;
+  color: #ffc800;
 }
 
 .main-action-button {
-  background-color: #ffc107;
+  background-color: #ffc800;
   color: #333;
   border: none;
   padding: 12px 20px;
