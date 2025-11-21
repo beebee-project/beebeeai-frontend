@@ -122,7 +122,7 @@ function initializePopups() {
       passwordInput.type = isHidden ? "text" : "password";
 
       // 아이콘/상태 변경
-      passwordToggleBtn.textContent = isHidden ? "🙈" : "👁";
+      passwordToggleBtn.textContent = isHidden ? "👁" : "👁";
       passwordToggleBtn.classList.toggle("active", isHidden);
       passwordToggleBtn.setAttribute(
         "aria-label",
