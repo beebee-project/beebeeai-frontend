@@ -320,7 +320,7 @@ a {
 }
 
 .password-toggle.active {
-  background-image: url("img/eye-open.svg");
+  color: #ffc800;
 }
 
 .main-action-button {
