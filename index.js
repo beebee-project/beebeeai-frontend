@@ -103,7 +103,7 @@ function initializePopups() {
     // 회원가입 탭에서만 비밀번호 힌트 표시
     if (passwordHint) {
       passwordHint.style.display = "block";
-      passwordHint.style.color = "#888"; // 기본 색상으로 리셋
+      passwordHint.style.color = "#888";
     }
 
     if (forgotPasswordLink) forgotPasswordLink.style.display = "none";
@@ -122,7 +122,6 @@ function initializePopups() {
       passwordInput.type = isHidden ? "text" : "password";
 
       // 아이콘/상태 변경
-      passwordToggleBtn.textContent = isHidden ? "👁" : "👁";
       passwordToggleBtn.classList.toggle("active", isHidden);
       passwordToggleBtn.setAttribute(
         "aria-label",
