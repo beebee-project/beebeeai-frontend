@@ -306,13 +306,16 @@ a {
 }
 
 .password-toggle {
-  width: 24px;
-  height: 24px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   border: none;
-  outline: none;
-  padding: 0;
-  background: transparent url("img/eye-closed.svg") center/20px 20px no-repeat;
+  background: none;
   cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: #aaa;
 }
 
 .password-toggle:hover {
