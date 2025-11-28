@@ -249,6 +249,64 @@ async function handleReturnIfNeeded() {
   }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const pricingModal = document.getElementById("pricing-modal-overlay");
+  const paymentModal = document.getElementById("payment-modal-overlay");
+
+  const subscribeBtn = document.getElementById("subscribe-btn");
+  const paymentCloseBtn = document.getElementById("payment-close-btn");
+
+  const termsCheckbox = document.getElementById("terms-checkbox");
+  const paymentNextBtn = document.getElementById("payment-next-btn");
+
+  // 1) 구독 버튼 → 결제창 열기
+  if (subscribeBtn) {
+    subscribeBtn.addEventListener("click", () => {
+      // 구독 모달 숨기고
+      pricingModal.style.display = "none";
+      // 결제 모달 보이기
+      paymentModal.style.display = "flex"; // modal-overlay가 flex면 이렇게
+      document.body.style.overflow = "hidden";
+    });
+  }
+
+  // 2) 결제창 닫기 버튼
+  if (paymentCloseBtn) {
+    paymentCloseBtn.addEventListener("click", () => {
+      paymentModal.style.display = "none";
+      document.body.style.overflow = "";
+    });
+  }
+
+  // 3) 약관 체크 여부에 따라 '다음' 버튼 활성/비활성
+  if (termsCheckbox && paymentNextBtn) {
+    termsCheckbox.addEventListener("change", () => {
+      paymentNextBtn.disabled = !termsCheckbox.checked;
+    });
+  }
+
+  // 4) '다음' 버튼 클릭 시 실제 토스 결제 연동 자리
+  if (paymentNextBtn) {
+    paymentNextBtn.addEventListener("click", () => {
+      if (paymentNextBtn.disabled) return;
+
+      // TODO: 여기서 카드번호/유효기간 값 읽고 유효성 검사한 뒤,
+      // 백엔드에 결제 요청 or TossPayments.requestPayment 호출
+      // 일단 테스트용 알림만 띄워둠
+      alert("토스 결제 연동 로직 실행 위치");
+    });
+  }
+
+  // (선택) 카드 타입 탭 토글
+  const cardTypeBtns = document.querySelectorAll(".card-type-btn");
+  cardTypeBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      cardTypeBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+});
+
 // =========================
 // [7] 최초 로드
 // =========================

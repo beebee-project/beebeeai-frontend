@@ -431,6 +431,211 @@ a {
   border-color: #e0b300;
 }
 
+#payment-modal-overlay {
+  display: none; /* 기본 숨김 */
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(1px);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ===========================
+   결제창 전체 박스
+=========================== */
+.payment-modal {
+  width: 430px;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.22s ease-out;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ===========================
+   상단 헤더
+=========================== */
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.payment-logo {
+  font-size: 13px;
+  font-weight: 600;
+  color: #868e96;
+}
+
+#payment-close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #868e96;
+  cursor: pointer;
+}
+
+/* ===========================
+   본문 영역 – 좌측 상점 / 우측 입력폼
+=========================== */
+.payment-body {
+  display: flex;
+  padding: 18px 14px;
+  gap: 14px;
+}
+
+/* ===========================
+   좌측: 상점 정보
+=========================== */
+.payment-shop {
+  width: 120px;
+  border-right: 1px solid #f1f3f5;
+  padding-right: 12px;
+}
+
+.shop-title {
+  font-size: 11px;
+  color: #adb5bd;
+  margin-bottom: 4px;
+}
+
+.shop-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 10px;
+}
+
+.shop-price {
+  font-size: 12px;
+  color: #495057;
+  font-weight: 500;
+}
+
+/* ===========================
+   우측: 카드 입력 폼
+=========================== */
+.payment-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 카드 타입 탭 */
+.card-type-tabs {
+  display: flex;
+  background: #f1f3f5;
+  padding: 2px;
+  border-radius: 999px;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.card-type-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  color: #495057;
+}
+
+.card-type-btn.active {
+  background: #fff;
+  box-shadow: 0 0 0 1px #dee2e6;
+}
+
+/* 카드번호 필드 */
+.field-label {
+  font-size: 11px;
+  color: #868e96;
+  margin-top: 4px;
+}
+
+.card-number-group {
+  display: flex;
+  gap: 6px;
+}
+
+.card-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  outline: none;
+}
+
+.card-input:focus {
+  border-color: #3182f6;
+  box-shadow: 0 0 0 1px rgba(49, 130, 246, 0.3);
+}
+
+/* 유효기간 */
+.field-input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  font-size: 13px;
+}
+
+.field-input:focus {
+  border-color: #3182f6;
+  box-shadow: 0 0 0 1px rgba(49, 130, 246, 0.3);
+}
+
+/* 약관 체크 */
+.terms {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #868e96;
+}
+
+.terms input {
+  width: 14px;
+  height: 14px;
+}
+
+/* 다음 버튼 */
+.primary-btn {
+  width: 100%;
+  padding: 10px 0;
+  background: #3182f6;
+  border: none;
+  color: white;
+  font-size: 13px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.primary-btn:disabled {
+  background: #d0d4d9;
+  cursor: not-allowed;
+}
+
 /* ==================== 가이드 팝업 스타일 ==================== */
 .guide-overlay {
   position: fixed;
