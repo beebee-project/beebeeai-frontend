@@ -11,8 +11,15 @@ function initializePriceButtons() {
   const proStartBtn = document.querySelector(
     "#pricing-modal-overlay .pro-button"
   );
-  proStartBtn?.addEventListener("click", async () => {
-    await startProPlanCheckout();
+  const pricingModal = document.getElementById("pricing-modal-overlay");
+  const paymentModal = document.getElementById("payment-modal-overlay");
+
+  proStartBtn?.addEventListener("click", () => {
+    // 1) 요금제 모달 닫고
+    pricingModal?.classList.remove("active");
+    // 2) 카드 입력 모달 열기
+    paymentModal.style.display = "flex";
+    document.body.style.overflow = "hidden";
   });
 }
 
