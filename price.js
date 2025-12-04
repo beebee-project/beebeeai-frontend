@@ -14,10 +14,20 @@ function initializePriceButtons() {
   const pricingModal = document.getElementById("pricing-modal-overlay");
   const paymentModal = document.getElementById("payment-modal-overlay");
 
-  proStartBtn?.addEventListener("click", () => {
-    // 1) 요금제 모달 닫고
+  proStartBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem("token");
+
+    // ① 로그인 안 된 상태라면 → 로그인 모달 열고 종료
+    if (!token) {
+      alert("구독은 로그인 후 이용 가능합니다.");
+      document.getElementById("login-modal-overlay")?.classList.add("active");
+      return;
+    }
+
+    // ② 로그인 된 상태라면 → 결제창으로 진행
     pricingModal?.classList.remove("active");
-    // 2) 카드 입력 모달 열기
     paymentModal.style.display = "flex";
     document.body.style.overflow = "hidden";
   });
