@@ -232,61 +232,59 @@
 
     <!-- 결제창 모달 (카드 정보 입력) -->
     <div class="modal-overlay" id="payment-modal-overlay" style="display: none">
-      <div class="payment-modal-content">
-        <button class="close-button" id="payment-close-btn">X</button>
-        <div class="payment-modal">
-          <div class="payment-header">
-            <span class="payment-logo">toss payments</span>
+      <!-- <button class="close-button" id="payment-close-btn">X</button> -->
+      <div class="payment-modal">
+        <div class="payment-header">
+          <span class="payment-logo">toss payments</span>
+        </div>
+
+        <div class="payment-body">
+          <!-- 왼쪽 상점 정보 -->
+          <div class="payment-shop">
+            <div class="shop-name">BeeBee AI 구독</div>
+            <div class="shop-price">₩4,900 / 월</div>
           </div>
 
-          <div class="payment-body">
-            <!-- 왼쪽 상점 정보 -->
-            <div class="payment-shop">
-              <div class="shop-name">BeeBee AI 구독</div>
-              <div class="shop-price">₩4,900 / 월</div>
-            </div>
-
-            <!-- 오른쪽 카드 입력 폼 -->
-            <div class="payment-form">
-              <!-- 카드 타입 탭 -->
-              <div class="card-type-tabs">
-                <button class="card-type-btn active" data-type="personal">
-                  개인 카드
-                </button>
-                <button class="card-type-btn" data-type="business">
-                  법인 카드
-                </button>
-              </div>
-
-              <!-- 카드번호 -->
-              <label class="field-label">카드번호</label>
-              <div class="card-number-group">
-                <input type="text" maxlength="4" class="card-input" />
-                <input type="text" maxlength="4" class="card-input" />
-                <input type="text" maxlength="4" class="card-input" />
-                <input type="text" maxlength="4" class="card-input" />
-              </div>
-
-              <!-- 유효기간 -->
-              <label class="field-label">유효기간</label>
-              <input
-                type="text"
-                class="field-input"
-                placeholder="MM/YY"
-                maxlength="5"
-              />
-
-              <!-- 약관동의 -->
-              <label class="terms">
-                <input type="checkbox" id="terms-checkbox" />
-                <span>[필수] 서비스 이용 약관, 개인정보 처리 동의</span>
-              </label>
-
-              <!-- 다음 버튼 -->
-              <button class="primary-btn" id="payment-next-btn" disabled>
-                다음
+          <!-- 오른쪽 카드 입력 폼 -->
+          <div class="payment-form">
+            <!-- 카드 타입 탭 -->
+            <div class="card-type-tabs">
+              <button class="card-type-btn active" data-type="personal">
+                개인 카드
+              </button>
+              <button class="card-type-btn" data-type="business">
+                법인 카드
               </button>
             </div>
+
+            <!-- 카드번호 -->
+            <label class="field-label">카드번호</label>
+            <div class="card-number-group">
+              <input type="text" maxlength="4" class="card-input" />
+              <input type="text" maxlength="4" class="card-input" />
+              <input type="text" maxlength="4" class="card-input" />
+              <input type="text" maxlength="4" class="card-input" />
+            </div>
+
+            <!-- 유효기간 -->
+            <label class="field-label">유효기간</label>
+            <input
+              type="text"
+              class="field-input"
+              placeholder="MM/YY"
+              maxlength="5"
+            />
+
+            <!-- 약관동의 -->
+            <label class="terms">
+              <input type="checkbox" id="terms-checkbox" />
+              <span>[필수] 서비스 이용 약관, 개인정보 처리 동의</span>
+            </label>
+
+            <!-- 다음 버튼 -->
+            <button class="primary-btn" id="payment-next-btn" disabled>
+              다음
+            </button>
           </div>
         </div>
       </div>
