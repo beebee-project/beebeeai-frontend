@@ -1,8 +1,9 @@
-const TOSS_CLIENT_KEY = "YOUR_TOSS_CLIENT_KEY_HERE";
+const TOSS_CLIENT_KEY = "test_ck_XZYkKL4MrjBjEKkXP9X1r0zJwIEW";
 
-// 같은 도메인에서 API를 쓰면 "" 그대로 두면 되고,
-// API Gateway 등 /prod 같은 prefix가 있으면 "/prod" 로 맞춰줘.
-const API_BASE = "";
+const API_BASE =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://beebeeai-backend-production.up.railway.app";
 
 // =========================
 // [1] Pro 시작하기 버튼 클릭 핸들러 등록
@@ -304,13 +305,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 4) '다음' 버튼 클릭 시 실제 토스 결제 연동 자리
   if (paymentNextBtn) {
-    paymentNextBtn.addEventListener("click", () => {
+    paymentNextBtn.addEventListener("click", async () => {
       if (paymentNextBtn.disabled) return;
 
-      // TODO: 여기서 카드번호/유효기간 값 읽고 유효성 검사한 뒤,
-      // 백엔드에 결제 요청 or TossPayments.requestPayment 호출
-      // 일단 테스트용 알림만 띄워둠
-      alert("토스 결제 연동 로직 실행 위치");
+      // 실제 결제 요청
+      await startProPlanCheckout();
     });
   }
 
