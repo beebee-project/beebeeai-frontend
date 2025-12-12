@@ -48,7 +48,7 @@ async function openTossWidget() {
 
     // ✅ widgets 인스턴스는 1개만 만들고 __widgets로만 관리
     __widgets = tossPayments.widgets({
-      customerKey: session.customerKey || session.customerName || "ANONYMOUS",
+      customerKey: session.customerKey || "ANONYMOUS",
     });
 
     await __widgets.setAmount({ currency: "KRW", value: session.amount });
