@@ -117,7 +117,9 @@ function initSubscribeButton() {
     tossOverlay?.classList.add("active");
     document.body.style.overflow = "hidden";
 
-    await openTossWidget();
+    requestAnimationFrame(() => {
+      openTossWidget();
+    });
   });
 
   tossClose?.addEventListener("click", () => {
