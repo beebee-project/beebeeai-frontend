@@ -46,8 +46,8 @@ async function openTossWidget() {
 
     const tossPayments = TossPayments(TOSS_CLIENT_KEY);
 
+    // ✅ widgets 인스턴스는 1개만 만들고 __widgets로만 관리
     __widgets = tossPayments.widgets({
-      // customerKey는 유저 고유값 권장(임시로 이름/아이디)
       customerKey: session.customerKey || session.customerName || "ANONYMOUS",
     });
 
@@ -64,7 +64,7 @@ async function openTossWidget() {
       }),
     ]);
 
-    // 결제수단 선택 시 버튼 활성화
+    // 결제수단 선택 시 결제 버튼 활성화
     paymentMethodWidget.on("paymentMethodSelect", () => {
       const btn = document.getElementById("payment-request-button");
       if (btn) btn.disabled = false;
@@ -76,14 +76,14 @@ async function openTossWidget() {
     await __widgets.setAmount({ currency: "KRW", value: session.amount });
   }
 
-  // 3) 결제 버튼 → requestPayment
+  // 3) 결제 버튼 → requestPayment (onclick은 한 번만 설정)
   const btn = document.getElementById("payment-request-button");
   if (!btn) {
     alert("결제 버튼(#payment-request-button)을 찾을 수 없습니다.");
     return;
   }
 
-  btn.disabled = true;
+  btn.disabled = true; // 결제수단 선택 전까지 비활성(원하면 유지)
   btn.onclick = async () => {
     try {
       await __widgets.requestPayment({
