@@ -1561,79 +1561,90 @@ main {
   text-decoration-color: #ffe694;
 }
 
-/* ================================
-   Toss Payment Widget (BeeBee Scoped)
-   ================================ */
+/* =========================================================
+   Toss Payment Widget + Result Pages (BeeBee 최적화)
+   - 기존 .modal-overlay / .close-button / .primary-btn 스타일을 최대한 재사용
+   - 토스 샘플의 wrapper/btn 같은 전역 충돌 클래스는 사용하지 않음
+========================================================= */
 
-/* 오버레이/모달 카드 */
-#toss-widget-overlay {
-  display: none; /* 기본은 숨김 (JS에서 active로 표시) */
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.6);
-  align-items: center;
-  justify-content: center;
+/* 공용 유틸(이미 다른 곳에서 쓰고 있어도 안전) */
+.w-100 {
+  width: 100%;
+}
+.h-100 {
+  height: 100%;
+}
+
+/* -------------------------------
+   1) 결제위젯 모달 (Overlay + Card)
+--------------------------------- */
+
+/* 기존 .modal-overlay가 display/center 처리 중이라,
+   추가로 z-index/패딩/스크롤만 보강 */
+#toss-widget-overlay.modal-overlay {
+  z-index: 2000; /* 기존 1000보다 위로 */
   padding: 24px;
 }
 
-#toss-widget-overlay.active {
-  display: flex;
-}
-
+/* 모달 카드 */
 #toss-widget-overlay .toss-widget-modal {
   width: 100%;
   max-width: 560px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
-  padding: 20px;
+  padding: 20px 18px 18px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
 
-/* 상단 닫기 버튼 (네 close-button 스타일과 맞추되, 위젯 모달 안에서만 보정) */
+/* 모바일에서는 높이 제한 + 내부 스크롤 */
+@media (max-width: 560px) {
+  #toss-widget-overlay .toss-widget-modal {
+    max-width: 100%;
+    max-height: 92vh;
+    overflow: auto;
+    border-radius: 14px;
+  }
+}
+
+/* 닫기 버튼: 기존 .close-button은 흰 배경에서 너무 밝게 보이니 위젯 모달 안에서만 덮어쓰기 */
 #toss-widget-overlay .close-button {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
   color: #6b7684;
 }
-
 #toss-widget-overlay .close-button:hover {
   color: #333d48;
 }
 
-/* 위젯 렌더링 영역 여백 */
+/* 위젯 렌더 영역 간격 */
 #toss-widget-overlay #payment-method {
-  margin-top: 28px;
+  margin-top: 26px;
 }
-
 #toss-widget-overlay #agreement {
   margin-top: 12px;
 }
 
-/* 토스 샘플의 w-100 같은 전역 유틸이 충돌 안 나도록 스코프 */
-#toss-widget-overlay .w-100 {
-  width: 100%;
+/* 토스 위젯 내부 요소가 모달 밖으로 튀지 않게 */
+#toss-widget-overlay #payment-method,
+#toss-widget-overlay #agreement {
+  overflow: hidden;
 }
 
-/* 결제 버튼 (토스 샘플 btn.primary 느낌 + BeeBee 톤에 맞게) */
+/* 결제 버튼:
+   - HTML이 토스 샘플처럼 id="payment-request-button"을 쓰는 경우를 대비해
+   - 기존 .primary-btn 톤과 동일하게 맞춤 */
 #toss-widget-overlay #payment-request-button {
   width: 100%;
-  margin-top: 16px;
-  padding: 12px 16px;
+  margin-top: 14px;
+  padding: 12px 0;
   border: none;
   border-radius: 12px;
+  background: #3182f6;
+  color: #ffffff;
+  font-size: 14px;
   font-weight: 700;
-  font-size: 16px;
   cursor: pointer;
-  background: #3282f6;
-  color: #f9fcff;
-  transition: opacity 0.15s ease, transform 0.05s ease;
+  transition: opacity 0.15s ease, transform 0.06s ease;
 }
 
 #toss-widget-overlay #payment-request-button:active {
@@ -1641,121 +1652,125 @@ main {
 }
 
 #toss-widget-overlay #payment-request-button:disabled {
-  opacity: 0.5;
+  background: #d0d4d9;
   cursor: not-allowed;
+  opacity: 1;
 }
 
-/* (선택) success/fail 페이지용 스타일을 그대로 쓰되 스코프만 걸고 싶을 때 */
-.toss-result-page .wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px;
-  overflow: auto;
+/* -------------------------------
+   2) success.html / fail.html 전용 스타일
+   - body에 class="toss-result-page" 를 넣는 것을 전제로 스코프 처리
+--------------------------------- */
+
+body.toss-result-page {
+  background: #272522; /* BeeBee 메인 배경과 일치 */
+  color: #eaeaea;
 }
 
-.toss-result-page .max-w-540 {
+/* 결과 페이지 컨테이너 */
+.toss-result-page .toss-result-wrap {
   width: 100%;
   max-width: 540px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
-.toss-result-page .btn-wrapper {
-  padding: 0 24px;
-}
-
-.toss-result-page .btn {
-  padding: 11px 22px;
-  border: none;
-  border-radius: 8px;
-  background-color: #f2f4f6;
-  color: #4e5968;
-  font-weight: 600;
-  font-size: 17px;
-  cursor: pointer;
-}
-
-.toss-result-page .btn.primary {
-  background-color: #3282f6;
-  color: #f9fcff;
-}
-
-.toss-result-page .text-center {
-  text-align: center;
-}
-.toss-result-page .flex {
-  display: flex;
-}
-.toss-result-page .flex-column {
-  display: flex;
-  flex-direction: column;
-}
-.toss-result-page .justify-center {
-  justify-content: center;
-}
-.toss-result-page .justify-between {
-  justify-content: space-between;
-}
-.toss-result-page .align-center {
-  align-items: center;
-}
-
-.toss-result-page .confirm-loading {
-  margin-top: 72px;
-  height: 400px;
-  justify-content: space-between;
-}
-
-.toss-result-page .confirm-success {
-  display: none;
-  margin-top: 72px;
-}
-
-.toss-result-page .button-group {
-  margin-top: 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 16px;
-}
-
+/* 토스 샘플 레이아웃을 BeeBee 톤으로 재구성 */
 .toss-result-page .title {
-  margin-top: 32px;
+  margin-top: 20px;
   margin-bottom: 0;
-  color: #191f28;
-  font-weight: bold;
-  font-size: 24px;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 22px;
 }
 
 .toss-result-page .description {
   margin-top: 8px;
-  color: #4e5968;
-  font-size: 17px;
+  color: rgba(234, 234, 234, 0.8);
+  font-size: 14px;
   font-weight: 500;
 }
 
 .toss-result-page .response-section {
-  margin-top: 60px;
+  margin-top: 26px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  font-size: 20px;
+  gap: 12px;
 }
 
-.toss-result-page .response-section .response-label {
+.toss-result-page .response-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.toss-result-page .response-label {
+  font-weight: 700;
+  color: rgba(234, 234, 234, 0.85);
+  font-size: 13px;
+}
+
+.toss-result-page .response-text {
   font-weight: 600;
-  color: #333d48;
-  font-size: 17px;
-}
-
-.toss-result-page .response-section .response-text {
-  font-weight: 500;
-  color: #4e5968;
-  font-size: 17px;
-  padding-left: 16px;
+  color: #ffffff;
+  font-size: 13px;
   word-break: break-word;
   text-align: right;
 }
 
+/* 로딩/성공 섹션 */
+.toss-result-page .confirm-loading {
+  margin-top: 26px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+}
+
+.toss-result-page .confirm-success {
+  display: none;
+  margin-top: 26px;
+}
+
+/* 결과 페이지 버튼 그룹 */
+.toss-result-page .button-group {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 결과 페이지 버튼: BeeBee .primary-btn 톤과 일치 */
+.toss-result-page .btn {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.toss-result-page .btn.primary {
+  background: #3182f6;
+  color: #ffffff;
+}
+
+.toss-result-page .btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.toss-result-page .btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
 .toss-result-page .color-grey {
-  color: #b0b8c1;
+  color: rgba(234, 234, 234, 0.55);
 }
