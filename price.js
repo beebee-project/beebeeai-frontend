@@ -1,4 +1,4 @@
-const TOSS_CLIENT_KEY = "test_ck_XZYkKL4MrjBjEKkXP9X1r0zJwIEW";
+const TOSS_CLIENT_KEY = "test_gck_26DlbXAaV0779WzGYRxd3qY50Q9R";
 
 const API_BASE =
   window.location.hostname === "localhost"
@@ -37,80 +37,6 @@ function initializePriceButtons() {
 // =========================
 // [2] 결제 세션 생성 → Toss 결제창 호출
 // =========================
-async function startProPlanCheckout() {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("로그인이 필요합니다.");
-    // 여기서 로그인 모달 열고 싶으면 custom 이벤트 날리면 됨
-    // window.dispatchEvent(new CustomEvent("auth:open"));
-    return;
-  }
-
-  if (!window.TossPayments) {
-    alert("결제 스크립트 로드에 실패했습니다. 잠시 후 다시 시도해주세요.");
-    return;
-  }
-
-  try {
-    // 1) 우리 서버에서 결제 세션 생성 (금액/주문명/성공URL/실패URL 등)
-    const r = await fetch(API_BASE + "/api/payments/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ plan: "PRO" }), // 금액은 서버가 결정
-    });
-
-    if (!r.ok) {
-      const err = await r.json().catch(() => ({}));
-      console.error("checkout error:", err);
-      alert(err.error || "결제 생성에 실패했습니다.");
-      return;
-    }
-
-    // 서버에서 내려주는 세션 정보
-    // { provider:'toss', orderId, amount, currency, orderName, customerName, successUrl, failUrl }
-    const info = await r.json();
-    console.log("checkout session:", info);
-
-    if (info.provider !== "toss") {
-      alert("결제 제공자가 올바르지 않습니다. (toss가 아님)");
-      return;
-    }
-
-    const tossPayments = TossPayments(TOSS_CLIENT_KEY);
-
-    // 2) 토스 결제창 띄우기
-    // v1/payment SDK 기준 requestPayment 사용 :contentReference[oaicite:3]{index=3}
-    await tossPayments
-      .requestPayment("카드", {
-        amount: info.amount,
-        orderId: info.orderId,
-        orderName: info.orderName || "BeeBee AI PRO (월 정기 결제)",
-        customerName: info.customerName || "",
-        // 서버에서 내려준 successUrl / failUrl 사용
-        successUrl:
-          info.successUrl || `${location.origin}?pg=success&provider=toss`,
-        failUrl: info.failUrl || `${location.origin}?pg=fail&provider=toss`,
-      })
-      .catch(function (error) {
-        if (error.code === "USER_CANCEL") {
-          // 사용자가 결제창 닫은 경우
-          console.log("사용자가 결제를 취소했습니다.");
-          return;
-        } else {
-          console.error("Toss requestPayment error:", error);
-          alert("결제창 호출 중 오류가 발생했습니다.");
-        }
-      });
-
-    // requestPayment 호출 이후에는 토스가 알아서 successUrl 또는 failUrl로 이동
-  } catch (e) {
-    console.error("startProPlanCheckout error:", e);
-    alert("결제 생성 중 오류가 발생했습니다.");
-  }
-}
 
 // =========================
 // [3] 사용량 카드 관련 DOM
@@ -309,7 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (paymentNextBtn.disabled) return;
 
       // 실제 결제 요청
-      await startProPlanCheckout();
+      openTossWidget();
     });
   }
 
@@ -322,6 +248,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+function openTossWidget() {
+  const overlay = document.getElementById("toss-widget-overlay");
+  overlay.classList.add("active");
+  document.body.style.overflow = "hidden";
+}
 
 // =========================
 // [7] 최초 로드

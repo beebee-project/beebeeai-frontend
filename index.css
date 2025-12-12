@@ -1560,3 +1560,202 @@ main {
   color: #ffe694;
   text-decoration-color: #ffe694;
 }
+
+/* ================================
+   Toss Payment Widget (BeeBee Scoped)
+   ================================ */
+
+/* 오버레이/모달 카드 */
+#toss-widget-overlay {
+  display: none; /* 기본은 숨김 (JS에서 active로 표시) */
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.6);
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#toss-widget-overlay.active {
+  display: flex;
+}
+
+#toss-widget-overlay .toss-widget-modal {
+  width: 100%;
+  max-width: 560px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 상단 닫기 버튼 (네 close-button 스타일과 맞추되, 위젯 모달 안에서만 보정) */
+#toss-widget-overlay .close-button {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  color: #6b7684;
+}
+
+#toss-widget-overlay .close-button:hover {
+  color: #333d48;
+}
+
+/* 위젯 렌더링 영역 여백 */
+#toss-widget-overlay #payment-method {
+  margin-top: 28px;
+}
+
+#toss-widget-overlay #agreement {
+  margin-top: 12px;
+}
+
+/* 토스 샘플의 w-100 같은 전역 유틸이 충돌 안 나도록 스코프 */
+#toss-widget-overlay .w-100 {
+  width: 100%;
+}
+
+/* 결제 버튼 (토스 샘플 btn.primary 느낌 + BeeBee 톤에 맞게) */
+#toss-widget-overlay #payment-request-button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  background: #3282f6;
+  color: #f9fcff;
+  transition: opacity 0.15s ease, transform 0.05s ease;
+}
+
+#toss-widget-overlay #payment-request-button:active {
+  transform: translateY(1px);
+}
+
+#toss-widget-overlay #payment-request-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* (선택) success/fail 페이지용 스타일을 그대로 쓰되 스코프만 걸고 싶을 때 */
+.toss-result-page .wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  overflow: auto;
+}
+
+.toss-result-page .max-w-540 {
+  width: 100%;
+  max-width: 540px;
+}
+
+.toss-result-page .btn-wrapper {
+  padding: 0 24px;
+}
+
+.toss-result-page .btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: 8px;
+  background-color: #f2f4f6;
+  color: #4e5968;
+  font-weight: 600;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.toss-result-page .btn.primary {
+  background-color: #3282f6;
+  color: #f9fcff;
+}
+
+.toss-result-page .text-center {
+  text-align: center;
+}
+.toss-result-page .flex {
+  display: flex;
+}
+.toss-result-page .flex-column {
+  display: flex;
+  flex-direction: column;
+}
+.toss-result-page .justify-center {
+  justify-content: center;
+}
+.toss-result-page .justify-between {
+  justify-content: space-between;
+}
+.toss-result-page .align-center {
+  align-items: center;
+}
+
+.toss-result-page .confirm-loading {
+  margin-top: 72px;
+  height: 400px;
+  justify-content: space-between;
+}
+
+.toss-result-page .confirm-success {
+  display: none;
+  margin-top: 72px;
+}
+
+.toss-result-page .button-group {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.toss-result-page .title {
+  margin-top: 32px;
+  margin-bottom: 0;
+  color: #191f28;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.toss-result-page .description {
+  margin-top: 8px;
+  color: #4e5968;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.toss-result-page .response-section {
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 20px;
+}
+
+.toss-result-page .response-section .response-label {
+  font-weight: 600;
+  color: #333d48;
+  font-size: 17px;
+}
+
+.toss-result-page .response-section .response-text {
+  font-weight: 500;
+  color: #4e5968;
+  font-size: 17px;
+  padding-left: 16px;
+  word-break: break-word;
+  text-align: right;
+}
+
+.toss-result-page .color-grey {
+  color: #b0b8c1;
+}
