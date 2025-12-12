@@ -23,7 +23,7 @@ async function openTossWidget() {
   }
 
   // 1) 결제 세션 생성(서버)
-  const checkoutRes = await fetch(API_BASE + "/api/v1/payments/checkout", {
+  const checkoutRes = await fetch(API_BASE + "/api/payments/checkout", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -89,7 +89,7 @@ async function openTossWidget() {
       await __widgets.requestPayment({
         orderId: session.orderId,
         orderName: session.orderName,
-        successUrl: session.successUrl, // ✅ 프론트 success.html 로 보내도록 백엔드에서 생성
+        successUrl: session.successUrl,
         failUrl: session.failUrl,
         customerName: session.customerName,
       });
