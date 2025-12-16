@@ -1,10 +1,18 @@
-import "./style.css";
-const urlParams = new URLSearchParams(window.location.search);
-const errorCode = urlParams.get("code");
-const errorMessage = urlParams.get("message");
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  const message = params.get("message");
+  const orderId = params.get("orderId");
 
-const errorCodeElement = document.getElementById("error-code");
-const errorMessageElement = document.getElementById("error-message");
+  const setText = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = v ?? "";
+  };
 
-errorCodeElement.textContent = errorCode;
-errorMessageElement.textContent = errorMessage;
+  setText("failCode", code);
+  setText("failMsg", message);
+  setText("orderId", orderId);
+
+  const btn = document.getElementById("goHome");
+  btn?.addEventListener("click", () => (window.location.href = "/"));
+})();
