@@ -8,7 +8,19 @@ const API_BASE =
 const urlParams = new URLSearchParams(window.location.search);
 const paymentKey = urlParams.get("paymentKey");
 const orderId = urlParams.get("orderId");
-const amount = urlParams.get("amount");
+let amount = urlParams.get("amount");
+
+// ✅ amount가 없으면 localStorage에서 복구
+if (!amount && orderId) {
+  try {
+    const pending = JSON.parse(
+      localStorage.getItem("pendingPayment") || "null"
+    );
+    if (pending && pending.orderId === orderId && pending.amount != null) {
+      amount = String(pending.amount);
+    }
+  } catch (e) {}
+}
 
 document.getElementById("paymentKey").textContent = paymentKey || "";
 document.getElementById("orderId").textContent = orderId || "";
@@ -29,12 +41,18 @@ async function confirmPayment() {
     return;
   }
 
+  if (!amount) {
+    alert("결제 금액(amount)을 확인할 수 없습니다. 결제를 다시 시도해주세요.");
+    return;
+  }
+
   const res = await fetch(`${API_BASE}/api/payments/confirm`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+
     body: JSON.stringify({
       paymentKey,
       orderId,

@@ -37,6 +37,14 @@ async function openTossWidget() {
     return;
   }
 
+  localStorage.setItem(
+    "pendingPayment",
+    JSON.stringify({
+      orderId: session.orderId,
+      amount: session.amount,
+    })
+  );
+
   // 2) 위젯 초기화/렌더 (1회)
   if (!__widgetsInited) {
     if (typeof TossPayments !== "function") {
