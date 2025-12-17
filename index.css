@@ -45,6 +45,19 @@ a {
   font-weight: bold;
 }
 
+.subscription-badge {
+  display: none;
+  margin-left: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.15);
+  padding: 3px 8px;
+  border-radius: 999px;
+  line-height: 1;
+  letter-spacing: -0.2px;
+}
+
 .header-nav {
   display: flex;
   gap: 30px;
@@ -1773,24 +1786,4 @@ body.toss-result-page {
 
 .toss-result-page .color-grey {
   color: rgba(234, 234, 234, 0.55);
-}
-
-/* ===== 구독 상태 배지 ===== */
-.logo-text-wrapper {
-  display: inline-flex;
-  align-items: baseline;
-}
-
-.subscription-badge {
-  display: none;
-  margin-left: 10px;
-  margin-top: 2px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #2ecc71;
-  background: rgba(46, 204, 113, 0.15);
-  padding: 3px 8px;
-  border-radius: 999px;
-  line-height: 1;
-  letter-spacing: -0.2px;
 }
