@@ -1,18 +1,10 @@
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get("code");
-  const message = params.get("message");
-  const orderId = params.get("orderId");
+const urlParams = new URLSearchParams(window.location.search);
+const errorCode = urlParams.get("code");
+const errorMessage = urlParams.get("message");
 
-  const setText = (id, v) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = v ?? "";
-  };
+const errorCodeElement = document.getElementById("error-code");
+const errorMessageElement = document.getElementById("error-message");
 
-  setText("failCode", code);
-  setText("failMsg", message);
-  setText("orderId", orderId);
-
-  const btn = document.getElementById("goHome");
-  btn?.addEventListener("click", () => (window.location.href = "/"));
-})();
+errorCodeElement.textContent = errorCode || "-";
+errorMessageElement.textContent =
+  errorMessage || "결제가 취소되었거나 실패했습니다.";

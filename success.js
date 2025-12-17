@@ -6,69 +6,47 @@ const API_BASE =
 const urlParams = new URLSearchParams(window.location.search);
 const paymentKey = urlParams.get("paymentKey");
 const orderId = urlParams.get("orderId");
-let amount = urlParams.get("amount");
+const amount = Number(urlParams.get("amount"));
 
-// ✅ amount가 없으면 localStorage에서 복구
-if (!amount && orderId) {
-  try {
-    const pending = JSON.parse(
-      localStorage.getItem("pendingPayment") || "null"
-    );
-    if (pending && pending.orderId === orderId && pending.amount != null) {
-      amount = String(pending.amount);
-    }
-  } catch (e) {}
-}
+const paymentKeyElement = document.getElementById("paymentKey");
+const orderIdElement = document.getElementById("orderId");
+const amountElement = document.getElementById("amount");
 
-// 화면 표시
-document.getElementById("paymentKey").textContent = paymentKey || "";
-document.getElementById("orderId").textContent = orderId || "";
-document.getElementById("amount").textContent = amount ? `${amount}원` : "";
+paymentKeyElement.textContent = paymentKey;
+orderIdElement.textContent = orderId;
+amountElement.textContent = `${amount}원`;
 
-// 버튼 클릭 시 승인 요청
+const confirmLoadingSection = document.querySelector(".confirm-loading");
+const confirmSuccessSection = document.querySelector(".confirm-success");
+
 async function confirmPayment() {
-  if (!paymentKey || !orderId) {
-    alert("paymentKey/orderId가 없습니다.");
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
     return;
   }
-  if (!amount) {
-    alert("결제 금액(amount)을 확인할 수 없습니다. 결제를 다시 시도해주세요.");
+  if (!paymentKey || !orderId || !amount) {
+    alert("결제 정보가 올바르지 않습니다. 다시 시도해주세요.");
     return;
   }
-
-  const token =
-    localStorage.getItem("token") || localStorage.getItem("accessToken") || "";
-
-  const res = await fetch(`${API_BASE}/api/payments/confirm`, {
+  const response = await fetch(`${API_BASE}/api/payments/confirm`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      paymentKey,
-      orderId,
-      amount: Number(amount),
-    }),
+    body: JSON.stringify({ paymentKey, orderId, amount }),
   });
 
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    alert(json.error || `결제 승인 실패 (status ${res.status})`);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    alert(err.error || "결제 승인에 실패했습니다.");
     return;
   }
 
-  // 성공 처리 UI (원래 너의 섹션 id가 다르면 맞춰줘)
-  const confirmLoadingSection = document.getElementById(
-    "confirmLoadingSection"
-  );
-  const confirmSuccessSection = document.getElementById(
-    "confirmSuccessSection"
-  );
-  if (confirmLoadingSection) confirmLoadingSection.style.display = "none";
-  if (confirmSuccessSection) confirmSuccessSection.style.display = "flex";
+  confirmLoadingSection.style.display = "none";
+  confirmSuccessSection.style.display = "flex";
 }
 
-document
-  .getElementById("confirmPaymentButton")
-  ?.addEventListener("click", confirmPayment);
+// ✅ 자동 승인
+confirmPayment();
