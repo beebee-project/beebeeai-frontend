@@ -15,9 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeLayout();
   initializeChat();
   initializeFileUpload();
-
-  // 2. 페이지 로드 시 로그인 상태 확인 및 UI 업데이트
   updateLoginState();
+  updateSubscriptionBadge();
 });
 
 // ==========================================
@@ -921,3 +920,34 @@ const openLoginModal = (event) => {
   event.preventDefault();
   document.getElementById("login-modal-overlay")?.classList.add("active");
 };
+
+async function updateSubscriptionBadge() {
+  const badge = document.getElementById("subscription-badge");
+  if (!badge) return;
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    badge.style.display = "none";
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      "https://beebeeai-backend-production.up.railway.app/api/payments/usage",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const data = await res.json();
+    if (res.ok && data.plan === "PRO") {
+      badge.style.display = "inline-flex";
+    } else {
+      badge.style.display = "none";
+    }
+  } catch (e) {
+    badge.style.display = "none";
+  }
+}
+
+window.addEventListener("auth:changed", updateSubscriptionBadge);

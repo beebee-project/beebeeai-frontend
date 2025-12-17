@@ -46,6 +46,15 @@ async function confirmPayment() {
 
   confirmLoadingSection.style.display = "none";
   confirmSuccessSection.style.display = "flex";
+
+  // ✅ 구독 완료 플래그 저장 (원래 페이지에서 읽어서 UI 갱신)
+  localStorage.setItem("justSubscribed", "1");
+  localStorage.setItem("justSubscribedAt", String(Date.now()));
+
+  // ✅ 1~2초 후 원래 페이지로 이동 (원하는 경로로 바꿔도 됨)
+  setTimeout(() => {
+    window.location.href = "/?subscribed=1";
+  }, 1200);
 }
 
 // ✅ 자동 승인
