@@ -1777,13 +1777,14 @@ body.toss-result-page {
 
 /* ===== 구독 상태 배지 ===== */
 .logo-text-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex;
+  align-items: baseline;
 }
 
 .subscription-badge {
   display: none;
+  margin-left: 10px;
+  margin-top: 2px;
   font-size: 13px;
   font-weight: 700;
   color: #2ecc71;
