@@ -45,12 +45,19 @@ a {
   font-weight: bold;
 }
 
+/* ===== 구독 상태 배지 ===== */
+.logo-text-wrapper {
+  display: flex;
+  align-items: center;
+  /* gap: 8px; */
+}
+
 .subscription-badge {
   display: none;
   margin-left: 13px;
   font-size: 15px;
   font-weight: 700;
-  color: #2ecc71;
+  color: #2ecc71; /* 그린 라이트 */
   background: rgba(46, 204, 113, 0.15);
   padding: 3px 8px;
   border-radius: 999px;
