@@ -308,7 +308,8 @@
           const data = await r.json().catch(() => ({}));
 
           if (!r.ok) {
-            msg.textContent = data?.error || "해지 처리에 실패했습니다.";
+            msg.textContent =
+              data?.message || data?.error || "해지 처리에 실패했습니다.";
             submitBtn.disabled = false;
             return;
           }
