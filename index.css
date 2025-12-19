@@ -1794,3 +1794,73 @@ body.toss-result-page {
 .toss-result-page .color-grey {
   color: rgba(234, 234, 234, 0.55);
 }
+
+/* 구독 해지 및 회원 탈퇴 */
+.modal.hidden {
+  display: none;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+.modal-card {
+  position: relative;
+  width: min(520px, calc(100% - 32px));
+  margin: 10vh auto;
+  background: #1f1f1f;
+  color: #fff;
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.modal-desc {
+  margin: 10px 0 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+.modal-label {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+.modal-card input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+.btn-secondary,
+.btn-danger {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.btn-danger {
+  background: #e53935;
+  color: #fff;
+}
+.modal-msg {
+  margin-top: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+}
