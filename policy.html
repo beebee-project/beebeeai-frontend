@@ -249,6 +249,7 @@
       </div>
     </div>
     <script>
+      const API_BASE = "https://beebeeai-backend-production.up.railway.app";
       const modal = document.getElementById("cancelModal");
       const openBtn = document.getElementById("open-cancel-modal");
       const closeBtn = document.getElementById("cancelModalClose");
@@ -290,12 +291,19 @@
         msg.textContent = "처리 중…";
 
         try {
-          const r = await fetch("/api/payments/subscription/cancel", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ password }),
-            credentials: "include",
-          });
+          const token = localStorage.getItem("token");
+          const r = await fetch(
+            `${API_BASE}/api/payments/subscription/cancel`,
+            {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({ password }),
+              credentials: "include",
+            }
+          );
 
           const data = await r.json().catch(() => ({}));
 
@@ -368,7 +376,7 @@
           // (B) JWT 토큰이면 Authorization 헤더를 추가해야 함
           const token = localStorage.getItem("token"); // 프로젝트에서 토큰 저장 키가 다르면 맞춰줘
 
-          const r = await fetch("/api/auth/withdraw", {
+          const r = await fetch(`${API_BASE}/api/auth/withdraw`, {
             method: "POST",
             headers: {
               "content-type": "application/json",
@@ -381,6 +389,16 @@
           const data = await r.json().catch(() => ({}));
 
           if (!r.ok) {
+            if (r.status === 409 && data?.code === "SUBSCRIPTION_ACTIVE") {
+              wMsg.textContent = data?.message || "먼저 구독을 해지해주세요.";
+              // 원하면 구독 해지 모달 자동 오픈
+              setTimeout(() => {
+                closeWithdraw();
+                openModal(); // 구독 해지 모달
+              }, 800);
+              wSubmitBtn.disabled = false;
+              return;
+            }
             wMsg.textContent =
               data?.message || data?.error || "탈퇴 처리에 실패했습니다.";
             wSubmitBtn.disabled = false;
