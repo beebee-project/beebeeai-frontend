@@ -1796,60 +1796,70 @@ body.toss-result-page {
 }
 
 /* 구독 해지 및 회원 탈퇴 */
-.modal.hidden {
-  display: none;
-}
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
+.hidden {
+  display: none !important;
 }
 .modal-backdrop {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
 }
-.modal-card {
-  position: relative;
-  width: min(520px, calc(100% - 32px));
-  margin: 10vh auto;
+.modal {
+  width: min(720px, 100%);
   background: #1f1f1f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.55);
+}
+.modal-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 10px 0;
   color: #fff;
-  border-radius: 14px;
-  padding: 18px 18px 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 .modal-desc {
-  margin: 10px 0 14px;
+  margin: 0 0 18px 0;
+  color: rgba(255, 255, 255, 0.75);
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.85);
 }
 .modal-label {
   display: block;
-  margin: 10px 0 6px;
-  font-size: 14px;
-  opacity: 0.9;
+  font-weight: 700;
+  margin: 16px 0 8px 0;
+  color: rgba(255, 255, 255, 0.9);
 }
-.modal-card input {
+.modal-input {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
+  padding: 0 14px;
+  outline: none;
+}
+.modal-input:focus {
+  border-color: rgba(255, 255, 255, 0.35);
 }
 .modal-actions {
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
-  margin-top: 14px;
+  gap: 10px;
+  margin-top: 18px;
 }
-.btn-secondary,
-.btn-danger {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: none;
+.btn {
+  border: 0;
+  border-radius: 12px;
+  height: 42px;
+  padding: 0 16px;
   cursor: pointer;
+  font-weight: 800;
 }
 .btn-secondary {
   background: rgba(255, 255, 255, 0.12);
@@ -1859,8 +1869,56 @@ body.toss-result-page {
   background: #e53935;
   color: #fff;
 }
-.modal-msg {
-  margin-top: 10px;
+.btn-primary {
+  background: #3b82f6;
+  color: #fff;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.modal-message {
+  margin-top: 12px;
+  min-height: 20px;
+  color: rgba(255, 255, 255, 0.82);
+}
+.modal-message.error {
+  color: #ff8080;
+}
+.modal-message.success {
+  color: #87f7a3;
+}
+
+/* 링크 버튼 스타일 (기존 index.css 없을 때 대비) */
+.policy-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 18px 0 4px 0;
+}
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+}
+.link-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.hint {
+  color: rgba(255, 255, 255, 0.65);
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
+  margin-top: 8px;
+}
+.hr {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 0;
+  margin: 22px 0;
 }
