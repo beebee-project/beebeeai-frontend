@@ -269,6 +269,51 @@
         modal.classList.add("hidden");
         modal.setAttribute("aria-hidden", "true");
       }
+      async function handleCancelSubscription() {
+        const ok = confirm(
+          "정말 구독을 해지하시겠습니까?\n해지 후 다음 결제일부터 자동 결제가 중단됩니다."
+        );
+        if (!ok) return;
+
+        const res = await fetch("/api/payments/subscription/cancel", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({}), // ✅ 비밀번호 없음
+        });
+
+        const data = await res.json();
+
+        // ✅ alert 대신 팝업 내 메시지 영역에 고정 출력 추천
+        showMessage(data.message || "처리되었습니다.");
+
+        // ✅ code로 UX 분기 가능 (선택)
+        // if (data.code === "ALREADY_CANCELED_PENDING") ...
+      }
+
+      async function handleWithdraw() {
+        const confirmText = document.getElementById(
+          "withdrawConfirmInput"
+        ).value;
+
+        const res = await fetch("/api/auth/withdraw", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ confirmText }), // ✅ 여기!
+        });
+
+        const data = await res.json();
+        if (!res.ok) return showMessage(data.message || "탈퇴 실패");
+
+        // 성공 시 로그아웃 + 홈 이동
+        logout();
+        location.href = "/index.html";
+      }
 
       openBtn?.addEventListener("click", (e) => {
         e.preventDefault();
