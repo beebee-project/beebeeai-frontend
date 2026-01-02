@@ -3,59 +3,52 @@ const API_BASE =
     ? "http://localhost:3000"
     : "https://beebeeai-backend-production.up.railway.app";
 
+const token =
+  localStorage.getItem("token") ||
+  localStorage.getItem("accessToken") ||
+  localStorage.getItem("jwt");
+
 const urlParams = new URLSearchParams(window.location.search);
-const paymentKey = urlParams.get("paymentKey");
-const orderId = urlParams.get("orderId");
-const amount = Number(urlParams.get("amount"));
+const authKey = urlParams.get("authKey");
+const customerKey = urlParams.get("customerKey");
 
-const paymentKeyElement = document.getElementById("paymentKey");
-const orderIdElement = document.getElementById("orderId");
-const amountElement = document.getElementById("amount");
+// customerKey는 startSubscription에서 내려준 값을 쓰는 게 제일 안전
+const pending = JSON.parse(localStorage.getItem("pendingSubscription") || "{}");
+const finalCustomerKey = customerKey || pending.customerKey;
 
-paymentKeyElement.textContent = paymentKey;
-orderIdElement.textContent = orderId;
-amountElement.textContent = `${amount}원`;
-
-const confirmLoadingSection = document.querySelector(".confirm-loading");
-const confirmSuccessSection = document.querySelector(".confirm-success");
-
-async function confirmPayment() {
-  const token = localStorage.getItem("token");
+async function complete() {
   if (!token) {
     alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
     return;
   }
-  if (!paymentKey || !orderId || !amount) {
-    alert("결제 정보가 올바르지 않습니다. 다시 시도해주세요.");
+  if (!authKey || !finalCustomerKey) {
+    alert("구독 인증 정보(authKey/customerKey)가 없습니다.");
     return;
   }
-  const response = await fetch(`${API_BASE}/api/payments/confirm`, {
+
+  const res = await fetch(`${API_BASE}/api/payments/subscription/complete`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ paymentKey, orderId, amount }),
+    body: JSON.stringify({ customerKey: finalCustomerKey, authKey }),
   });
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    alert(err.error || "결제 승인에 실패했습니다.");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    alert(data.error || "구독 완료 처리 실패");
     return;
   }
 
-  confirmLoadingSection.style.display = "none";
-  confirmSuccessSection.style.display = "flex";
-
-  // ✅ 구독 완료 플래그 저장 (원래 페이지에서 읽어서 UI 갱신)
   localStorage.setItem("justSubscribed", "1");
   localStorage.setItem("justSubscribedAt", String(Date.now()));
+  localStorage.removeItem("pendingSubscription");
 
-  // ✅ 1~2초 후 원래 페이지로 이동 (원하는 경로로 바꿔도 됨)
+  // 원래 페이지로 복귀
   setTimeout(() => {
     window.location.href = "/?subscribed=1";
-  }, 1200);
+  }, 800);
 }
 
-// ✅ 자동 승인
-confirmPayment();
+complete();

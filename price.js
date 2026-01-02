@@ -22,8 +22,8 @@ async function openTossWidget() {
     return;
   }
 
-  // 1) 결제 세션 생성(서버)
-  const checkoutRes = await fetch(API_BASE + "/api/payments/checkout", {
+  // 1️⃣ 구독 시작 (billing 등록 준비)
+  const startRes = await fetch(API_BASE + "/api/payments/subscription/start", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -31,80 +31,44 @@ async function openTossWidget() {
     },
   });
 
-  const session = await checkoutRes.json().catch(() => ({}));
-  if (!checkoutRes.ok) {
-    alert(session.error || "결제 준비(checkout) 실패");
+  const start = await startRes.json().catch(() => ({}));
+  if (!startRes.ok) {
+    alert(start.error || "구독 시작에 실패했습니다.");
     return;
   }
 
-  localStorage.setItem(
-    "pendingPayment",
-    JSON.stringify({
-      orderId: session.orderId,
-      amount: session.amount,
-    })
-  );
+  const { customerKey, successUrl, failUrl } = start;
 
-  // 2) 위젯 초기화/렌더 (1회)
-  if (!__widgetsInited) {
-    if (typeof TossPayments !== "function") {
-      alert("TossPayments SDK(v2)가 로드되지 않았습니다.");
-      return;
-    }
-
-    const tossPayments = TossPayments(TOSS_CLIENT_KEY);
-
-    __widgets = tossPayments.widgets({
-      customerKey: session.customerKey || "ANONYMOUS",
-    });
-
-    await __widgets.setAmount({ currency: "KRW", value: session.amount });
-
-    const [paymentMethodWidget] = await Promise.all([
-      __widgets.renderPaymentMethods({
-        selector: "#payment-method",
-        variantKey: "DEFAULT",
-      }),
-      __widgets.renderAgreement({
-        selector: "#agreement",
-        variantKey: "AGREEMENT",
-      }),
-    ]);
-
-    // 결제수단 선택 시 결제 버튼 활성화
-    paymentMethodWidget.on("paymentMethodSelect", () => {
-      const btn = document.getElementById("payment-request-button");
-      if (btn) btn.disabled = false;
-    });
-
-    __widgetsInited = true;
-  } else {
-    // 금액만 갱신
-    await __widgets.setAmount({ currency: "KRW", value: session.amount });
-  }
-
-  // 3) 결제 버튼 → requestPayment (onclick은 한 번만 설정)
-  const btn = document.getElementById("payment-request-button");
-  if (!btn) {
-    alert("결제 버튼(#payment-request-button)을 찾을 수 없습니다.");
+  if (!customerKey || !successUrl || !failUrl) {
+    alert("구독 시작 정보가 올바르지 않습니다.");
     return;
   }
 
-  btn.disabled = true; // 결제수단 선택 전까지 비활성(원하면 유지)
-  btn.onclick = async () => {
-    try {
-      await __widgets.requestPayment({
-        orderId: session.orderId,
-        orderName: session.orderName,
-        successUrl: session.successUrl,
-        failUrl: session.failUrl,
-        customerName: session.customerName,
-      });
-    } catch (e) {
-      console.error(e);
-      alert("결제 요청 중 오류가 발생했습니다.");
-    }
-  };
+  // subscription-success 페이지에서 재사용
+  localStorage.setItem("pendingSubscription", JSON.stringify({ customerKey }));
+
+  // 2️⃣ Toss SDK 로드 확인
+  if (typeof TossPayments !== "function") {
+    alert("TossPayments SDK가 로드되지 않았습니다.");
+    return;
+  }
+
+  const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+
+  // 3️⃣ ✅ 카드 자동결제(빌링) 인증 요청
+  // - 결제 ❌
+  // - 카드 등록 인증 ⭕
+  // - 성공 시 successUrl로 authKey 리다이렉트
+  try {
+    await tossPayments.requestBillingAuth("CARD", {
+      customerKey,
+      successUrl, // ex) /subscription-success.html
+      failUrl, // ex) /subscription-fail.html
+    });
+  } catch (err) {
+    console.error(err);
+    alert("카드 자동결제 인증 중 오류가 발생했습니다.");
+  }
 }
 
 // ===== UI wiring =====
