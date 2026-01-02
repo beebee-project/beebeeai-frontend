@@ -22,7 +22,7 @@ async function openTossWidget() {
     return;
   }
 
-  // 1️⃣ 구독 시작 (billing 등록 준비)
+  // 1) subscription/start
   const startRes = await fetch(API_BASE + "/api/payments/subscription/start", {
     method: "POST",
     headers: {
@@ -33,41 +33,31 @@ async function openTossWidget() {
 
   const start = await startRes.json().catch(() => ({}));
   if (!startRes.ok) {
-    alert(start.error || "구독 시작에 실패했습니다.");
+    alert(start.error || "구독 시작 실패");
     return;
   }
 
   const { customerKey, successUrl, failUrl } = start;
-
-  if (!customerKey || !successUrl || !failUrl) {
-    alert("구독 시작 정보가 올바르지 않습니다.");
-    return;
-  }
-
-  // subscription-success 페이지에서 재사용
   localStorage.setItem("pendingSubscription", JSON.stringify({ customerKey }));
 
-  // 2️⃣ Toss SDK 로드 확인
-  if (typeof TossPayments !== "function") {
-    alert("TossPayments SDK가 로드되지 않았습니다.");
-    return;
-  }
-
+  // 2) ✅ v2 standard: payment() 인스턴스 생성 후 requestBillingAuth()
   const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+  const payment = tossPayments.payment({ customerKey }); // 중요
 
-  // 3️⃣ ✅ 카드 자동결제(빌링) 인증 요청
-  // - 결제 ❌
-  // - 카드 등록 인증 ⭕
-  // - 성공 시 successUrl로 authKey 리다이렉트
   try {
-    await tossPayments.requestBillingAuth("CARD", {
-      customerKey,
-      successUrl, // ex) /subscription-success.html
-      failUrl, // ex) /subscription-fail.html
+    await payment.requestBillingAuth({
+      method: "CARD",
+      successUrl,
+      failUrl,
+      // 선택: customerName, customerEmail 등
+      // windowTarget: "iframe" (PC 기본) / "self"(모바일)
     });
   } catch (err) {
-    console.error(err);
-    alert("카드 자동결제 인증 중 오류가 발생했습니다.");
+    console.error("BillingAuth error:", err);
+    alert(
+      `카드 자동결제 인증 중 오류가 발생했습니다.\n` +
+        `code: ${err?.code || "-"}\nmessage: ${err?.message || "-"}`
+    );
   }
 }
 
