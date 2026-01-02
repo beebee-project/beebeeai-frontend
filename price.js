@@ -47,12 +47,14 @@ async function openTossWidget() {
   const payment = tossPayments.payment({ customerKey });
 
   try {
+    console.log("before requestBillingAuth");
     await payment.requestBillingAuth({
       method: "CARD",
       successUrl,
       failUrl,
       windowTarget: "self", // ✅ 추천 (멈춤/차단 줄임)
     });
+    console.log("after requestBillingAuth");
   } catch (err) {
     console.error("BillingAuth error:", err);
     alert(
@@ -89,9 +91,7 @@ function initSubscribeButton() {
     tossOverlay?.classList.add("active");
     document.body.style.overflow = "hidden";
 
-    requestAnimationFrame(() => {
-      openTossWidget();
-    });
+    openTossWidget();
   });
 
   tossClose?.addEventListener("click", () => {
