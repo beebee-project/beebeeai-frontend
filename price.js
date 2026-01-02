@@ -1,5 +1,7 @@
-// ===== config =====
-const TOSS_CLIENT_KEY = "test_gck_26DlbXAaV0779WzGYRxd3qY50Q9R";
+const TOSS_CLIENT_KEY =
+  window.location.hostname === "localhost"
+    ? "test_ck_AQ92ymxN34MPQBMyEZe4VajRKXvd"
+    : "live_ck_XZYkKL4Mrjja02d4qbyRr0zJwlEW";
 
 const API_BASE =
   window.location.hostname === "localhost"
