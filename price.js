@@ -1,7 +1,4 @@
-const TOSS_CLIENT_KEY =
-  window.location.hostname === "localhost"
-    ? "test_ck_AQ92ymxN34MPQBMyEZe4VajRKXvd"
-    : "live_ck_XZYkKL4Mrjja02d4qbyRr0zJwlEW";
+const TOSS_CLIENT_KEY = "test_ck_AQ92ymxN34MPQBMyEZe4VajRKXvd";
 
 const API_BASE =
   window.location.hostname === "localhost"
@@ -9,9 +6,6 @@ const API_BASE =
     : "https://beebeeai-backend-production.up.railway.app";
 
 // ===== widget state =====
-let __widgetsInited = false;
-let __widgets = null;
-
 async function openTossWidget() {
   console.log("[openTossWidget] clicked");
 
