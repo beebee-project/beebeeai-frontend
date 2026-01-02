@@ -1,53 +1,64 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-<meta charset="utf-8" />
-<link rel="stylesheet" href="index.css" />
-<link rel="icon" href="https://static.toss.im/icons/png/4x/icon-toss-logo.png" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>구독 등록 성공</title>
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="index.css" />
+    <link
+      rel="icon"
+      href="https://static.toss.im/icons/png/4x/icon-toss-logo.png"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>구독 등록 완료</title>
+  </head>
 
-<body class="toss-result-page">
-<div class="wrapper w-100">
-<div class="flex-column align-center confirm-loading w-100 max-w-540">
-  <div class="flex-column align-center">
-    <img src="https://static.toss.im/lotties/loading-spot-apng.png" width="120" height="120"></img>
-    <h2 class="title text-center">결제 요청까지 성공했어요.</h2>
-    <h4 class="text-center description">결제 승인하고 완료해보세요.</h4>
-  </div>
-  <div class="w-100">
-    <button id="confirmPaymentButton" class="btn primary w-100">결제 승인하기</button>
-  </div>
-</div>
-<div class="flex-column align-center confirm-success w-100 max-w-540">
-  <img src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png" width="120" height="120"></img>
-  <h2 class="title">결제를 완료했어요</h2>
-  <div class="response-section w-100">
-    <div class="flex justify-between">
-      <span class="response-label">결제 금액</span>
-      <span id="amount" class="response-text"></span>
-    </div>
-    <div class="flex justify-between">
-      <span class="response-label">주문번호</span>
-      <span id="orderId" class="response-text"></span>
-    </div>
-    <div class="flex justify-between">
-      <span class="response-label">paymentKey</span>
-      <span id="paymentKey" class="response-text"></span>
-    </div>
-  </div>
+  <body class="toss-result-page">
+    <div class="toss-result-wrap">
+      <div class="flex-column align-center confirm-loading w-100">
+        <div class="flex-column align-center">
+          <img
+            src="https://static.toss.im/lotties/loading-spot-apng.png"
+            width="120"
+            height="120"
+            alt="loading"
+          />
+          <h2 class="title text-center">구독 등록을 처리 중이에요.</h2>
+          <h4 class="text-center description">잠시만 기다려주세요.</h4>
+        </div>
+      </div>
 
-  <div class="w-100 button-group">
-    
-    <div class="flex" style="gap: 16px;">
-      <a class="btn w-100" href="https://developers.tosspayments.com/sandbox">다시 테스트하기</a>
-      <a class="btn w-100" href="https://docs.tosspayments.com/guides/v2/payment-widget/integration" target="_blank" rel="noreferrer noopener">결제 연동 문서가기</a>
+      <div
+        class="flex-column align-center confirm-success w-100"
+        style="display: none"
+      >
+        <img
+          src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png"
+          width="120"
+          height="120"
+          alt="success"
+        />
+        <h2 class="title">구독 등록이 완료되었어요</h2>
+
+        <div class="response-section w-100">
+          <div class="response-row">
+            <span class="response-label">customerKey</span>
+            <span id="customerKey" class="response-text"></span>
+          </div>
+          <div class="response-row">
+            <span class="response-label">authKey</span>
+            <span id="authKey" class="response-text"></span>
+          </div>
+        </div>
+
+        <div class="button-group w-100" style="margin-top: 18px">
+          <div class="flex" style="gap: 16px">
+            <a class="btn primary w-100" href="/?subscribed=1">서비스로 이동</a>
+            <a class="btn secondary w-100" href="/">홈으로</a>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-</div>
-<script src="success.js"></script>
-</body>
+
+    <script src="success.js"></script>
+  </body>
 </html>

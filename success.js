@@ -10,19 +10,32 @@ const token =
 
 const urlParams = new URLSearchParams(window.location.search);
 const authKey = urlParams.get("authKey");
-const customerKey = urlParams.get("customerKey");
+const customerKeyFromQuery = urlParams.get("customerKey");
 
-// customerKey는 startSubscription에서 내려준 값을 쓰는 게 제일 안전
-const pending = JSON.parse(localStorage.getItem("pendingSubscription") || "{}");
-const finalCustomerKey = customerKey || pending.customerKey;
+// start에서 저장해둔 customerKey를 우선 사용(더 신뢰 가능)
+let pending = {};
+try {
+  pending = JSON.parse(localStorage.getItem("pendingSubscription") || "{}");
+} catch (e) {}
+const customerKey = pending.customerKey || customerKeyFromQuery;
 
-async function complete() {
+const loadingEl = document.querySelector(".confirm-loading");
+const successEl = document.querySelector(".confirm-success");
+
+const authKeyEl = document.getElementById("authKey");
+const customerKeyEl = document.getElementById("customerKey");
+if (authKeyEl) authKeyEl.textContent = authKey || "-";
+if (customerKeyEl) customerKeyEl.textContent = customerKey || "-";
+
+async function completeSubscription() {
   if (!token) {
     alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+    window.location.href = "/?pricing=1";
     return;
   }
-  if (!authKey || !finalCustomerKey) {
+  if (!authKey || !customerKey) {
     alert("구독 인증 정보(authKey/customerKey)가 없습니다.");
+    window.location.href = "/?pricing=1";
     return;
   }
 
@@ -32,23 +45,28 @@ async function complete() {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ customerKey: finalCustomerKey, authKey }),
+    body: JSON.stringify({ customerKey, authKey }),
   });
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     alert(data.error || "구독 완료 처리 실패");
+    window.location.href = "/?pricing=1";
     return;
   }
+
+  // 성공: UI 토글 + 플래그 저장
+  if (loadingEl) loadingEl.style.display = "none";
+  if (successEl) successEl.style.display = "flex";
 
   localStorage.setItem("justSubscribed", "1");
   localStorage.setItem("justSubscribedAt", String(Date.now()));
   localStorage.removeItem("pendingSubscription");
 
-  // 원래 페이지로 복귀
+  // 자동 이동(원하면 주석)
   setTimeout(() => {
     window.location.href = "/?subscribed=1";
-  }, 800);
+  }, 1000);
 }
 
-complete();
+completeSubscription();
