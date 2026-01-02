@@ -11,6 +11,8 @@ let __widgetsInited = false;
 let __widgets = null;
 
 async function openTossWidget() {
+  console.log("[openTossWidget] clicked");
+
   const token =
     localStorage.getItem("token") ||
     localStorage.getItem("accessToken") ||
@@ -22,7 +24,6 @@ async function openTossWidget() {
     return;
   }
 
-  // 1) subscription/start
   const startRes = await fetch(API_BASE + "/api/payments/subscription/start", {
     method: "POST",
     headers: {
@@ -32,6 +33,8 @@ async function openTossWidget() {
   });
 
   const start = await startRes.json().catch(() => ({}));
+  console.log("[openTossWidget] start:", startRes.status, start);
+
   if (!startRes.ok) {
     alert(start.error || "구독 시작 실패");
     return;
@@ -40,25 +43,33 @@ async function openTossWidget() {
   const { customerKey, successUrl, failUrl } = start;
   localStorage.setItem("pendingSubscription", JSON.stringify({ customerKey }));
 
-  // 2) ✅ v2 standard: payment() 인스턴스 생성 후 requestBillingAuth()
   const tossPayments = TossPayments(TOSS_CLIENT_KEY);
-  const payment = tossPayments.payment({ customerKey }); // 중요
+  const payment = tossPayments.payment({ customerKey });
 
   try {
     await payment.requestBillingAuth({
       method: "CARD",
       successUrl,
       failUrl,
-      // 선택: customerName, customerEmail 등
-      // windowTarget: "iframe" (PC 기본) / "self"(모바일)
+      windowTarget: "self", // ✅ 추천 (멈춤/차단 줄임)
     });
   } catch (err) {
     console.error("BillingAuth error:", err);
     alert(
-      `카드 자동결제 인증 중 오류가 발생했습니다.\n` +
-        `code: ${err?.code || "-"}\nmessage: ${err?.message || "-"}`
+      `카드 자동결제 인증 오류\ncode:${err?.code || "-"}\nmsg:${
+        err?.message || "-"
+      }`
     );
   }
+}
+
+function bindSubscribeButton() {
+  const btn = document.getElementById("payment-request-button");
+  if (!btn) return;
+
+  btn.disabled = false; // 🔥 정기결제에서는 항상 활성화
+  btn.innerText = "구독 등록하기"; // 선택
+  btn.onclick = openTossWidget; // 🔥 바로 호출
 }
 
 // ===== UI wiring =====
@@ -99,4 +110,5 @@ function initSubscribeButton() {
 
 document.addEventListener("DOMContentLoaded", () => {
   initSubscribeButton();
+  bindSubscribeButton();
 });
