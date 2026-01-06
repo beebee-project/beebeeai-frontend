@@ -178,8 +178,6 @@
       <p class="footer-copy">© 2025 BeeBee AI. All rights reserved.</p>
     </footer> -->
 
-    <script src="index.js"></script>
-
     <!-- ===================================================== -->
     <!-- ✅ 구독 해지 모달 (비밀번호 제거 / 확인 버튼 방식) -->
     <!-- ===================================================== -->
@@ -390,12 +388,6 @@
               ? `이미 구독 해지가 접수되었습니다. 이용 만료일(${exp})까지 사용 가능합니다.`
               : "이미 구독 해지가 접수되었습니다. 이용 만료일까지 사용 가능합니다.";
             cMsg.classList.add("success");
-          } else if (data?.code === "CANCELED_TRIAL") {
-            const exp = fmtKST(data?.expiresAt);
-            cMsg.textContent = exp
-              ? `무료 체험 해지가 완료되었습니다. 체험 종료일(${exp})까지 이용 가능합니다.`
-              : "무료 체험 해지가 완료되었습니다. 체험 종료일까지 이용 가능합니다.";
-            cMsg.classList.add("success");
           } else {
             const exp = fmtKST(data?.expiresAt);
             cMsg.textContent = exp
@@ -406,8 +398,7 @@
 
           cSubmit.disabled = false;
 
-          // 필요하면 상태 갱신 이벤트
-          // window.dispatchEvent(new Event("auth:changed"));
+          window.dispatchEvent(new Event("auth:changed"));
         } catch (e) {
           cMsg.textContent = "네트워크 오류가 발생했습니다.";
           cMsg.classList.add("error");
