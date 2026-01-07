@@ -603,11 +603,49 @@ async function handleFileUpload(file) {
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
-    const updatedFiles = await response.json();
-    if (!response.ok) throw new Error(updatedFiles.message);
-    uploadedFiles = updatedFiles;
+
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (_) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      // 1) 사용량 초과(429) 메시지 예쁘게
+      if (
+        response.status === 429 &&
+        (data?.code === "LIMIT_EXCEEDED" || data?.code === "LIMIT_EXCEEDED")
+      ) {
+        const field = data?.field ?? data?.meta?.field;
+        const used = data?.used ?? data?.meta?.used;
+        const limit = data?.limit ?? data?.meta?.limit;
+
+        const label =
+          field === "fileUploads"
+            ? "파일 업로드"
+            : field === "formulaConversions"
+            ? "AI 변환"
+            : "사용량";
+
+        alert(
+          `${label} 한도를 초과했습니다. (${used}/${limit})\n구독 후 무제한으로 이용할 수 있어요.`
+        );
+        return;
+      }
+
+      // 2) 일반 오류(기존 방식 보강)
+      const msg =
+        data?.message || data?.error || "업로드 중 오류가 발생했습니다.";
+      alert(msg);
+      return;
+    }
+
+    // ✅ 성공 처리
+    uploadedFiles = data; // data가 updatedFiles 역할
     lastSelectedFile = file.name;
     renderFiles();
+    await updateSubscriptionBadge();
   } catch (error) {
     alert(error.message);
   }
@@ -779,6 +817,7 @@ function sendApiRequest(message, fileName, conversionType) {
     })
     .then((data) => {
       addMessage(data.result, "ai", lastUserMessage);
+      updateSubscriptionBadge();
     })
     .catch((error) => {
       console.error("API 호출 중 오류 발생:", error);
