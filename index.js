@@ -9,14 +9,13 @@ const API_BASE_URL = "https://beebeeai-backend-production.up.railway.app";
 
 // 페이지 로드 시 실행
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. 초기화 함수들 호출
+  updateSubscriptionBadge();
   initializeAuth();
   initializePopups();
   initializeLayout();
   initializeChat();
   initializeFileUpload();
   updateLoginState();
-  updateSubscriptionBadge();
 });
 
 // ==========================================
