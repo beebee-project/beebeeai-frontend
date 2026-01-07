@@ -65,6 +65,28 @@ a {
   letter-spacing: -0.2px;
 }
 
+/* ===== 비구독 사용량 배지 ===== */
+.usage-badge {
+  display: none;
+  margin-top: 5px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(255, 200, 0, 0.12); /* BeeBee 노랑 톤 */
+  border: 1px solid rgba(255, 200, 0, 0.22);
+  color: #ffd84d;
+  line-height: 1.2;
+}
+
+.usage-badge .usage-line {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.usage-badge .usage-line + .usage-line {
+  margin-top: 4px;
+}
+
 .header-nav {
   display: flex;
   gap: 30px;

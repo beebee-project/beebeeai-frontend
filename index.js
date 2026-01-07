@@ -922,31 +922,56 @@ const openLoginModal = (event) => {
 };
 
 async function updateSubscriptionBadge() {
-  const badge = document.getElementById("subscription-badge");
-  if (!badge) return;
+  const subBadge = document.getElementById("subscription-badge");
+  const usageBadge = document.getElementById("usage-badge");
+  if (!subBadge) return;
 
   const token = localStorage.getItem("token");
   if (!token) {
-    badge.style.display = "none";
+    subBadge.style.display = "none";
+    if (usageBadge) usageBadge.style.display = "none";
     return;
   }
 
   try {
-    const res = await fetch(
-      "https://beebeeai-backend-production.up.railway.app/api/payments/usage",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const res = await fetch(`${API_BASE_URL}/api/payments/usage`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     const data = await res.json();
-    if (res.ok && data.plan === "PRO") {
-      badge.style.display = "inline-flex";
-    } else {
-      badge.style.display = "none";
+
+    // 기본 숨김 처리
+    subBadge.style.display = "none";
+    if (usageBadge) usageBadge.style.display = "none";
+
+    if (!res.ok) return;
+
+    // ✅ PRO: Active 배지 표시
+    if (data.plan === "PRO") {
+      subBadge.style.display = "inline-flex";
+      return;
+    }
+
+    // ✅ FREE(비구독): 사용량 표시
+    // 서버 응답 필드명에 맞춰 안전하게 처리 (둘 중 하나로 올 수 있어서 방어)
+    const formulaUsed =
+      data.usage?.formulaConversions ?? data.formulaConversions ?? 0;
+    const fileUsed = data.usage?.fileUploads ?? data.fileUploads ?? 0;
+
+    // 비구독 한도(요구사항): 수식 10회, 업로드 1회
+    const formulaLimit = 10;
+    const fileLimit = 1;
+
+    if (usageBadge) {
+      usageBadge.innerHTML = `
+        <div class="usage-line">수식 변환 ${formulaUsed}/${formulaLimit}</div>
+        <div class="usage-line">파일 업로드 ${fileUsed}/${fileLimit}</div>
+      `;
+      usageBadge.style.display = "inline-block";
     }
   } catch (e) {
-    badge.style.display = "none";
+    subBadge.style.display = "none";
+    if (usageBadge) usageBadge.style.display = "none";
   }
 }
 
