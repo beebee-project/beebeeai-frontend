@@ -964,7 +964,7 @@ async function updateSubscriptionBadge() {
 
     if (usageBadge) {
       usageBadge.innerHTML = `
-        <div class="usage-line">수식 변환 ${formulaUsed}/${formulaLimit}</div>
+        <div class="usage-line">AI 변환 ${formulaUsed}/${formulaLimit}</div>
         <div class="usage-line">파일 업로드 ${fileUsed}/${fileLimit}</div>
       `;
       usageBadge.style.display = "inline-block";
