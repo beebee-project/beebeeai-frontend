@@ -772,6 +772,49 @@ function getConversionTypeFromFileExtension(fileName) {
 // ==========================================
 // 채팅 관련 함수
 // ==========================================
+async function sendApiRequest(message, fileName, conversionType) {
+  const userInput = document.getElementById("user-input");
+  const token = localStorage.getItem("token");
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const payload = { message, fileName, conversionType };
+
+  lastUserMessage = message;
+  addMessage(message, "user");
+
+  userInput.value = "";
+  userInput.style.height = "24px";
+  toggleLoadingState(true);
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/convert`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      addMessage(
+        data?.message || "죄송합니다. API 호출 중 오류가 발생했습니다.",
+        "ai"
+      );
+      return;
+    }
+
+    addMessage(data.result, "ai", lastUserMessage);
+
+    // ✅ 실시간 반영 보장
+    await updateSubscriptionBadge();
+  } catch (error) {
+    console.error("API 호출 중 오류 발생:", error);
+    addMessage("죄송합니다. API 호출 중 오류가 발생했습니다.", "ai");
+  } finally {
+    toggleLoadingState(false);
+  }
+}
 
 function handleUserInput() {
   const userInput = document.getElementById("user-input");
@@ -784,47 +827,6 @@ function handleUserInput() {
   }
 
   sendApiRequest(messageText, lastSelectedFile, selectedConversionType);
-}
-
-function sendApiRequest(message, fileName, conversionType) {
-  const userInput = document.getElementById("user-input");
-  const token = localStorage.getItem("token");
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const payload = {
-    message,
-    fileName,
-    conversionType,
-  };
-
-  lastUserMessage = message;
-  addMessage(message, "user");
-
-  userInput.value = "";
-  userInput.style.height = "24px";
-  toggleLoadingState(true);
-
-  fetch(`${API_BASE_URL}/api/convert`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  })
-    .then((res) => {
-      if (!res.ok) throw new Error("API 응답 오류");
-      return res.json();
-    })
-    .then((data) => {
-      addMessage(data.result, "ai", lastUserMessage);
-      updateSubscriptionBadge();
-    })
-    .catch((error) => {
-      console.error("API 호출 중 오류 발생:", error);
-      addMessage("죄송합니다. API 호출 중 오류가 발생했습니다.", "ai");
-    })
-    .finally(() => {
-      toggleLoadingState(false);
-    });
 }
 
 function addMessage(text, sender, userMessageForFeedback) {
