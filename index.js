@@ -493,7 +493,20 @@ async function handleAuthFormSubmit(event) {
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message);
+    if (!response.ok) {
+      if (data?.code === "REJOIN_BLOCKED") {
+        const until = data?.purgeAt
+          ? new Date(data.purgeAt).toLocaleString("ko-KR", {
+              timeZone: "Asia/Seoul",
+            })
+          : null;
+        const msg = until
+          ? `탈퇴한 계정은 30일 동안 재가입이 불가능합니다.\n재가입 가능 시점: ${until}`
+          : "탈퇴한 계정은 30일 동안 재가입이 불가능합니다.";
+        throw new Error(msg);
+      }
+      throw new Error(data?.message || "요청 처리 중 오류가 발생했습니다.");
+    }
 
     if (isSignup) {
       alert(data.message);
