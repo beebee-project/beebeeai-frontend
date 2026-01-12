@@ -70,7 +70,7 @@
         const messageElement = document.getElementById("message");
         const loginLink = document.getElementById("login-link");
 
-        // 1. URL에서 인증 토큰을 가져옵니다.
+        // 1. URL에서 인증 토큰을 가져옴.
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get("token");
 
@@ -80,13 +80,13 @@
         }
 
         try {
-          // 2. 백엔드에 인증 요청을 보냅니다.
+          // 2. 백엔드에 인증 요청을 보냄.
           const response = await fetch(
             `${API_BASE_URL}/api/auth/verify-email/${token}`
           );
           const data = await response.json();
 
-          // 3. 결과에 따라 메시지를 표시합니다.
+          // 3. 결과에 따라 메시지를 표시.
           messageElement.textContent = data.message;
           if (response.ok) {
             loginLink.style.display = "inline-block";

@@ -37,9 +37,8 @@ function initializeAuth() {
     alert("소셜 로그인이 완료되었습니다.");
   }
 
-  // ✅ 소셜 로그인 실패/차단 UX (구글 포함)
+  // 소셜 로그인 실패/차단 UX
   if (authError) {
-    // URL 정리
     window.history.replaceState({}, document.title, window.location.pathname);
 
     if (authError === "REJOIN_BLOCKED") {
@@ -241,7 +240,7 @@ function highlightElement(el, text) {
 
   const rect = el.getBoundingClientRect();
 
-  // --------------- 공통 툴팁 생성 ---------------
+  // 공통 툴팁 생성
   const tooltip = document.createElement("div");
   tooltip.className = "guide-tooltip";
   tooltip.textContent = text;
@@ -259,10 +258,10 @@ function highlightElement(el, text) {
   tooltip.style.top = `${top}px`;
   tooltip.style.left = `${left}px`;
 
-  // --------------- 추가 정보 안내 (단계별 조건) ---------------
+  // --------------- 추가 정보 안내 (단계별 조건)
   // 단계별 안내 문구
   let infoHTML = "";
-  let position = "bottom"; // 기본 아래쪽
+  let position = "bottom";
   if (currentGuideStep === 1) {
     infoHTML = `
       <div class="guide-info-content">
@@ -651,7 +650,7 @@ async function handleFileUpload(file) {
     }
 
     if (!response.ok) {
-      // 1) 사용량 초과(429) 메시지 예쁘게
+      // 1) 사용량 초과(429) 메시지
       if (
         response.status === 429 &&
         (data?.code === "LIMIT_EXCEEDED" || data?.code === "LIMIT_EXCEEDED")
@@ -673,7 +672,7 @@ async function handleFileUpload(file) {
         return;
       }
 
-      // 2) 일반 오류(기존 방식 보강)
+      // 2) 일반 오류
       const msg =
         data?.message || data?.error || "업로드 중 오류가 발생했습니다.";
       alert(msg);
@@ -846,7 +845,7 @@ async function sendApiRequest(message, fileName, conversionType) {
 
     addMessage(data.result, "ai", lastUserMessage);
 
-    // ✅ 실시간 반영 보장
+    // 실시간 반영
     await updateSubscriptionBadge();
   } catch (error) {
     console.error("API 호출 중 오류 발생:", error);
@@ -1026,19 +1025,19 @@ async function updateSubscriptionBadge() {
 
     if (!res.ok) return;
 
-    // ✅ PRO: Active 배지 표시
+    // PRO: Active 배지 표시
     if (data.plan === "PRO") {
       subBadge.style.display = "inline-flex";
       return;
     }
 
-    // ✅ FREE(비구독): 사용량 표시
+    // FREE(비구독): 사용량 표시
     // 서버 응답 필드명에 맞춰 안전하게 처리 (둘 중 하나로 올 수 있어서 방어)
     const formulaUsed =
       data.usage?.formulaConversions ?? data.formulaConversions ?? 0;
     const fileUsed = data.usage?.fileUploads ?? data.fileUploads ?? 0;
 
-    // 비구독 한도(요구사항): 수식 10회, 업로드 1회
+    // 비구독 한도: 수식 10회, 업로드 1회
     const formulaLimit = 10;
     const fileLimit = 1;
 

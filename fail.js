@@ -13,7 +13,7 @@ const msgEl = document.getElementById("error-message");
 if (codeEl) codeEl.textContent = code || "-";
 if (msgEl) msgEl.textContent = message || "구독 등록이 취소되었습니다.";
 
-// ✅ 정기결제 등록 실패면 pendingSubscription 정리
+// 정기결제 등록 실패면 pendingSubscription 정리
 try {
   localStorage.removeItem("pendingSubscription");
 } catch (e) {

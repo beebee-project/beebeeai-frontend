@@ -5,7 +5,7 @@ const API_BASE =
     ? "http://localhost:3000"
     : "https://beebeeai-backend-production.up.railway.app";
 
-// ===== widget state =====
+// ===== 위젯 상태 =====
 async function openTossWidget() {
   console.log("[openTossWidget] clicked");
 
@@ -48,7 +48,7 @@ async function openTossWidget() {
       method: "CARD",
       successUrl,
       failUrl,
-      windowTarget: "self", // ✅ 추천 (멈춤/차단 줄임)
+      windowTarget: "self", // 멈춤/차단 줄임
     });
     console.log("after requestBillingAuth");
   } catch (err) {
@@ -65,12 +65,12 @@ function bindSubscribeButton() {
   const btn = document.getElementById("payment-request-button");
   if (!btn) return;
 
-  btn.disabled = false; // 🔥 정기결제에서는 항상 활성화
+  btn.disabled = false; // 정기결제에서는 항상 활성화
   btn.innerText = "구독 등록하기"; // 선택
-  btn.onclick = openTossWidget; // 🔥 바로 호출
+  btn.onclick = openTossWidget; // 바로 호출
 }
 
-// ===== UI wiring =====
+// ===== UI 와이어링 =====
 function initSubscribeButton() {
   const proStartBtn = document.querySelector(
     "#pricing-modal-overlay .pro-button"
@@ -95,7 +95,7 @@ function initSubscribeButton() {
     document.body.style.overflow = "";
   });
 
-  // overlay 바깥 클릭 시 닫기(선택)
+  // overlay 바깥 클릭 시 닫기
   tossOverlay?.addEventListener("click", (e) => {
     if (e.target === tossOverlay) {
       tossOverlay.classList.remove("active");

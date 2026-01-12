@@ -12,7 +12,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const authKey = urlParams.get("authKey");
 const customerKeyFromQuery = urlParams.get("customerKey");
 
-// start에서 저장해둔 customerKey를 우선 사용(더 신뢰 가능)
+// start에서 저장해둔 customerKey를 우선 사용
 let pending = {};
 try {
   pending = JSON.parse(localStorage.getItem("pendingSubscription") || "{}");
@@ -63,7 +63,7 @@ async function completeSubscription() {
   localStorage.setItem("justSubscribedAt", String(Date.now()));
   localStorage.removeItem("pendingSubscription");
 
-  // 자동 이동(원하면 주석)
+  // 자동 이동
   setTimeout(() => {
     window.location.href = "/?subscribed=1";
   }, 1000);
