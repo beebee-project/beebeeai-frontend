@@ -25,6 +25,8 @@ function initializeAuth() {
   // URL에 토큰이 있는지 확인 (소셜 로그인 콜백 처리)
   const urlParams = new URLSearchParams(window.location.search);
   const tokenFromUrl = urlParams.get("token");
+  const authError = urlParams.get("authError");
+  const untilFromUrl = urlParams.get("until");
 
   if (tokenFromUrl) {
     localStorage.setItem("token", tokenFromUrl);
@@ -33,6 +35,31 @@ function initializeAuth() {
       new CustomEvent("auth:changed", { detail: { isLoggedIn: true } })
     );
     alert("소셜 로그인이 완료되었습니다.");
+  }
+
+  // ✅ 소셜 로그인 실패/차단 UX (구글 포함)
+  if (authError) {
+    // URL 정리
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    if (authError === "REJOIN_BLOCKED") {
+      const until = untilFromUrl
+        ? new Date(untilFromUrl).toLocaleString("ko-KR", {
+            timeZone: "Asia/Seoul",
+          })
+        : null;
+      const msg = until
+        ? `탈퇴한 계정은 30일 동안 재가입이 불가능합니다.\n재가입 가능 시점: ${until}`
+        : "탈퇴한 계정은 30일 동안 재가입이 불가능합니다.";
+
+      alert(msg);
+      // 로그인 모달 띄우기
+      document.getElementById("login-modal-overlay")?.classList.add("active");
+      // 로그인 탭으로 전환
+      document.getElementById("login-tab")?.click();
+    } else {
+      alert("소셜 로그인에 실패했습니다. 다시 시도해주세요.");
+    }
   }
 
   // 소셜 로그인 버튼 이벤트
