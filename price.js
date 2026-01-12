@@ -1,4 +1,4 @@
-const TOSS_CLIENT_KEY = "test_ck_AQ92ymxN34MPQBMyEZe4VajRKXvd";
+const TOSS_CLIENT_KEY = "live_ck_XZYkKL4Mrjja02d4qbyRr0zJwlEW";
 
 const API_BASE =
   window.location.hostname === "localhost"
