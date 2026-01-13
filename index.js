@@ -7,6 +7,9 @@ let originalSendButtonHtml = null;
 
 const API_BASE_URL = "https://beebeeai-backend-production.up.railway.app";
 
+const CONVERSION_TYPE_OFFICE_SCRIPT = "Excel Office Scripts";
+const CONVERSION_TYPE_APPS_SCRIPT = "Google Apps Script";
+
 // 페이지 로드 시 실행
 document.addEventListener("DOMContentLoaded", () => {
   updateSubscriptionBadge();
@@ -817,7 +820,16 @@ async function sendApiRequest(message, fileName, conversionType) {
   const headers = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const payload = { message, fileName, conversionType };
+  // ✅ 매크로 타겟 매핑
+  let macroTarget = null;
+  if (conversionType === CONVERSION_TYPE_OFFICE_SCRIPT)
+    macroTarget = "officeScript";
+  else if (conversionType === CONVERSION_TYPE_APPS_SCRIPT)
+    macroTarget = "appsScript";
+
+  const payload = macroTarget
+    ? { prompt: message, target: macroTarget }
+    : { message, fileName, conversionType };
 
   lastUserMessage = message;
   addMessage(message, "user");
@@ -827,7 +839,8 @@ async function sendApiRequest(message, fileName, conversionType) {
   toggleLoadingState(true);
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/convert`, {
+    const endpoint = macroTarget ? "/api/macro/generate" : "/api/convert";
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",
       headers,
       body: JSON.stringify(payload),
@@ -836,6 +849,15 @@ async function sendApiRequest(message, fileName, conversionType) {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
+      if (res.status === 401) {
+        addMessage(
+          "매크로 생성은 로그인이 필요합니다. 로그인 후 다시 시도해주세요.",
+          "ai"
+        );
+        document.getElementById("login-modal-overlay")?.classList.add("active");
+        document.getElementById("login-tab")?.click();
+        return;
+      }
       addMessage(
         data?.message || "죄송합니다. API 호출 중 오류가 발생했습니다.",
         "ai"
@@ -843,7 +865,14 @@ async function sendApiRequest(message, fileName, conversionType) {
       return;
     }
 
-    addMessage(data.result, "ai", lastUserMessage);
+    // ✅ 매크로 응답은 { result } or { script } 형태일 수 있어 방어
+    const resultText =
+      data?.result ?? data?.script ?? data?.output ?? data?.message ?? "";
+    addMessage(
+      resultText || "결과를 생성하지 못했습니다.",
+      "ai",
+      lastUserMessage
+    );
 
     // 실시간 반영
     await updateSubscriptionBadge();
@@ -877,7 +906,10 @@ function addMessage(text, sender, userMessageForFeedback) {
     sender === "ai" &&
     (text.trim().startsWith("=") ||
       text.toUpperCase().startsWith("SELECT") ||
-      text.includes("prop("));
+      text.includes("prop(") ||
+      text.includes("ExcelScript.Workbook") ||
+      text.includes("function main(") ||
+      text.includes("function myFunction("));
 
   if (isFormula) {
     messageBubble.innerHTML = `
