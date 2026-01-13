@@ -145,13 +145,8 @@
           <li>월 구독료: 4,900원</li>
           <li>결제 방식: 토스페이먼츠 정기구독</li>
           <li>
-            <!-- <a href="#" id="open-cancel-modal">구독 해지</a
-            > false 변경 시 주석 해지--><a
-              href="#"
-              id="open-cancel-modal"
-              data-beta-lock="cancel"
-              >구독 해지</a
-            >는 언제든지 신청 가능합니다.
+            <a href="#" id="open-cancel-modal">구독 해지</a>는 언제든지 신청
+            가능합니다.
           </li>
           <li>
             이용자는 구독 기간 동안 모든 일반 기능을 자유롭게 이용할 수
@@ -455,28 +450,6 @@
           wSubmit.disabled = false;
         }
       });
-
-      // false 변경 시 제거
-      function applyBetaLocks(betaMode) {
-        document.querySelectorAll("[data-beta-lock]").forEach((el) => {
-          el.classList.toggle("beta-disabled", betaMode);
-        });
-      }
-
-      async function applyPolicyBetaLock() {
-        try {
-          const r = await fetch(`${API_BASE_URL}/api/payments/plans`);
-          const data = await r.json().catch(() => ({}));
-          const betaMode = Boolean(data?.betaMode);
-          applyBetaLocks(betaMode);
-        } catch (e) {
-          // 네트워크 실패 시: 잠금 스킵 (원하면 true로 기본 잠금도 가능)
-          // applyBetaLocks(true);
-        }
-      }
-
-      document.addEventListener("DOMContentLoaded", applyPolicyBetaLock);
-      window.addEventListener("auth:changed", applyPolicyBetaLock); // 여기까지 제거
     </script>
   </body>
 </html>
