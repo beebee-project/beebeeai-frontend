@@ -1042,11 +1042,24 @@ const openLoginModal = (event) => {
   document.getElementById("login-modal-overlay")?.classList.add("active");
 };
 
-async function updateSubscriptionBadge() {
-  const betaMode = Boolean(data?.betaMode);
-  applyBetaLocks(betaMode);
-  // false 변경 시 위 2줄 제거
+function applyBetaLocks(betaMode) {
+  document.querySelectorAll("[data-beta-lock]").forEach((el) => {
+    el.classList.toggle("beta-disabled", betaMode);
+  });
+} // false로 변경 시 제거
 
+async function applyBetaLocksFromPlans() {
+  try {
+    const r = await fetch(`${API_BASE_URL}/api/payments/plans`);
+    const data = await r.json().catch(() => ({}));
+    const betaMode = Boolean(data?.betaMode);
+    applyBetaLocks(betaMode);
+  } catch (e) {
+    // 네트워크 오류 시 잠금 처리 스킵 (원하면 기본 잠금으로 바꿔도 됨)
+  }
+} // false로 변경 시 제거
+
+async function updateSubscriptionBadge() {
   const subBadge = document.getElementById("subscription-badge");
   const usageBadge = document.getElementById("usage-badge");
   if (!subBadge) return;
@@ -1101,3 +1114,5 @@ async function updateSubscriptionBadge() {
 }
 
 window.addEventListener("auth:changed", updateSubscriptionBadge);
+window.addEventListener("auth:changed", applyBetaLocksFromPlans); // false로 변경 시 제거
+document.addEventListener("DOMContentLoaded", applyBetaLocksFromPlans); // false로 변경 시 제거

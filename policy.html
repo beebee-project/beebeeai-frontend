@@ -161,28 +161,6 @@
       </section>
     </main>
 
-    <!-- footer -->
-    <!-- <footer class="site-footer">
-      <div class="footer-inner">
-        <div class="footer-company">
-          <strong class="footer-logo">BeeBee AI</strong>
-          <span>상호명: 비비에이아이</span>
-          <span>대표자명: 김상준</span>
-          <span>사업자등록번호: 354-46-01224</span>
-          <span>통신판매업 신고번호: 2025-대구서구-0488</span>
-        </div>
-
-        <div class="footer-meta">
-          <span>사업장 주소: 대구광역시 서구 평리로 72길 16-1, 501호</span>
-          <span>번호: 010-5161-3072</span>
-          <span>이메일: rlatkdwns011@naver.com</span>
-          <span>서비스명: BeeBee AI 수식/매크로 자동 생성 플랫폼</span>
-        </div>
-      </div>
-
-      <p class="footer-copy">© 2025 BeeBee AI. All rights reserved.</p>
-    </footer> -->
-
     <!-- ===================================================== -->
     <!-- 구독 해지 모달 (비밀번호 제거 / 확인 버튼 방식) -->
     <!-- ===================================================== -->
@@ -479,26 +457,25 @@
       });
 
       // false 변경 시 제거
-      async function applyPolicyBetaLock() {
-        // 로그인 안 한 상태면 usage API가 401일 수 있으니 "betaMode 조회용" endpoint가 있으면 제일 좋음.
-        // 지금 당장은 /api/payments/usage로 시도하고 실패하면 그냥 잠그지 않음(또는 기본 잠금) 중 택1.
-        try {
-          const token = localStorage.getItem("token");
-          const r = await fetch(`${API_BASE}/api/payments/usage`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          const data = await r.json().catch(() => ({}));
+      function applyBetaLocks(betaMode) {
+        document.querySelectorAll("[data-beta-lock]").forEach((el) => {
+          el.classList.toggle("beta-disabled", betaMode);
+        });
+      }
 
+      async function applyPolicyBetaLock() {
+        try {
+          const r = await fetch(`${API_BASE_URL}/api/payments/plans`);
+          const data = await r.json().catch(() => ({}));
           const betaMode = Boolean(data?.betaMode);
-          document.querySelectorAll("[data-beta-lock]").forEach((el) => {
-            el.classList.toggle("beta-disabled", betaMode);
-          });
+          applyBetaLocks(betaMode);
         } catch (e) {
-          // 네트워크 실패 시: 아무 처리 안 함
+          // 네트워크 실패 시: 잠금 스킵 (원하면 true로 기본 잠금도 가능)
+          // applyBetaLocks(true);
         }
       }
 
-      applyPolicyBetaLock();
+      document.addEventListener("DOMContentLoaded", applyPolicyBetaLock);
       window.addEventListener("auth:changed", applyPolicyBetaLock); // 여기까지 제거
     </script>
   </body>

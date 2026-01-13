@@ -1922,10 +1922,3 @@ body.toss-result-page {
   pointer-events: none;
   cursor: not-allowed;
 }
-
-.mobile-pricing-link,
-.desktop-pricing-link {
-  opacity: 0.4;
-  pointer-events: none;
-  cursor: not-allowed;
-}
