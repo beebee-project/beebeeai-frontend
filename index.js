@@ -886,7 +886,12 @@ async function sendApiRequest(message, fileName, conversionType) {
     await updateSubscriptionBadge();
   } catch (error) {
     console.error("API 호출 중 오류 발생:", error);
-    addMessage("죄송합니다. API 호출 중 오류가 발생했습니다.", "ai");
+    addMessage(
+      data?.message ||
+        data?.error ||
+        "죄송합니다. API 호출 중 오류가 발생했습니다.",
+      "ai"
+    );
   } finally {
     toggleLoadingState(false);
   }
