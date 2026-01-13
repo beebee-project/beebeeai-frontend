@@ -859,7 +859,9 @@ async function sendApiRequest(message, fileName, conversionType) {
         return;
       }
       addMessage(
-        data?.message || "죄송합니다. API 호출 중 오류가 발생했습니다.",
+        data?.message ||
+          data?.error ||
+          "죄송합니다. API 호출 중 오류가 발생했습니다.",
         "ai"
       );
       return;
@@ -867,7 +869,13 @@ async function sendApiRequest(message, fileName, conversionType) {
 
     // ✅ 매크로 응답은 { result } or { script } 형태일 수 있어 방어
     const resultText =
-      data?.result ?? data?.script ?? data?.output ?? data?.message ?? "";
+      data?.code ??
+      data?.result ??
+      data?.script ??
+      data?.output ??
+      data?.message ??
+      "";
+
     addMessage(
       resultText || "결과를 생성하지 못했습니다.",
       "ai",
