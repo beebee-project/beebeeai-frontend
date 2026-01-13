@@ -1915,3 +1915,11 @@ body.toss-result-page {
 .modal-msg.success {
   color: #87f7a3;
 }
+
+/* false 변경 시 제거 */
+.beta-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}

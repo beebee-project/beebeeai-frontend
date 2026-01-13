@@ -850,10 +850,7 @@ async function sendApiRequest(message, fileName, conversionType) {
 
     if (!res.ok) {
       if (res.status === 401) {
-        addMessage(
-          "매크로 생성은 로그인이 필요합니다. 로그인 후 다시 시도해주세요.",
-          "ai"
-        );
+        addMessage("로그인이 필요합니다. 로그인 후 다시 시도해주세요.", "ai");
         document.getElementById("login-modal-overlay")?.classList.add("active");
         document.getElementById("login-tab")?.click();
         return;
@@ -1046,6 +1043,10 @@ const openLoginModal = (event) => {
 };
 
 async function updateSubscriptionBadge() {
+  const betaMode = Boolean(data?.betaMode);
+  applyBetaLocks(betaMode);
+  // false 변경 시 위 2줄 제거
+
   const subBadge = document.getElementById("subscription-badge");
   const usageBadge = document.getElementById("usage-badge");
   if (!subBadge) return;
