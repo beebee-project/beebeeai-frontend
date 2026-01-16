@@ -1031,8 +1031,8 @@ async function sendFeedback(
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        userMessage,
-        aiResponse,
+        message: userMessage,
+        result: aiResponse,
         feedback,
         feedbackText,
         conversionType: selectedConversionType,
