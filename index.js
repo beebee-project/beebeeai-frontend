@@ -1033,8 +1033,13 @@ async function sendFeedback(
       body: JSON.stringify({
         message: userMessage,
         result: aiResponse,
-        feedback,
-        feedbackText,
+        isHelpful:
+          feedback === "correct"
+            ? true
+            : feedback === "incorrect"
+            ? false
+            : null,
+        reason: feedback === "incorrect" ? (feedbackText || "").trim() : "",
         conversionType: selectedConversionType,
       }),
     });
