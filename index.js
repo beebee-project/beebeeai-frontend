@@ -1005,25 +1005,72 @@ function renderFeedbackUI(container, userMessage, aiResponse) {
     });
 }
 
-function sendFeedback(
+async function sendFeedback(
   userMessage,
   aiResponse,
   feedback,
   feedbackText,
   container
 ) {
-  container.innerHTML = `<p class="feedback-thanks">피드백 감사합니다!</p>`;
-  fetch(`${API_BASE_URL}/api/convert/feedback`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userMessage,
-      aiResponse,
-      feedback,
-      feedbackText,
-      conversionType: selectedConversionType,
-    }),
-  });
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("로그인이 필요합니다.");
+    document.getElementById("login-modal-overlay")?.classList.add("active");
+    document.getElementById("login-tab")?.click();
+    return;
+  }
+
+  // 로딩 UI (성공/실패 확인 전에는 '감사합니다'를 띄우지 않음)
+  container.innerHTML = `<p class="feedback-thanks">저장 중...</p>`;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/convert/feedback`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userMessage,
+        aiResponse,
+        feedback,
+        feedbackText,
+        conversionType: selectedConversionType,
+      }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        // 토큰 만료/무효 처리
+        localStorage.removeItem("token");
+        window.dispatchEvent(
+          new CustomEvent("auth:changed", { detail: { isLoggedIn: false } })
+        );
+        updateLoginState();
+
+        alert("로그인이 필요합니다. 다시 로그인해주세요.");
+        document.getElementById("login-modal-overlay")?.classList.add("active");
+        document.getElementById("login-tab")?.click();
+
+        // UI 복구(다시 피드백 가능하게)
+        renderFeedbackUI(container, userMessage, aiResponse);
+        return;
+      }
+
+      // 기타 오류: 메시지 보여주고 UI 복구
+      alert(data?.message || data?.error || "피드백 저장에 실패했습니다.");
+      renderFeedbackUI(container, userMessage, aiResponse);
+      return;
+    }
+
+    // ✅ 성공
+    container.innerHTML = `<p class="feedback-thanks">피드백 감사합니다!</p>`;
+  } catch (e) {
+    alert("네트워크 오류로 피드백 저장에 실패했습니다.");
+    renderFeedbackUI(container, userMessage, aiResponse);
+  }
 }
 
 function toggleLoadingState(isLoading) {
