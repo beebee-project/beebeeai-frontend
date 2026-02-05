@@ -1577,13 +1577,6 @@ main {
   line-height: 1.7;
 }
 
-.policy-container p,
-.policy-container li {
-  line-height: 1.7;
-  word-break: keep-all;
-  white-space: normal;
-}
-
 /* 섹션 블록 */
 .policy-section {
   margin-bottom: 60px;
