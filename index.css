@@ -1605,6 +1605,7 @@ main {
 /* 리스트 */
 .policy-section ul {
   padding-left: 20px;
+  margin-bottom: 8px;
 }
 
 .policy-section li {
