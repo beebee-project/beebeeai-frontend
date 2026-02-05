@@ -97,7 +97,9 @@ a {
   font-size: 15px;
   text-decoration: none;
   color: #eaeaea;
-  transition: color 0.3s, font-weight 0.3s;
+  transition:
+    color 0.3s,
+    font-weight 0.3s;
 }
 
 .header-nav a:hover {
@@ -447,7 +449,9 @@ a {
   cursor: pointer;
   text-decoration: none;
   display: block;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
   border: 2px solid #ffc800;
 }
 
@@ -690,7 +694,9 @@ a {
 .guide-highlight {
   position: relative;
   z-index: 1200; /* 오버레이보다 위로 */
-  box-shadow: 0 0 0 2px #f6c744, 0 0 16px rgba(0, 0, 0, 0.9);
+  box-shadow:
+    0 0 0 2px #f6c744,
+    0 0 16px rgba(0, 0, 0, 0.9);
   border-radius: 8px;
 }
 
@@ -905,7 +911,9 @@ main {
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.9em;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
 }
 
 .content-footer .cancel-button {
@@ -1398,9 +1406,14 @@ main {
   padding: 0 12px;
   position: relative;
   text-align: center;
-  -webkit-transition: background-color 0.218s, border-color 0.218s,
+  -webkit-transition:
+    background-color 0.218s,
+    border-color 0.218s,
     box-shadow 0.218s;
-  transition: background-color 0.218s, border-color 0.218s, box-shadow 0.218s;
+  transition:
+    background-color 0.218s,
+    border-color 0.218s,
+    box-shadow 0.218s;
   vertical-align: middle;
   white-space: nowrap;
   width: auto;
@@ -1471,9 +1484,11 @@ main {
 }
 
 .gsi-material-button:not(:disabled):hover {
-  -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3),
+  -webkit-box-shadow:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
     0 1px 3px 1px rgba(60, 64, 67, 0.15);
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3),
+  box-shadow:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
     0 1px 3px 1px rgba(60, 64, 67, 0.15);
 }
 
@@ -1562,6 +1577,13 @@ main {
   line-height: 1.7;
 }
 
+.policy-container p,
+.policy-container li {
+  line-height: 1.7;
+  word-break: keep-all;
+  white-space: normal;
+}
+
 /* 섹션 블록 */
 .policy-section {
   margin-bottom: 60px;
@@ -1595,7 +1617,9 @@ main {
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 2px;
-  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    text-decoration-color 0.15s ease;
 }
 
 .policy-section a:hover {
@@ -1686,7 +1710,9 @@ main {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.06s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.06s ease;
 }
 
 #toss-widget-overlay #payment-request-button:active {
