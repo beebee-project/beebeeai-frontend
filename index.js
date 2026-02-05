@@ -5,20 +5,71 @@ let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
 
-const API_BASE_URL = "https://beebeeai-backend-production.up.railway.app";
+const API_BASE_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://beebeeai-backend-production.up.railway.app";
 
 const CONVERSION_TYPE_OFFICE_SCRIPT = "Excel Office Scripts";
 const CONVERSION_TYPE_APPS_SCRIPT = "Google Apps Script";
+
+function handlePostSubscribeUX() {
+  const url = new URL(window.location.href);
+  const subscribed = url.searchParams.get("subscribed");
+  const justSubscribed = localStorage.getItem("justSubscribed");
+
+  if (subscribed === "1" || justSubscribed === "1") {
+    // 배지/사용량 즉시 갱신 트리거
+    updateSubscriptionBadge();
+
+    // UX: 1회성 알림 (원하면 toast로 교체 가능)
+    alert("구독이 활성화되었습니다. PRO 기능을 이용할 수 있어요!");
+
+    // 플래그 정리
+    localStorage.removeItem("justSubscribed");
+    localStorage.removeItem("justSubscribedAt");
+
+    // URL 파라미터 정리 (새로고침해도 alert 반복 안 뜨게)
+    url.searchParams.delete("subscribed");
+    window.history.replaceState({}, document.title, url.pathname + url.search);
+  }
+}
+
+// ===============================
+// Legacy UX 정리: Token helpers
+// ===============================
+function getAuthToken() {
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken") ||
+    localStorage.getItem("jwt")
+  );
+}
+
+function clearAuthTokens() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("jwt");
+}
+
+function handleUnauthorized() {
+  clearAuthTokens();
+  alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+  document.getElementById("login-modal-overlay")?.classList.add("active");
+  document.getElementById("login-tab")?.click();
+}
 
 // 페이지 로드 시 실행
 document.addEventListener("DOMContentLoaded", () => {
   updateSubscriptionBadge();
   initializeAuth();
   initializePopups();
+  handleLegacyUxParams();
   initializeLayout();
   initializeChat();
   initializeFileUpload();
   updateLoginState();
+  handlePostSubscribeUX();
 });
 
 // ==========================================
@@ -35,7 +86,7 @@ function initializeAuth() {
     localStorage.setItem("token", tokenFromUrl);
     window.history.replaceState({}, document.title, window.location.pathname);
     window.dispatchEvent(
-      new CustomEvent("auth:changed", { detail: { isLoggedIn: true } })
+      new CustomEvent("auth:changed", { detail: { isLoggedIn: true } }),
     );
     alert("소셜 로그인이 완료되었습니다.");
   }
@@ -72,6 +123,51 @@ function initializeAuth() {
     e.preventDefault();
     window.location.href = `${API_BASE_URL}/api/auth/naver`;
   });
+}
+
+function handleLegacyUxParams() {
+  try {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+
+    let changed = false;
+
+    // 1) 구독 완료(리다이렉트) UX: /?subscribed=1
+    if (params.get("subscribed") === "1") {
+      // 한번만 보여주고 제거
+      localStorage.removeItem("justSubscribed");
+      localStorage.removeItem("justSubscribedAt");
+
+      alert("구독이 완료되었습니다. PRO 플랜이 활성화되었습니다.");
+      updateSubscriptionBadge();
+
+      params.delete("subscribed");
+      changed = true;
+    }
+
+    // 2) 결제/구독 흐름에서 실패/만료 시: /?pricing=1 → 자동으로 구독 모달 열기
+    if (params.get("pricing") === "1") {
+      document.getElementById("pricing-modal-overlay")?.classList.add("active");
+      params.delete("pricing");
+      changed = true;
+    }
+
+    // 3) justSubscribed 플래그는 오래되면 자동 정리 (예: 탭 복원/캐시 이슈)
+    const atRaw = localStorage.getItem("justSubscribedAt");
+    const at = atRaw ? Number(atRaw) : 0;
+    if (at && Date.now() - at > 10 * 60 * 1000) {
+      localStorage.removeItem("justSubscribed");
+      localStorage.removeItem("justSubscribedAt");
+    }
+
+    if (changed) {
+      const qs = params.toString();
+      const next = qs ? `${url.pathname}?${qs}` : url.pathname;
+      window.history.replaceState({}, document.title, next);
+    }
+  } catch (e) {
+    // no-op
+  }
 }
 
 function initializePopups() {
@@ -153,7 +249,7 @@ function initializePopups() {
       passwordToggleBtn.classList.toggle("active", isHidden);
       passwordToggleBtn.setAttribute(
         "aria-label",
-        isHidden ? "비밀번호 숨기기" : "비밀번호 표시"
+        isHidden ? "비밀번호 숨기기" : "비밀번호 표시",
       );
     });
   }
@@ -185,7 +281,7 @@ function initializePopups() {
   // 4. 구독 팝업
   const pricingModalOverlay = document.getElementById("pricing-modal-overlay");
   const openPricingModal = (event) => {
-    event.preventDefault();
+    if (event?.preventDefault) event.preventDefault();
     pricingModalOverlay?.classList.add("active");
   };
   const closePricingModal = () =>
@@ -376,7 +472,7 @@ function initializeChat() {
   const userInput = document.getElementById("user-input");
   const sendButton = document.getElementById("send-button");
   const conversionTypeSelect = document.getElementById(
-    "conversion-type-select"
+    "conversion-type-select",
   );
 
   originalSendButtonHtml = sendButton.innerHTML;
@@ -459,7 +555,7 @@ function initializeFileUpload() {
     if (lastSelectedFile) {
       addMessage(
         `'${lastSelectedFile}' 파일이 선택되었습니다. 이제 관련된 질문을 입력해주세요.`,
-        "ai"
+        "ai",
       );
       const type = getConversionTypeFromFileExtension(lastSelectedFile);
       document.getElementById("conversion-type-select").value = type;
@@ -540,9 +636,11 @@ async function handleAuthFormSubmit(event) {
     if (isSignup) {
       alert(data.message);
     } else {
+      // Legacy UX 정리: 다른 키로 저장된 토큰 제거 후 token만 유지
+      clearAuthTokens();
       localStorage.setItem("token", data.token);
       window.dispatchEvent(
-        new CustomEvent("auth:changed", { detail: { isLoggedIn: true } })
+        new CustomEvent("auth:changed", { detail: { isLoggedIn: true } }),
       );
       alert(data.message);
     }
@@ -558,16 +656,16 @@ async function handleAuthFormSubmit(event) {
 
 function handleLogout(event) {
   event.preventDefault();
-  localStorage.removeItem("token");
+  clearAuthTokens();
   window.dispatchEvent(
-    new CustomEvent("auth:changed", { detail: { isLoggedIn: false } })
+    new CustomEvent("auth:changed", { detail: { isLoggedIn: false } }),
   );
   alert("로그아웃 되었습니다.");
   updateLoginState();
 }
 
 function updateLoginState() {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   const desktopLoginLink = document.getElementById("desktop-login-link");
   const mobileLoginLink = document.getElementById("mobile-login-link");
 
@@ -595,7 +693,7 @@ function updateLoginState() {
 // ==========================================
 
 async function loadUserFiles() {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) {
     uploadedFiles = [];
     renderFiles();
@@ -607,9 +705,9 @@ async function loadUserFiles() {
     });
     if (!response.ok) {
       if (response.status === 401) {
-        localStorage.removeItem("token");
+        handleUnauthorized();
         window.dispatchEvent(
-          new CustomEvent("auth:changed", { detail: { isLoggedIn: false } })
+          new CustomEvent("auth:changed", { detail: { isLoggedIn: false } }),
         );
         updateLoginState();
       }
@@ -625,12 +723,12 @@ async function loadUserFiles() {
 }
 
 async function handleFileUpload(file) {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) return alert("로그인이 필요합니다.");
 
   if (uploadedFiles.length >= 5) {
     alert(
-      "파일은 최대 5개까지만 업로드할 수 있습니다.\n기존 파일을 삭제한 후 다시 시도해주세요."
+      "파일은 최대 5개까지만 업로드할 수 있습니다.\n기존 파일을 삭제한 후 다시 시도해주세요.",
     );
     return;
   }
@@ -666,11 +764,11 @@ async function handleFileUpload(file) {
           field === "fileUploads"
             ? "파일 업로드"
             : field === "formulaConversions"
-            ? "AI 변환"
-            : "사용량";
+              ? "AI 변환"
+              : "사용량";
 
         alert(
-          `${label} 한도를 초과했습니다. (${used}/${limit})\n구독 후 무제한으로 이용할 수 있어요.`
+          `${label} 한도를 초과했습니다. (${used}/${limit})\n구독 후 무제한으로 이용할 수 있어요.`,
         );
         return;
       }
@@ -693,14 +791,14 @@ async function handleFileUpload(file) {
 }
 
 async function handleFileDownload(originalName) {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) return alert("로그인이 필요합니다.");
   try {
     const response = await fetch(
       `${API_BASE_URL}/api/files/download/${encodeURIComponent(originalName)}`,
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     if (!response.ok) throw new Error("다운로드 실패");
     const blob = await response.blob();
@@ -718,7 +816,7 @@ async function handleFileDownload(originalName) {
 }
 
 async function handleFileDelete(originalName) {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) return alert("로그인이 필요합니다.");
   if (!confirm(`'${originalName}' 파일을 정말 삭제하시겠습니까?`)) return;
   try {
@@ -727,7 +825,7 @@ async function handleFileDelete(originalName) {
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     const updatedFiles = await response.json();
     if (!response.ok) throw new Error(updatedFiles.message);
@@ -816,7 +914,7 @@ function getConversionTypeFromFileExtension(fileName) {
 // ==========================================
 async function sendApiRequest(message, fileName, conversionType) {
   const userInput = document.getElementById("user-input");
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   const headers = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -838,6 +936,7 @@ async function sendApiRequest(message, fileName, conversionType) {
   userInput.style.height = "24px";
   toggleLoadingState(true);
 
+  let data = {};
   try {
     const endpoint = macroTarget ? "/api/macro/generate" : "/api/convert";
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -846,20 +945,18 @@ async function sendApiRequest(message, fileName, conversionType) {
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json().catch(() => ({}));
+    data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
       if (res.status === 401) {
-        addMessage("로그인이 필요합니다. 로그인 후 다시 시도해주세요.", "ai");
-        document.getElementById("login-modal-overlay")?.classList.add("active");
-        document.getElementById("login-tab")?.click();
+        handleUnauthorized();
         return;
       }
       addMessage(
         data?.message ||
           data?.error ||
           "죄송합니다. API 호출 중 오류가 발생했습니다.",
-        "ai"
+        "ai",
       );
       return;
     }
@@ -876,7 +973,7 @@ async function sendApiRequest(message, fileName, conversionType) {
     addMessage(
       resultText || "결과를 생성하지 못했습니다.",
       "ai",
-      lastUserMessage
+      lastUserMessage,
     );
 
     // 실시간 반영
@@ -884,10 +981,8 @@ async function sendApiRequest(message, fileName, conversionType) {
   } catch (error) {
     console.error("API 호출 중 오류 발생:", error);
     addMessage(
-      data?.message ||
-        data?.error ||
-        "죄송합니다. API 호출 중 오류가 발생했습니다.",
-      "ai"
+      error?.message || "죄송합니다. API 호출 중 오류가 발생했습니다.",
+      "ai",
     );
   } finally {
     toggleLoadingState(false);
@@ -951,7 +1046,7 @@ function addMessage(text, sender, userMessageForFeedback) {
     renderFeedbackUI(
       messageBubble.querySelector(".feedback-container"),
       userMessageForFeedback,
-      text
+      text,
     );
   } else {
     messageBubble.textContent = text;
@@ -994,7 +1089,7 @@ function renderFeedbackUI(container, userMessage, aiResponse) {
             aiResponse,
             "incorrect",
             feedbackText,
-            container
+            container,
           );
         });
       container
@@ -1010,9 +1105,9 @@ async function sendFeedback(
   aiResponse,
   feedback,
   feedbackText,
-  container
+  container,
 ) {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) {
     alert("로그인이 필요합니다.");
     document.getElementById("login-modal-overlay")?.classList.add("active");
@@ -1023,6 +1118,7 @@ async function sendFeedback(
   // 로딩 UI (성공/실패 확인 전에는 '감사합니다'를 띄우지 않음)
   container.innerHTML = `<p class="feedback-thanks">저장 중...</p>`;
 
+  let data = {};
   try {
     const res = await fetch(`${API_BASE_URL}/api/convert/feedback`, {
       method: "POST",
@@ -1037,21 +1133,21 @@ async function sendFeedback(
           feedback === "correct"
             ? true
             : feedback === "incorrect"
-            ? false
-            : null,
+              ? false
+              : null,
         reason: feedback === "incorrect" ? (feedbackText || "").trim() : "",
         conversionType: selectedConversionType,
       }),
     });
 
-    const data = await res.json().catch(() => ({}));
+    data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
       if (res.status === 401) {
         // 토큰 만료/무효 처리
-        localStorage.removeItem("token");
+        clearAuthTokens();
         window.dispatchEvent(
-          new CustomEvent("auth:changed", { detail: { isLoggedIn: false } })
+          new CustomEvent("auth:changed", { detail: { isLoggedIn: false } }),
         );
         updateLoginState();
 
@@ -1116,7 +1212,7 @@ async function updateSubscriptionBadge() {
   const usageBadge = document.getElementById("usage-badge");
   if (!subBadge) return;
 
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) {
     subBadge.style.display = "none";
     if (usageBadge) usageBadge.style.display = "none";

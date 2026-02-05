@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
@@ -65,7 +65,10 @@
     </div>
 
     <script>
-      const API_BASE_URL = "https://beebeeai-backend-production.up.railway.app";
+      const API_BASE_URL =
+        window.location.hostname === "localhost"
+          ? "http://localhost:3000"
+          : "https://beebeeai-backend-production.up.railway.app";
       window.onload = async () => {
         const messageElement = document.getElementById("message");
         const loginLink = document.getElementById("login-link");
@@ -80,17 +83,19 @@
         }
 
         try {
-          // 2. 백엔드에 인증 요청을 보냄.
           const response = await fetch(
-            `${API_BASE_URL}/api/auth/verify-email/${token}`
+            `${API_BASE_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`,
           );
-          const data = await response.json();
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(data?.message || "이메일 인증에 실패했습니다.");
+          }
 
           // 3. 결과에 따라 메시지를 표시.
-          messageElement.textContent = data.message;
-          if (response.ok) {
-            loginLink.style.display = "inline-block";
-          }
+          messageElement.textContent =
+            data?.message || "이메일 인증이 완료되었습니다.";
+          loginLink.style.display = "inline-block";
         } catch (error) {
           messageElement.textContent =
             "인증 처리 중 오류가 발생했습니다. 다시 시도해주세요.";
