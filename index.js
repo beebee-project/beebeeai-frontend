@@ -976,11 +976,10 @@ async function sendApiRequest(message, fileName, conversionType) {
       data?.message ??
       "";
 
-    addMessage(
-      resultText || "결과를 생성하지 못했습니다.",
-      "ai",
-      lastUserMessage,
-    );
+    addMessage(resultText || "결과를 생성하지 못했습니다.", "ai", {
+      userMessage: lastUserMessage,
+      result: data?.excelFormula ?? resultText ?? "",
+    });
 
     // 실시간 반영
     await updateSubscriptionBadge();
@@ -1008,7 +1007,15 @@ function handleUserInput() {
   sendApiRequest(messageText, lastSelectedFile, selectedConversionType);
 }
 
-function addMessage(text, sender, userMessageForFeedback) {
+function addMessage(text, sender, feedbackMeta = null) {
+  const feedbackUserMessage =
+    typeof feedbackMeta === "string"
+      ? feedbackMeta
+      : feedbackMeta?.userMessage || "";
+  const feedbackResult =
+    typeof feedbackMeta === "object" && feedbackMeta
+      ? feedbackMeta.result || text.trim()
+      : text.trim();
   const chatMessages = document.getElementById("chat-messages");
   const messageBubble = document.createElement("div");
   messageBubble.classList.add("message-bubble", sender);
@@ -1051,8 +1058,8 @@ function addMessage(text, sender, userMessageForFeedback) {
     // 피드백 UI 렌더링
     renderFeedbackUI(
       messageBubble.querySelector(".feedback-container"),
-      userMessageForFeedback,
-      text,
+      feedbackUserMessage,
+      feedbackResult,
     );
   } else {
     messageBubble.textContent = text;
