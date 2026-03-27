@@ -497,12 +497,15 @@ function initializeChat() {
   conversionTypeSelect.addEventListener("change", (e) => {
     selectedConversionType = e.target.value || null;
     if (selectedConversionType) {
-      addMessage(`'${selectedConversionType}' 타입이 선택되었습니다.`, "ai");
+      addMessage(
+        `'${selectedConversionType}' 타입이 선택되었습니다. 질문을 입력해 보세요 !`,
+        "ai",
+      );
     }
   });
 
   // 처음 안내 문구
-  addMessage("변환할 타입을 선택해 주세요 : ", "ai");
+  addMessage("무엇을 하고 싶나요 ? 변환할 타입을 선택해 주세요 : ", "ai");
 }
 
 function initializeFileUpload() {
@@ -961,8 +964,11 @@ async function sendApiRequest(message, fileName, conversionType) {
       return;
     }
 
-    // ✅ 매크로 응답은 { result } or { script } 형태일 수 있어 방어
+    // ✅ 변환 API는 excelFormula / sheetsFormula 구조,
+    // ✅ 매크로 API는 code / result / script / output 구조를 사용
     const resultText =
+      data?.excelFormula ??
+      data?.sheetsFormula ??
       data?.code ??
       data?.result ??
       data?.script ??
