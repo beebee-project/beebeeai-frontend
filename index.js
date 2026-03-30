@@ -4,6 +4,7 @@ let lastSelectedFile = null;
 let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
+let suppressNextConversionTypeMessage = false;
 
 const API_BASE_URL =
   window.location.hostname === "localhost"
@@ -18,11 +19,7 @@ const CONVERSION_TYPE_LABEL_MAP = {
   "Google Apps Script": "구글시트 매크로 만들기",
 };
 const CONVERSION_TYPE_EXAMPLE_MAP = {
-  "Excel/Google Sheets": [
-    "부서별 직원 수를 계산해줘",
-    "연봉 평균을 구해줘",
-    "2023년 이후 입사 직원 수를 계산해줘",
-  ],
+  "Excel/Google Sheets": ["A1:A10 합계", "B1:B20의 평균", "C1:C15의 최대값"],
   "Excel Office Scripts": [
     "A열 기준으로 중복을 제거해줘",
     "연봉이 높은 순으로 정렬해줘",
@@ -34,6 +31,37 @@ const CONVERSION_TYPE_EXAMPLE_MAP = {
     "새 시트에 월별 합계를 정리해줘",
   ],
 };
+
+const CONVERSION_TYPE_UPLOADED_EXAMPLE_MAP = {
+  "Excel/Google Sheets": [
+    "부서별 직원 수를 계산해줘",
+    "연봉 평균을 구해줘",
+    "2023년 이후 입사 직원 수를 계산해줘",
+  ],
+};
+
+function getExamplesForConversionType(conversionType) {
+  const hasUploadedFile = !!lastSelectedFile;
+  const sourceMap = hasUploadedFile
+    ? CONVERSION_TYPE_UPLOADED_EXAMPLE_MAP
+    : CONVERSION_TYPE_EXAMPLE_MAP;
+
+  return (
+    sourceMap[conversionType] ||
+    CONVERSION_TYPE_EXAMPLE_MAP[conversionType] ||
+    []
+  );
+}
+
+function buildConversionTypeGuideMessage(conversionType) {
+  const selectedLabel =
+    CONVERSION_TYPE_LABEL_MAP[conversionType] || conversionType;
+  const examples = getExamplesForConversionType(conversionType);
+  const exampleLines =
+    examples.length > 0 ? `\n\n예시\n- ${examples.join("\n- ")}` : "";
+
+  return `${selectedLabel} 모드입니다.\n어떤 작업을 하고 싶은지 질문해주세요.${exampleLines}`;
+}
 
 function handlePostSubscribeUX() {
   const url = new URL(window.location.href);
@@ -519,18 +547,12 @@ function initializeChat() {
   conversionTypeSelect.addEventListener("change", (e) => {
     selectedConversionType = e.target.value || null;
     if (selectedConversionType) {
-      const selectedLabel =
-        CONVERSION_TYPE_LABEL_MAP[selectedConversionType] ||
-        selectedConversionType;
-      const examples =
-        CONVERSION_TYPE_EXAMPLE_MAP[selectedConversionType] || [];
-      const exampleText =
-        examples.length > 0 ? `\n\n예시:\n- ${examples.join("\n- ")}` : "";
+      if (suppressNextConversionTypeMessage) {
+        suppressNextConversionTypeMessage = false;
+        return;
+      }
 
-      addMessage(
-        `'${selectedLabel}' 타입을 선택했습니다. 질문을 입력해 보세요!${exampleText}`,
-        "ai",
-      );
+      addMessage(buildConversionTypeGuideMessage(selectedConversionType), "ai");
     }
   });
 
@@ -587,10 +609,11 @@ function initializeFileUpload() {
   startUploadBtn.addEventListener("click", () => {
     if (lastSelectedFile) {
       addMessage(
-        `'${lastSelectedFile}' 파일이 선택되었습니다. 이제 관련된 질문을 입력해주세요.`,
+        `'${lastSelectedFile}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.`,
         "ai",
       );
       const type = getConversionTypeFromFileExtension(lastSelectedFile);
+      suppressNextConversionTypeMessage = true;
       document.getElementById("conversion-type-select").value = type;
       selectedConversionType = type;
       uploadPopupOverlay.classList.remove("active");
@@ -1093,6 +1116,9 @@ function addMessage(text, sender, feedbackMeta = null) {
     );
   } else {
     messageBubble.textContent = text;
+    if (sender === "ai") {
+      messageBubble.style.whiteSpace = "pre-line";
+    }
   }
 
   chatMessages.appendChild(messageBubble);
