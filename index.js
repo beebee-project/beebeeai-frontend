@@ -58,17 +58,17 @@ function buildConversionTypeGuideMessage(conversionType) {
     CONVERSION_TYPE_LABEL_MAP[conversionType] || conversionType;
   const examples = getExamplesForConversionType(conversionType);
   const exampleLines =
-    examples.length > 0 ? `\n\n💡예시\n- ${examples.join("\n- ")}` : "";
+    examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
 
-  return `📌 ${selectedLabel} 타입이 선택되었습니다.\n어떤 작업을 하고 싶은지 질문해주세요.${exampleLines}`;
+  return `📌 ${selectedLabel} 타입이 선택되었습니다. 관련된 질문을 입력해주세요!${exampleLines}`;
 }
 
 function buildUploadedFileGuideMessage(fileName, conversionType) {
   const examples = getExamplesForConversionType(conversionType);
   const exampleLines =
-    examples.length > 0 ? `\n\n예시\n- ${examples.join("\n- ")}` : "";
+    examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
 
-  return `'${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
+  return `'${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요!${exampleLines}`;
 }
 
 function handlePostSubscribeUX() {
