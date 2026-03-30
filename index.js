@@ -12,6 +12,28 @@ const API_BASE_URL =
 
 const CONVERSION_TYPE_OFFICE_SCRIPT = "Excel Office Scripts";
 const CONVERSION_TYPE_APPS_SCRIPT = "Google Apps Script";
+const CONVERSION_TYPE_LABEL_MAP = {
+  "Excel/Google Sheets": "엑셀/구글시트 수식 만들기",
+  "Excel Office Scripts": "엑셀 매크로 만들기",
+  "Google Apps Script": "구글시트 매크로 만들기",
+};
+const CONVERSION_TYPE_EXAMPLE_MAP = {
+  "Excel/Google Sheets": [
+    "부서별 직원 수를 계산해줘",
+    "연봉 평균을 구해줘",
+    "2023년 이후 입사 직원 수를 계산해줘",
+  ],
+  "Excel Office Scripts": [
+    "A열 기준으로 중복을 제거해줘",
+    "연봉이 높은 순으로 정렬해줘",
+    "새 시트에 요약표를 만들어줘",
+  ],
+  "Google Apps Script": [
+    "중복된 행을 삭제해줘",
+    "특정 열 기준으로 데이터를 정렬해줘",
+    "새 시트에 월별 합계를 정리해줘",
+  ],
+};
 
 function handlePostSubscribeUX() {
   const url = new URL(window.location.href);
@@ -497,8 +519,16 @@ function initializeChat() {
   conversionTypeSelect.addEventListener("change", (e) => {
     selectedConversionType = e.target.value || null;
     if (selectedConversionType) {
+      const selectedLabel =
+        CONVERSION_TYPE_LABEL_MAP[selectedConversionType] ||
+        selectedConversionType;
+      const examples =
+        CONVERSION_TYPE_EXAMPLE_MAP[selectedConversionType] || [];
+      const exampleText =
+        examples.length > 0 ? `\n\n예시:\n- ${examples.join("\n- ")}` : "";
+
       addMessage(
-        `'${selectedConversionType}' 타입이 선택되었습니다. 질문을 입력해 보세요 !`,
+        `'${selectedLabel}' 타입을 선택했습니다. 질문을 입력해 보세요!${exampleText}`,
         "ai",
       );
     }
