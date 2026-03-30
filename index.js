@@ -559,7 +559,7 @@ function initializeChat() {
   });
 
   // 처음 안내 문구
-  addMessage("무엇을 하고 싶나요 ? 변환할 타입을 선택해 주세요 :) ", "ai");
+  addMessage("무엇을 하고 싶나요 ? 변환할 타입을 선택해 주세요 : ", "ai");
 }
 
 function initializeFileUpload() {
