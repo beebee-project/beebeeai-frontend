@@ -66,7 +66,7 @@ function buildConversionTypeGuideMessage(conversionType) {
 function buildUploadedFileGuideMessage(fileName, conversionType) {
   const examples = getExamplesForConversionType(conversionType);
   const exampleLines =
-    examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
+    examples.length > 0 ? `\n\n예시\n- ${examples.join("\n- ")}` : "";
 
   return `💡 '${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
 }
