@@ -4,7 +4,6 @@ let lastSelectedFile = null;
 let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
-let suppressNextConversionTypeMessage = false;
 
 const API_BASE_URL =
   window.location.hostname === "localhost"
@@ -555,11 +554,6 @@ function initializeChat() {
   conversionTypeSelect.addEventListener("change", (e) => {
     selectedConversionType = e.target.value || null;
     if (selectedConversionType) {
-      if (suppressNextConversionTypeMessage) {
-        suppressNextConversionTypeMessage = false;
-        return;
-      }
-
       addMessage(buildConversionTypeGuideMessage(selectedConversionType), "ai");
     }
   });
@@ -617,16 +611,9 @@ function initializeFileUpload() {
   startUploadBtn.addEventListener("click", () => {
     if (lastSelectedFile) {
       const type = getConversionTypeFromFileExtension(lastSelectedFile);
-      suppressNextConversionTypeMessage = true;
-      const select = document.getElementById("conversion-type-select");
-      select.value = ""; // 초기화
-      setTimeout(() => {
-        select.value = type;
-      }, 0);
+      document.getElementById("conversion-type-select").value = type;
       selectedConversionType = type;
-
       addMessage(buildUploadedFileGuideMessage(lastSelectedFile, type), "ai");
-
       uploadPopupOverlay.classList.remove("active");
     }
   });
