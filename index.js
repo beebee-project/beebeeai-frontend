@@ -58,17 +58,17 @@ function buildConversionTypeGuideMessage(conversionType) {
     CONVERSION_TYPE_LABEL_MAP[conversionType] || conversionType;
   const examples = getExamplesForConversionType(conversionType);
   const exampleLines =
-    examples.length > 0 ? `\n\n예시\n- ${examples.join("\n- ")}` : "";
+    examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
 
-  return `💡 ${selectedLabel} 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
+  return `✨ ${selectedLabel} 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
 }
 
 function buildUploadedFileGuideMessage(fileName, conversionType) {
   const examples = getExamplesForConversionType(conversionType);
   const exampleLines =
-    examples.length > 0 ? `\n\n예시\n- ${examples.join("\n- ")}` : "";
+    examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
 
-  return `💡 '${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
+  return `✨ '${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
 }
 
 function handlePostSubscribeUX() {
@@ -618,7 +618,11 @@ function initializeFileUpload() {
     if (lastSelectedFile) {
       const type = getConversionTypeFromFileExtension(lastSelectedFile);
       suppressNextConversionTypeMessage = true;
-      document.getElementById("conversion-type-select").value = type;
+      const select = document.getElementById("conversion-type-select");
+      select.value = ""; // 초기화
+      setTimeout(() => {
+        select.value = type;
+      }, 0);
       selectedConversionType = type;
 
       addMessage(buildUploadedFileGuideMessage(lastSelectedFile, type), "ai");
