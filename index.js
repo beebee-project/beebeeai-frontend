@@ -59,7 +59,7 @@ function buildConversionTypeGuideMessage(conversionType) {
   const exampleLines =
     examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
 
-  return `✨ ${selectedLabel} 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
+  return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
 }
 
 function buildUploadedFileGuideMessage(fileName, conversionType) {
