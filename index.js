@@ -14,7 +14,7 @@ const CONVERSION_TYPE_VBA = "Excel VBA";
 const CONVERSION_TYPE_APPS_SCRIPT = "Google Apps Script";
 const CONVERSION_TYPE_LABEL_MAP = {
   "Excel/Google Sheets": "엑셀/구글시트 수식 만들기",
-  "Excel VBA": "엑셀 VBA 매크로 만들기",
+  "Excel VBA": "엑셀 매크로 만들기",
   "Google Apps Script": "구글시트 매크로 만들기",
 };
 const CONVERSION_TYPE_EXAMPLE_MAP = {
