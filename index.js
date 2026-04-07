@@ -10,16 +10,16 @@ const API_BASE_URL =
     ? "http://localhost:3000"
     : "https://beebeeai-backend-production.up.railway.app";
 
-const CONVERSION_TYPE_OFFICE_SCRIPT = "Excel Office Scripts";
+const CONVERSION_TYPE_VBA = "Excel VBA";
 const CONVERSION_TYPE_APPS_SCRIPT = "Google Apps Script";
 const CONVERSION_TYPE_LABEL_MAP = {
   "Excel/Google Sheets": "엑셀/구글시트 수식 만들기",
-  "Excel Office Scripts": "엑셀 매크로 만들기",
+  "Excel VBA": "엑셀 VBA 매크로 만들기",
   "Google Apps Script": "구글시트 매크로 만들기",
 };
 const CONVERSION_TYPE_EXAMPLE_MAP = {
   "Excel/Google Sheets": ["A1:A10 합계", "B1:B20의 평균", "C1:C15의 최대값"],
-  "Excel Office Scripts": [
+  "Excel VBA": [
     "A열 기준으로 중복을 제거해줘",
     "연봉이 높은 순으로 정렬해줘",
     "새 시트에 요약표를 만들어줘",
@@ -974,8 +974,7 @@ async function sendApiRequest(message, fileName, conversionType) {
 
   // ✅ 매크로 타겟 매핑
   let macroTarget = null;
-  if (conversionType === CONVERSION_TYPE_OFFICE_SCRIPT)
-    macroTarget = "officeScript";
+  if (conversionType === CONVERSION_TYPE_VBA) macroTarget = "vba";
   else if (conversionType === CONVERSION_TYPE_APPS_SCRIPT)
     macroTarget = "appsScript";
 
@@ -1077,8 +1076,8 @@ function addMessage(text, sender, feedbackMeta = null) {
       text.toUpperCase().startsWith("SELECT") ||
       text.includes("prop(") ||
       text.includes("ExcelScript.Workbook") ||
-      text.includes("function main(") ||
-      text.includes("function myFunction("));
+      /^function\s+[A-Za-z_][A-Za-z0-9_]*\s*\(/m.test(text) ||
+      /^Sub\s+[A-Za-z_][A-Za-z0-9_]*\s*\(\s*\)/im.test(text));
 
   if (isFormula) {
     messageBubble.innerHTML = `
