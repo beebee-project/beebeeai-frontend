@@ -1060,7 +1060,7 @@ main {
 
 .feedback-container p {
   margin: 0;
-  color: #ffc800;
+  color: #fff;
 }
 
 .feedback-btn {
@@ -1963,7 +1963,7 @@ body.toss-result-page {
 .formula-card-label {
   font-size: 14px;
   font-weight: 700;
-  color: #eaeaea;
+  color: #ffc800;
   flex: 1 1 auto;
 }
 
