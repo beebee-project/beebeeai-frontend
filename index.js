@@ -1016,20 +1016,39 @@ async function sendApiRequest(message, fileName, conversionType) {
 
     // ✅ 변환 API는 excelFormula / sheetsFormula 구조,
     // ✅ 매크로 API는 code / result / script / output 구조를 사용
-    const resultText =
-      data?.excelFormula ??
-      data?.sheetsFormula ??
-      data?.code ??
-      data?.result ??
-      data?.script ??
-      data?.output ??
-      data?.message ??
-      "";
+    const isFormulaResponse =
+      typeof data?.excelFormula === "string" ||
+      typeof data?.sheetsFormula === "string";
 
-    addMessage(resultText || "결과를 생성하지 못했습니다.", "ai", {
-      userMessage: lastUserMessage,
-      result: data?.excelFormula ?? resultText ?? "",
-    });
+    if (isFormulaResponse) {
+      addMessage(
+        {
+          type: "formula_result",
+          excelFormula: data?.excelFormula || "",
+          sheetsFormula: data?.sheetsFormula || "",
+          compatibility: data?.compatibility || null,
+          debugMeta: data?.debugMeta || null,
+        },
+        "ai",
+        {
+          userMessage: lastUserMessage,
+          result: data?.excelFormula || data?.sheetsFormula || "",
+        },
+      );
+    } else {
+      const resultText =
+        data?.code ??
+        data?.result ??
+        data?.script ??
+        data?.output ??
+        data?.message ??
+        "";
+
+      addMessage(resultText || "결과를 생성하지 못했습니다.", "ai", {
+        userMessage: lastUserMessage,
+        result: resultText ?? "",
+      });
+    }
 
     // 실시간 반영
     await updateSubscriptionBadge();
@@ -1057,6 +1076,27 @@ function handleUserInput() {
   sendApiRequest(messageText, lastSelectedFile, selectedConversionType);
 }
 
+function escapeHtml(text = "") {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function buildLabeledCodeBlock(label, code, copyValue) {
+  return `
+    <div class="code-block labeled-code-block">
+      <div class="code-block-label">${escapeHtml(label)}</div>
+      <pre>${escapeHtml(code)}</pre>
+      <button class="copy-button" title="클립보드에 복사" data-copy="${escapeHtml(copyValue)}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+        </svg>
+      </button>
+    </div>
+  `;
+}
+
 function addMessage(text, sender, feedbackMeta = null) {
   const feedbackUserMessage =
     typeof feedbackMeta === "string"
@@ -1070,16 +1110,79 @@ function addMessage(text, sender, feedbackMeta = null) {
   const messageBubble = document.createElement("div");
   messageBubble.classList.add("message-bubble", sender);
 
+  const isStructuredFormulaResult =
+    sender === "ai" &&
+    text &&
+    typeof text === "object" &&
+    text.type === "formula_result";
+
+  const plainText = typeof text === "string" ? text : "";
+
   const isFormula =
     sender === "ai" &&
-    (text.trim().startsWith("=") ||
-      text.toUpperCase().startsWith("SELECT") ||
-      text.includes("prop(") ||
-      text.includes("ExcelScript.Workbook") ||
-      /^function\s+[A-Za-z_][A-Za-z0-9_]*\s*\(/m.test(text) ||
-      /^Sub\s+[A-Za-z_][A-Za-z0-9_]*\s*\(\s*\)/im.test(text));
+    !isStructuredFormulaResult &&
+    (plainText.trim().startsWith("=") ||
+      plainText.toUpperCase().startsWith("SELECT") ||
+      plainText.includes("prop(") ||
+      plainText.includes("ExcelScript.Workbook") ||
+      /^function\s+[A-Za-z_][A-Za-z0-9_]*\s*\(/m.test(plainText) ||
+      /^Sub\s+[A-Za-z_][A-Za-z0-9_]*\s*\(\s*\)/im.test(plainText));
 
-  if (isFormula) {
+  if (isStructuredFormulaResult) {
+    const excelFormula = text.excelFormula || "";
+    const sheetsFormula = text.sheetsFormula || "";
+    const sameFormula =
+      excelFormula &&
+      sheetsFormula &&
+      excelFormula.trim() === sheetsFormula.trim();
+
+    let blocksHtml = "";
+
+    if (sameFormula) {
+      blocksHtml = buildLabeledCodeBlock("Common", excelFormula, excelFormula);
+    } else {
+      if (excelFormula) {
+        blocksHtml += buildLabeledCodeBlock(
+          "Excel",
+          excelFormula,
+          excelFormula,
+        );
+      }
+      if (sheetsFormula) {
+        blocksHtml += buildLabeledCodeBlock(
+          "Google Sheets",
+          sheetsFormula,
+          sheetsFormula,
+        );
+      }
+    }
+
+    messageBubble.innerHTML = `
+      ${blocksHtml}
+      <div class="feedback-container"></div>
+    `;
+
+    messageBubble.querySelectorAll(".copy-button").forEach((copyBtn) => {
+      copyBtn.addEventListener("click", () => {
+        const value = copyBtn.getAttribute("data-copy") || "";
+        navigator.clipboard.writeText(value).then(() => {
+          copyBtn.innerHTML = `<i class="fas fa-check"></i>`;
+          setTimeout(() => {
+            copyBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+              </svg>`;
+          }, 2000);
+        });
+      });
+    });
+
+    renderFeedbackUI(
+      messageBubble.querySelector(".feedback-container"),
+      feedbackUserMessage,
+      feedbackResult,
+    );
+  } else if (isFormula) {
     messageBubble.innerHTML = `
         <div class="code-block">
             <pre>${text.trim()}</pre>
@@ -1112,7 +1215,7 @@ function addMessage(text, sender, feedbackMeta = null) {
       feedbackResult,
     );
   } else {
-    messageBubble.textContent = text;
+    messageBubble.textContent = plainText;
     if (sender === "ai") {
       messageBubble.style.whiteSpace = "pre-line";
     }

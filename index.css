@@ -1942,3 +1942,15 @@ body.toss-result-page {
   pointer-events: none;
   cursor: not-allowed;
 }
+
+.labeled-code-block {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.code-block-label {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #f4c542;
+}
