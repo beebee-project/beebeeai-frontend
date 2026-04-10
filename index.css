@@ -1943,14 +1943,32 @@ body.toss-result-page {
   cursor: not-allowed;
 }
 
-.labeled-code-block {
-  position: relative;
+.formula-result-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 10px;
 }
 
-.code-block-label {
-  font-size: 12px;
+.formula-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.formula-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.formula-card-label {
+  font-size: 14px;
   font-weight: 700;
-  margin-bottom: 6px;
   color: #f4c542;
+}
+
+.formula-card .code-block {
+  margin: 0;
 }

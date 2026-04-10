@@ -1085,14 +1085,18 @@ function escapeHtml(text = "") {
 
 function buildLabeledCodeBlock(label, code, copyValue) {
   return `
-    <div class="code-block labeled-code-block">
-      <div class="code-block-label">${escapeHtml(label)}</div>
-      <pre>${escapeHtml(code)}</pre>
-      <button class="copy-button" title="클립보드에 복사" data-copy="${escapeHtml(copyValue)}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-        </svg>
-      </button>
+    <div class="formula-card">
+      <div class="formula-card-header">
+        <span class="formula-card-label">${escapeHtml(label)}</span>
+        <button class="copy-button" title="클립보드에 복사" data-copy="${escapeHtml(copyValue)}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="code-block">
+        <pre>${escapeHtml(code)}</pre>
+      </div>
     </div>
   `;
 }
@@ -1158,7 +1162,9 @@ function addMessage(text, sender, feedbackMeta = null) {
     }
 
     messageBubble.innerHTML = `
-      ${blocksHtml}
+      <div class="formula-result-group">
+        ${blocksHtml}
+      </div>
       <div class="feedback-container"></div>
     `;
 
