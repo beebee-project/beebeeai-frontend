@@ -1245,11 +1245,10 @@ main {
 }
 
 .copy-button {
-  background-color: transparent;
-  color: #eaeaea;
+  background: transparent;
   border: none;
+  color: #eaeaea;
   cursor: pointer;
-  transition: color 0.2s;
 }
 
 .copy-button:hover {
@@ -1980,19 +1979,21 @@ body.toss-result-page {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 48px;
-  height: 32px;
-  padding: 0 10px;
+  min-width: auto;
+  width: auto;
+  height: auto;
+  padding: 0;
   border: none;
-  background: rgba(255, 255, 255, 0.08);
+  background: transparent;
   color: #ffffff;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
 .formula-card-header .copy-button:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: transparent;
+  opacity: 0.8;
 }
 
 .formula-card-header .copy-button svg {
