@@ -20,14 +20,16 @@ const CONVERSION_TYPE_LABEL_MAP = {
 const CONVERSION_TYPE_EXAMPLE_MAP = {
   "Excel/Google Sheets": ["A1:A10 합계", "B1:B20의 평균", "C1:C15의 최대값"],
   "Excel VBA": [
-    "A열 기준으로 중복을 제거해줘",
-    "연봉이 높은 순으로 정렬해줘",
-    "새 시트에 요약표를 만들어줘",
+    "A1에 '합계'라고 입력해줘",
+    "B열을 굵게 표시해줘",
+    "C열 기준으로 내림차순 정렬해줘",
+    "2행을 삽입해줘",
   ],
   "Google Apps Script": [
-    "중복된 행을 삭제해줘",
-    "특정 열 기준으로 데이터를 정렬해줘",
-    "새 시트에 월별 합계를 정리해줘",
+    "A1에 '완료'라고 입력해줘",
+    "B열 배경을 노란색으로 바꿔줘",
+    "C열 기준으로 오름차순 정렬해줘",
+    "3행을 삭제해줘",
   ],
 };
 
@@ -58,8 +60,12 @@ function buildConversionTypeGuideMessage(conversionType) {
   const examples = getExamplesForConversionType(conversionType);
   const exampleLines =
     examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
+  const macroHint =
+    conversionType === "Excel VBA" || conversionType === "Google Apps Script"
+      ? `\n\n현재는 입력, 서식 변경, 복사/이동, 정렬, 필터, 행/열 삽입·삭제, 시트 생성/이름변경 등의 작업을 우선 지원합니다.`
+      : "";
 
-  return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
+  return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${macroHint}${exampleLines}`;
 }
 
 function buildUploadedFileGuideMessage(fileName, conversionType) {
