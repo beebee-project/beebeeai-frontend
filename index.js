@@ -66,7 +66,7 @@ function buildConversionTypeGuideMessage(conversionType) {
       : "";
   const formulaHint =
     conversionType === "Excel/Google Sheets"
-      ? `\n\n현재는 합계, 평균, 개수, 최대/최소, 조건 필터, 간단한 조회 등의 수식을 우선 지원합니다.\n복잡한 통계/피벗/고급 분석은 아직 제한될 수 있습니다.`
+      ? `\n\n현재 복잡한 통계/피벗/고급 분석은 아직 제한될 수 있습니다.`
       : "";
 
   return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${macroHint}${formulaHint}${exampleLines}`;
@@ -76,8 +76,12 @@ function buildUploadedFileGuideMessage(fileName, conversionType) {
   const examples = getExamplesForConversionType(conversionType);
   const exampleLines =
     examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
+  const formulaHint =
+    conversionType === "Excel/Google Sheets"
+      ? `\n\n현재 복잡한 통계/피벗/고급 분석은 아직 제한될 수 있습니다.`
+      : "";
 
-  return `✨ '${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
+  return `✨ '${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${formulaHint}${exampleLines}`;
 }
 
 function handlePostSubscribeUX() {
