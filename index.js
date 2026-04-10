@@ -1094,24 +1094,10 @@ function buildLabeledCodeBlock(label, code, copyValue) {
           type="button"
           title="클립보드에 복사"
           data-copy="${escapeHtml(copyValue)}"
-          style="
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            min-width:48px;
-            height:28px;
-            padding:0 10px;
-            border:none;
-            border-radius:8px;
-            background:rgba(255,255,255,0.10);
-            color:#ffffff;
-            cursor:pointer;
-            font-size:12px;
-            font-weight:700;
-            flex-shrink:0;
-          "
         >
-          복사
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+          </svg>
         </button>
       </div>
       <div class="code-block">
@@ -1198,9 +1184,13 @@ function addMessage(text, sender, feedbackMeta = null) {
         const value = copyBtn.getAttribute("data-copy") || "";
         try {
           await navigator.clipboard.writeText(value);
-          copyBtn.textContent = "복사됨";
+          copyBtn.innerHTML = `<i class="fas fa-check"></i>`;
           setTimeout(() => {
-            copyBtn.textContent = "복사";
+            copyBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+              </svg>
+            `;
           }, 1500);
         } catch (err) {
           console.error("복사 실패:", err);
@@ -1217,31 +1207,11 @@ function addMessage(text, sender, feedbackMeta = null) {
     messageBubble.innerHTML = `
       <div class="code-block">
         <pre>${escapeHtml(plainText.trim())}</pre>
-        <button
-  class="copy-button"
-  type="button"
-  title="클립보드에 복사"
-  style="
-    position:absolute;
-    top:0;
-    right:-5px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-width:48px;
-    height:28px;
-    padding:0 10px;
-    border:none;
-    border-radius:8px;
-    background:rgba(255,255,255,0.10);
-    color:#ffffff;
-    cursor:pointer;
-    font-size:12px;
-    font-weight:700;
-  "
->
-  복사
-</button>
+        <button class="copy-button" type="button" title="클립보드에 복사">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+          </svg>
+        </button>
       </div>
       <div class="feedback-container"></div>
     `;
@@ -1250,9 +1220,13 @@ function addMessage(text, sender, feedbackMeta = null) {
     copyButton.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(plainText.trim());
-        copyButton.textContent = "복사됨";
+        copyButton.innerHTML = `<i class="fas fa-check"></i>`;
         setTimeout(() => {
-          copyButton.textContent = "복사";
+          copyButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+            </svg>
+          `;
         }, 1500);
       } catch (err) {
         console.error("복사 실패:", err);
