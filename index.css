@@ -1972,3 +1972,27 @@ body.toss-result-page {
 .formula-card .code-block {
   margin: 0;
 }
+
+.formula-card-header .copy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.formula-card-header .copy-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.formula-card-header .copy-button svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}

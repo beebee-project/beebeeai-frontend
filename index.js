@@ -1080,7 +1080,8 @@ function escapeHtml(text = "") {
   return String(text)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function buildLabeledCodeBlock(label, code, copyValue) {
@@ -1088,7 +1089,12 @@ function buildLabeledCodeBlock(label, code, copyValue) {
     <div class="formula-card">
       <div class="formula-card-header">
         <span class="formula-card-label">${escapeHtml(label)}</span>
-        <button class="copy-button" title="클립보드에 복사" data-copy="${escapeHtml(copyValue)}">
+        <button
+          class="copy-button"
+          type="button"
+          title="클립보드에 복사"
+          data-copy="${escapeHtml(copyValue)}"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
           </svg>
@@ -1106,10 +1112,14 @@ function addMessage(text, sender, feedbackMeta = null) {
     typeof feedbackMeta === "string"
       ? feedbackMeta
       : feedbackMeta?.userMessage || "";
+
   const feedbackResult =
     typeof feedbackMeta === "object" && feedbackMeta
-      ? feedbackMeta.result || text.trim()
-      : text.trim();
+      ? feedbackMeta.result || (typeof text === "string" ? text.trim() : "")
+      : typeof text === "string"
+        ? text.trim()
+        : "";
+
   const chatMessages = document.getElementById("chat-messages");
   const messageBubble = document.createElement("div");
   messageBubble.classList.add("message-bubble", sender);
@@ -1135,6 +1145,7 @@ function addMessage(text, sender, feedbackMeta = null) {
   if (isStructuredFormulaResult) {
     const excelFormula = text.excelFormula || "";
     const sheetsFormula = text.sheetsFormula || "";
+
     const sameFormula =
       excelFormula &&
       sheetsFormula &&
@@ -1169,17 +1180,21 @@ function addMessage(text, sender, feedbackMeta = null) {
     `;
 
     messageBubble.querySelectorAll(".copy-button").forEach((copyBtn) => {
-      copyBtn.addEventListener("click", () => {
+      copyBtn.addEventListener("click", async () => {
         const value = copyBtn.getAttribute("data-copy") || "";
-        navigator.clipboard.writeText(value).then(() => {
+        try {
+          await navigator.clipboard.writeText(value);
           copyBtn.innerHTML = `<i class="fas fa-check"></i>`;
           setTimeout(() => {
             copyBtn.innerHTML = `
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-              </svg>`;
-          }, 2000);
-        });
+              </svg>
+            `;
+          }, 1500);
+        } catch (err) {
+          console.error("복사 실패:", err);
+        }
       });
     });
 
@@ -1190,31 +1205,34 @@ function addMessage(text, sender, feedbackMeta = null) {
     );
   } else if (isFormula) {
     messageBubble.innerHTML = `
-        <div class="code-block">
-            <pre>${text.trim()}</pre>
-            <button class="copy-button" title="클립보드에 복사">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-                </svg>
-            </button>
-        </div>
-        <div class="feedback-container"></div>
+      <div class="code-block">
+        <pre>${escapeHtml(plainText.trim())}</pre>
+        <button class="copy-button" type="button" title="클립보드에 복사">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="feedback-container"></div>
     `;
 
-    const copyBtn = messageBubble.querySelector(".copy-button");
-    copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(text.trim()).then(() => {
-        copyBtn.innerHTML = `<i class="fas fa-check"></i>`;
+    const copyButton = messageBubble.querySelector(".copy-button");
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(plainText.trim());
+        copyButton.innerHTML = `<i class="fas fa-check"></i>`;
         setTimeout(() => {
-          copyBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-                </svg>`;
-        }, 2000);
-      });
+          copyButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+            </svg>
+          `;
+        }, 1500);
+      } catch (err) {
+        console.error("복사 실패:", err);
+      }
     });
 
-    // 피드백 UI 렌더링
     renderFeedbackUI(
       messageBubble.querySelector(".feedback-container"),
       feedbackUserMessage,
