@@ -64,8 +64,12 @@ function buildConversionTypeGuideMessage(conversionType) {
     conversionType === "Excel VBA" || conversionType === "Google Apps Script"
       ? `\n\n현재는 입력, 서식 변경, 복사/이동, 정렬, 필터, 행/열 삽입·삭제, 시트 생성/이름변경 등의 작업을 우선 지원합니다.`
       : "";
+  const formulaHint =
+    conversionType === "Excel/Google Sheets"
+      ? `\n\n현재는 합계, 평균, 개수, 최대/최소, 조건 필터, 간단한 조회 등의 수식을 우선 지원합니다.\n복잡한 통계/피벗/고급 분석은 아직 제한될 수 있습니다.`
+      : "";
 
-  return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${macroHint}${exampleLines}`;
+  return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${macroHint}${formulaHint}${exampleLines}`;
 }
 
 function buildUploadedFileGuideMessage(fileName, conversionType) {
