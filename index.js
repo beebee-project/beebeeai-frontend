@@ -1050,10 +1050,38 @@ async function sendApiRequest(message, fileName, conversionType) {
         data?.message ??
         "";
 
-      addMessage(resultText || "결과를 생성하지 못했습니다.", "ai", {
-        userMessage: lastUserMessage,
-        result: resultText ?? "",
-      });
+      const isMacroResponse =
+        typeof data?.code === "string" ||
+        typeof data?.result === "string" ||
+        typeof data?.script === "string" ||
+        typeof data?.output === "string";
+
+      if (isMacroResponse) {
+        addMessage(
+          {
+            type: "macro_result",
+            label:
+              data?.target === "appsScript"
+                ? "App Script"
+                : data?.target === "vba"
+                  ? "VBA"
+                  : macroTarget === "appsScript"
+                    ? "App Script"
+                    : "VBA",
+            code: resultText || "",
+          },
+          "ai",
+          {
+            userMessage: lastUserMessage,
+            result: resultText ?? "",
+          },
+        );
+      } else {
+        addMessage(resultText || "결과를 생성하지 못했습니다.", "ai", {
+          userMessage: lastUserMessage,
+          result: resultText ?? "",
+        });
+      }
     }
 
     // 실시간 반영
@@ -1136,11 +1164,18 @@ function addMessage(text, sender, feedbackMeta = null) {
     typeof text === "object" &&
     text.type === "formula_result";
 
+  const isStructuredMacroResult =
+    sender === "ai" &&
+    text &&
+    typeof text === "object" &&
+    text.type === "macro_result";
+
   const plainText = typeof text === "string" ? text : "";
 
   const isFormula =
     sender === "ai" &&
     !isStructuredFormulaResult &&
+    !isStructuredMacroResult &&
     (plainText.trim().startsWith("=") ||
       plainText.toUpperCase().startsWith("SELECT") ||
       plainText.includes("prop(") ||
@@ -1203,6 +1238,38 @@ function addMessage(text, sender, feedbackMeta = null) {
         }
       });
     });
+
+    renderFeedbackUI(
+      messageBubble.querySelector(".feedback-container"),
+      feedbackUserMessage,
+      feedbackResult,
+    );
+  } else if (isStructuredMacroResult) {
+    const label = text.label || "VBA";
+    const code = text.code || "";
+
+    messageBubble.innerHTML = `
+      <div class="formula-result-group">
+        ${buildLabeledCodeBlock(label, code, code)}
+      </div>
+      <div class="feedback-container"></div>
+    `;
+
+    const copyBtn = messageBubble.querySelector(".copy-button");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(code.trim()).then(() => {
+          copyBtn.innerHTML = `<i class="fas fa-check"></i>`;
+          setTimeout(() => {
+            copyBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
+              </svg>
+            `;
+          }, 2000);
+        });
+      });
+    }
 
     renderFeedbackUI(
       messageBubble.querySelector(".feedback-container"),

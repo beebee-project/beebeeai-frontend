@@ -1972,6 +1972,10 @@ body.toss-result-page {
   padding-right: 0;
 }
 
+.formula-card .code-block pre {
+  line-height: 1.55;
+}
+
 .formula-card-header .copy-button {
   position: static !important;
   top: auto !important;
