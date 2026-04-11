@@ -1,4 +1,4 @@
-const TOSS_CLIENT_KEY = "live_ck_XZYkKL4Mrjja02d4qbyRr0zJwlEW";
+const TOSS_CLIENT_KEY = "live_ck_LkKEypNArW2BE0KLKwAaVlmeaxYG";
 
 const API_BASE =
   window.location.hostname === "localhost"
@@ -56,7 +56,7 @@ async function openTossWidget() {
     alert(
       `카드 자동결제 인증 오류\ncode:${err?.code || "-"}\nmsg:${
         err?.message || "-"
-      }`
+      }`,
     );
   }
 }
@@ -73,7 +73,7 @@ function bindSubscribeButton() {
 // ===== UI 와이어링 =====
 function initSubscribeButton() {
   const proStartBtn = document.querySelector(
-    "#pricing-modal-overlay .pro-button"
+    "#pricing-modal-overlay .pro-button",
   );
   const pricingModal = document.getElementById("pricing-modal-overlay");
   const tossOverlay = document.getElementById("toss-widget-overlay");
