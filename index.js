@@ -65,7 +65,7 @@ function buildConversionTypeGuideMessage(conversionType) {
       ? `\n\n현재는 입력, 서식 변경, 복사/이동, 정렬, 필터, 행/열 삽입·삭제, 시트 생성/이름변경 등의 작업을 우선 지원합니다.`
       : "";
 
-  return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${macroHint}${exampleLines}`;
+  return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${macroHint}${exampleLines}\n\n⚠️ 복잡한 요청은 나눠서 입력하면 더 정확합니다.`;
 }
 
 function buildUploadedFileGuideMessage(fileName, conversionType) {
@@ -73,7 +73,7 @@ function buildUploadedFileGuideMessage(fileName, conversionType) {
   const exampleLines =
     examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
 
-  return `✨ '${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}`;
+  return `✨ '${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}\n\n⚠️ 복잡한 요청은 나눠서 입력하면 더 정확합니다.`;
 }
 
 function handlePostSubscribeUX() {
