@@ -1513,8 +1513,8 @@ async function updateSubscriptionBadge() {
 
     if (usageBadge) {
       usageBadge.innerHTML = `
-        <div class="usage-line">AI 변환 ${formulaUsed}/${formulaLimit}</div>
-        <div class="usage-line">파일 업로드 ${fileUsed}/${fileLimit}</div>
+        <div class="usage-line">AI 변환 ${formulaUsed}/${formulaLimit}회</div>
+        <div class="usage-line">파일 업로드 ${fileUsed}/${fileLimit}회</div>
       `;
       usageBadge.style.display = "inline-block";
     }
