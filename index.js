@@ -35,9 +35,10 @@ const CONVERSION_TYPE_EXAMPLE_MAP = {
 
 const CONVERSION_TYPE_UPLOADED_EXAMPLE_MAP = {
   "Excel/Google Sheets": [
-    "부서별 직원 수를 계산해줘",
-    "연봉 평균을 구해줘",
+    "개발 부서의 직원 수를 계산해줘",
+    "성적이 3.5 이상인 학생 수",
     "2023년 이후 입사 직원 수를 계산해줘",
+    "방문일이 2024-03-01 이후인 환자 수",
   ],
 };
 
