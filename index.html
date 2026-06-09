@@ -62,6 +62,7 @@
       </div>
 
       <nav class="header-nav">
+        <a href="">템플릿</a>
         <a href="#" id="desktop-guide-link">가이드</a>
         <a href="policy.html" id="desktop-policy-link">약관</a>
         <!-- <a href="#" id="desktop-pricing-link">구독</a> false 변경 시 주석 해지 -->
@@ -74,8 +75,9 @@
       <div class="menu-icon">☰</div>
 
       <div id="popup-overlay" class="popup-overlay">
-        <button class="close-button" id="popup-close">X</button>
+        <button class="close-button" id="popup-close">✕</button>
         <div class="popup-menu">
+          <a href="">템플릿</a>
           <a href="#" id="mobile-guide-link">가이드</a>
           <a href="policy.html" id="mobile-policy-link">약관</a>
           <!-- <a href="#" id="mobile-pricing-link">구독</a> false 변경 시 주석 해지 -->
@@ -133,7 +135,7 @@
     <!-- 로그인/회원가입 팝업 오버레이 -->
     <div class="modal-overlay" id="login-modal-overlay">
       <div class="login-modal-content">
-        <button class="close-button" id="login-close-btn">X</button>
+        <button class="close-button" id="login-close-btn">✕</button>
         <div class="tab-group">
           <button class="tab-button active" id="login-tab">로그인</button>
           <button class="tab-button" id="signup-tab">회원가입</button>
@@ -224,7 +226,7 @@
     <!-- 구독 팝업 오버레이 -->
     <div class="modal-overlay" id="pricing-modal-overlay">
       <div class="pricing-modal-content">
-        <button class="close-button" id="pricing-close-btn">X</button>
+        <button class="close-button" id="pricing-close-btn">✕</button>
         <div class="pricing-card">
           <div class="plan-price">₩5900<span>/월</span></div>
           <p class="plan-description">
@@ -255,6 +257,38 @@
         <button id="payment-request-button" class="primary-btn w-100" disabled>
           결제하기
         </button>
+      </div>
+    </div>
+
+    <!-- 템플릿 팝업 -->
+    <div class="modal-overlay" id="template-modal-overlay">
+      <button class="close-button" id="template-close-btn">✕</button>
+
+      <div class="template-modal-content">
+        <div class="template-modal-header">
+          <!-- <h2>템플릿</h2> -->
+          <p>원하는 작업 예시를 선택해 빠르게 시작하세요.</p>
+        </div>
+
+        <div class="template-body">
+          <div class="template-grid">
+            <div class="template-card" data-template-action="template">
+              <h3>자동화 템플릿</h3>
+              <p>반복 작업 자동화 템플릿 생성</p>
+            </div>
+
+            <div class="template-card" data-template-action="automation">
+              <h3>데이터 분석</h3>
+              <p>데이터 분석 및 인사이트 생성</p>
+            </div>
+
+            <div class="template-card" data-template-action="ppt">
+              <h3>PPT 보고서</h3>
+              <p>차트 및 발표 자료 생성</p>
+            </div>
+          </div>
+          <div class="template-preview-panel" id="template-preview-panel"></div>
+        </div>
       </div>
     </div>
 

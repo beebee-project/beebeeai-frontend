@@ -360,6 +360,39 @@ function initializePopups() {
   pricingModalOverlay?.addEventListener("click", (e) => {
     if (e.target === pricingModalOverlay) closePricingModal();
   });
+
+  // ==================== 템플릿 팝업 ====================
+
+  const templateModalOverlay = document.getElementById(
+    "template-modal-overlay",
+  );
+
+  const openTemplateModal = (event) => {
+    event?.preventDefault?.();
+    templateModalOverlay?.classList.add("active");
+  };
+
+  const closeTemplateModal = () => {
+    templateModalOverlay?.classList.remove("active");
+  };
+
+  document
+    .querySelectorAll('a[href=""], a[href="#template"]')
+    .forEach((link) => {
+      if (link.textContent.includes("템플릿")) {
+        link.addEventListener("click", openTemplateModal);
+      }
+    });
+
+  document
+    .getElementById("template-close-btn")
+    ?.addEventListener("click", closeTemplateModal);
+
+  templateModalOverlay?.addEventListener("click", (e) => {
+    if (e.target === templateModalOverlay) {
+      closeTemplateModal();
+    }
+  });
 }
 
 // 5. 가이드 투어

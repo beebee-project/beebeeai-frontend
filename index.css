@@ -2005,3 +2005,88 @@ body.toss-result-page {
   height: 18px;
   display: block;
 }
+
+/* ==================== 템플릿 팝업 ==================== */
+
+.template-modal-content {
+  width: min(1080px, calc(100vw - 120px));
+  min-height: 560px;
+  background: #2f2c28;
+  border-radius: 18px;
+  padding: 40px 38px;
+  position: relative;
+  color: #f1f1f1;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+}
+
+.template-modal-header {
+  margin-bottom: 10px;
+}
+
+.template-modal-header h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: #ffc800;
+}
+
+.template-modal-header p {
+  color: #e4e4e4;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.template-body {
+  display: flex;
+  align-items: stretch;
+  gap: 32px;
+  width: 100%;
+  margin-top: 36px;
+}
+
+.template-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 250px;
+  max-width: 100%;
+}
+
+.template-preview-panel {
+  flex: 1;
+  background: #3a3733;
+  border: 1px solid rgba(255, 200, 0, 0.22);
+  border-radius: 14px;
+}
+
+.template-card {
+  width: 100%;
+  min-height: 104px;
+  background: #3a3733;
+  border: 1px solid rgba(255, 200, 0, 0.22);
+  border-radius: 14px;
+  padding: 22px 24px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.template-card:hover {
+  transform: none;
+  border-color: #ffc800;
+  background: #403c37;
+}
+
+.template-card h3 {
+  font-size: 21px;
+  margin-bottom: 10px;
+  color: #ffc800;
+}
+
+.template-card p {
+  font-size: 15px;
+  color: #d7d7d7;
+  line-height: 1.5;
+}
