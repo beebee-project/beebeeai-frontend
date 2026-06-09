@@ -42,6 +42,21 @@ const CONVERSION_TYPE_UPLOADED_EXAMPLE_MAP = {
   ],
 };
 
+const TEMPLATE_PREVIEW_MAP = {
+  template: {
+    title: "자동화 템플릿",
+    desc: "업로드된 데이터를 쿼리화하고, 반복 업무에 사용할 수 있는 자동화 템플릿을 생성합니다.",
+  },
+  automation: {
+    title: "데이터 분석",
+    desc: "업로드된 데이터를 구조화해 핵심 지표, 그룹별 요약, 추이, 인사이트를 자동으로 분석합니다.",
+  },
+  ppt: {
+    title: "PPT 보고서",
+    desc: "분석된 데이터를 기반으로 차트와 인사이트가 포함된 발표용 PPT 자료를 생성합니다.",
+  },
+};
+
 function getExamplesForConversionType(conversionType) {
   const hasUploadedFile = !!lastSelectedFile;
   const sourceMap = hasUploadedFile
@@ -230,6 +245,22 @@ function handleLegacyUxParams() {
   }
 }
 
+function setTemplatePreview(action) {
+  const panel = document.getElementById("template-preview-panel");
+  const data = TEMPLATE_PREVIEW_MAP[action];
+
+  if (!panel || !data) return;
+
+  panel.innerHTML = `
+    <div class="template-preview-title">${escapeHtml(data.title)}</div>
+    <div class="template-preview-desc">${escapeHtml(data.desc)}</div>
+  `;
+
+  document.querySelectorAll("[data-template-action]").forEach((card) => {
+    card.classList.toggle("active", card.dataset.templateAction === action);
+  });
+}
+
 function initializePopups() {
   // 1. 로그인 / 회원가입 팝업
   const loginModalOverlay = document.getElementById("login-modal-overlay");
@@ -249,6 +280,13 @@ function initializePopups() {
   document
     .getElementById("auth-form")
     ?.addEventListener("submit", handleAuthFormSubmit);
+
+  // 템플릿 공용 폼
+  document.querySelectorAll("[data-template-action]").forEach((card) => {
+    card.addEventListener("click", () => {
+      setTemplatePreview(card.dataset.templateAction);
+    });
+  });
 
   // 2. 탭 전환 로직
   const loginTab = document.getElementById("login-tab");
@@ -370,6 +408,7 @@ function initializePopups() {
   const openTemplateModal = (event) => {
     event?.preventDefault?.();
     templateModalOverlay?.classList.add("active");
+    setTemplatePreview("template");
   };
 
   const closeTemplateModal = () => {
