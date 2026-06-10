@@ -44,12 +44,12 @@ const CONVERSION_TYPE_UPLOADED_EXAMPLE_MAP = {
 
 const TEMPLATE_PREVIEW_MAP = {
   template: {
-    title: "자동화 템플릿",
-    desc: "업로드된 데이터를 쿼리화하고, 반복 업무에 사용할 수 있는 자동화 템플릿을 생성합니다.",
+    title: "자동화 시트",
+    desc: "업로드된 데이터를 쿼리화하고, 반복 업무에 사용할 수 있는 자동화 시트를 생성합니다.",
   },
   automation: {
     title: "데이터 분석",
-    desc: "업로드된 데이터를 구조화해 핵심 지표, 그룹별 요약, 추이, 인사이트를 자동으로 분석합니다.",
+    desc: "업로드된 데이터를 구조화해 핵심 지표, 요약, 추이, 인사이트를 자동으로 분석합니다.",
   },
   ppt: {
     title: "PPT 보고서",
