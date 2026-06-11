@@ -714,11 +714,13 @@ function initializeFileUpload() {
     } else if (target.matches(".file-checkbox")) {
       if (target.checked) {
         lastSelectedFile = fileName;
+        currentTemplateFileName = fileName;
         uploadArea.querySelectorAll(".file-checkbox").forEach((box) => {
           if (box !== target) box.checked = false;
         });
       } else {
         lastSelectedFile = null;
+        currentTemplateFileName = "";
       }
       updateStartButtonState();
     }
@@ -824,12 +826,18 @@ function updateLoginState() {
   setupLink(mobileLoginLink, !!token);
 }
 
+function getCurrentTemplateFileName() {
+  return currentTemplateFileName || lastSelectedFile || "";
+}
+
 function renderTemplateFileInfo() {
   const panel = document.getElementById("template-preview-panel");
 
   if (!panel) return;
 
-  if (!currentTemplateFileName) {
+  const fileName = getCurrentTemplateFileName();
+
+  if (!fileName) {
     panel.innerHTML = `
       <div class="template-preview-title">
         파일이 없습니다
@@ -849,7 +857,7 @@ function renderTemplateFileInfo() {
     </div>
 
     <div class="template-preview-file">
-      📄 ${escapeHtml(currentTemplateFileName)}
+      📄 ${escapeHtml(fileName)}
     </div>
 
     <div class="template-preview-desc">
@@ -956,7 +964,7 @@ async function handleFileUpload(file) {
     uploadedFiles = data; // data가 updatedFiles 역할
     lastSelectedFile = file.name;
     renderFiles();
-    currentTemplateFileName = uploadedFile.fileName || uploadedFile.name || "";
+    currentTemplateFileName = lastSelectedFile;
     await updateSubscriptionBadge();
   } catch (error) {
     alert(error.message);
@@ -1005,6 +1013,7 @@ async function handleFileDelete(originalName) {
     uploadedFiles = updatedFiles;
     if (lastSelectedFile === originalName) {
       lastSelectedFile = null;
+      currentTemplateFileName = "";
     }
     renderFiles();
   } catch (error) {
