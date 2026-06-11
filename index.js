@@ -522,7 +522,7 @@ function highlightElement(el, text) {
         </div>
         <div class="guide-info-content">
           <strong>📁 업로드 제한</strong><br />
-          파일 업로드는 최대 <b>5개</b> 까지만 가능합니다.
+          파일 업로드는 최대 <b>4개</b> 까지만 가능합니다.
         </div>
       </div>`;
     position = "top";
@@ -964,9 +964,9 @@ async function handleFileUpload(file) {
   const token = getAuthToken();
   if (!token) return alert("로그인이 필요합니다.");
 
-  if (uploadedFiles.length >= 5) {
+  if (uploadedFiles.length >= 4) {
     alert(
-      "파일은 최대 5개까지만 업로드할 수 있습니다.\n기존 파일을 삭제한 후 다시 시도해주세요.",
+      "파일은 최대 4개까지만 업로드할 수 있습니다.\n기존 파일을 삭제한 후 다시 시도해주세요.",
     );
     return;
   }
