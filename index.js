@@ -851,7 +851,18 @@ function renderTemplateFileInfo() {
   const selectedFileName = getCurrentTemplateFileName();
 
   panel.innerHTML = `
+    <div class="template-preview-header-row">
     <div class="template-preview-title">현재 업로드 파일</div>
+
+      <button
+        type="button"
+        class="template-start-button"
+        id="template-start-button"
+        ${getCurrentTemplateFileName() ? "" : "disabled"}
+      >
+        시작하기
+      </button>
+    </div>
 
     <div class="template-file-list">
       ${uploadedFiles
@@ -875,17 +886,6 @@ function renderTemplateFileInfo() {
           `;
         })
         .join("")}
-    </div>
-
-    <div class="template-preview-actions">
-      <button
-        type="button"
-        class="template-start-button"
-        id="template-start-button"
-        ${getCurrentTemplateFileName() ? "" : "disabled"}
-      >
-        시작하기
-      </button>
     </div>
   `;
 

@@ -2213,6 +2213,69 @@ body.toss-result-page {
   transform: none;
 }
 
+.template-preview-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.template-preview-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.template-preview-header-row .template-preview-title {
+  margin-bottom: 0;
+}
+
+.template-file-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 330px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.template-file-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.template-file-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 200, 0, 0.35);
+  border-radius: 999px;
+}
+
+.template-preview-desc {
+  flex-shrink: 0;
+  margin-top: 16px;
+}
+
+.template-preview-actions {
+  display: none;
+}
+
+.template-start-button {
+  min-width: 108px;
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  background: #ffc800;
+  color: #272522;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.template-start-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 @media (max-width: 720px) {
   .modal-overlay.active {
     align-items: flex-start;
