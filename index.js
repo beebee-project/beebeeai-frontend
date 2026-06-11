@@ -408,12 +408,16 @@ function initializePopups() {
     "template-modal-overlay",
   );
 
-  const openTemplateModal = (event) => {
+  const openTemplateModal = async (event) => {
     event?.preventDefault?.();
 
     templateModalOverlay?.classList.add("active");
 
     setTemplatePreview("template");
+
+    if (!uploadedFiles.length) {
+      await loadUserFiles();
+    }
 
     renderTemplateFileInfo();
   };
@@ -832,40 +836,72 @@ function getCurrentTemplateFileName() {
 
 function renderTemplateFileInfo() {
   const panel = document.getElementById("template-preview-panel");
-
   if (!panel) return;
 
-  const fileName = getCurrentTemplateFileName();
-
-  if (!fileName) {
+  if (!uploadedFiles.length) {
     panel.innerHTML = `
-      <div class="template-preview-title">
-        파일이 없습니다
-      </div>
-
+      <div class="template-preview-title">파일이 없습니다</div>
       <div class="template-preview-desc">
         분석할 엑셀 또는 CSV 파일을 업로드해 주세요.
       </div>
     `;
-
     return;
   }
 
-  panel.innerHTML = `
-    <div class="template-preview-title">
-      현재 업로드 파일
-    </div>
+  const selectedFileName = getCurrentTemplateFileName();
 
-    <div class="template-preview-file">
-      📄 ${escapeHtml(fileName)}
+  panel.innerHTML = `
+    <div class="template-preview-title">현재 업로드 파일</div>
+
+    <div class="template-file-list">
+      ${uploadedFiles
+        .map((file) => {
+          const fileName =
+            file.originalName || file.name || file.fileName || "";
+          const checked = selectedFileName === fileName ? "checked" : "";
+
+          return `
+            <label class="template-file-item">
+              <span class="template-file-name">
+                📄 ${escapeHtml(fileName)}
+              </span>
+              <input
+                type="checkbox"
+                class="template-file-checkbox"
+                data-template-file-name="${escapeHtml(fileName)}"
+                ${checked}
+              />
+            </label>
+          `;
+        })
+        .join("")}
     </div>
 
     <div class="template-preview-desc">
-      이 파일을 기반으로
-      데이터 분석, 자동화 템플릿,
-      PPT 보고서를 생성합니다.
+      선택한 파일을 기반으로 데이터 분석, 자동화 템플릿, PPT 보고서를 생성합니다.
     </div>
   `;
+
+  panel.querySelectorAll(".template-file-checkbox").forEach((checkbox) => {
+    checkbox.addEventListener("change", (event) => {
+      const target = event.target;
+      const fileName = target.dataset.templateFileName || "";
+
+      panel.querySelectorAll(".template-file-checkbox").forEach((box) => {
+        if (box !== target) box.checked = false;
+      });
+
+      if (target.checked) {
+        currentTemplateFileName = fileName;
+        lastSelectedFile = fileName;
+      } else {
+        currentTemplateFileName = "";
+        lastSelectedFile = null;
+      }
+
+      renderTemplateFileInfo();
+    });
+  });
 }
 
 // ==========================================
