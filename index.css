@@ -2087,9 +2087,9 @@ body.toss-result-page {
 
 .template-preview-panel {
   flex: 1;
-  height: 454px;
-  min-height: 454px;
-  max-height: 454px;
+  height: 356px;
+  min-height: 356px;
+  max-height: 356px;
   padding: 28px 30px;
   color: #eaeaea;
   background: #3a3733;
