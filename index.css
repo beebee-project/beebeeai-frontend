@@ -2176,6 +2176,43 @@ body.toss-result-page {
   flex-shrink: 0;
 }
 
+.template-preview-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.template-preview-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 24px;
+}
+
+.template-start-button {
+  min-width: 120px;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  background: #ffc800;
+  color: #272522;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    transform 0.1s ease;
+}
+
+.template-start-button:hover {
+  transform: translateY(-1px);
+}
+
+.template-start-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
 @media (max-width: 720px) {
   .modal-overlay.active {
     align-items: flex-start;

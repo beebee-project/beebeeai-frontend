@@ -876,6 +876,17 @@ function renderTemplateFileInfo() {
         })
         .join("")}
     </div>
+
+    <div class="template-preview-actions">
+      <button
+        type="button"
+        class="template-start-button"
+        id="template-start-button"
+        ${getCurrentTemplateFileName() ? "" : "disabled"}
+      >
+        시작하기
+      </button>
+    </div>
   `;
 
   panel.querySelectorAll(".template-file-checkbox").forEach((checkbox) => {
@@ -898,6 +909,21 @@ function renderTemplateFileInfo() {
       renderTemplateFileInfo();
     });
   });
+
+  panel
+    .querySelector("#template-start-button")
+    ?.addEventListener("click", () => {
+      const fileName = getCurrentTemplateFileName();
+
+      if (!fileName) {
+        alert("파일을 먼저 선택해 주세요.");
+        return;
+      }
+
+      console.log("template start:", {
+        fileName,
+      });
+    });
 }
 
 // ==========================================
