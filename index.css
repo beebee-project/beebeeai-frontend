@@ -2276,6 +2276,39 @@ body.toss-result-page {
   cursor: not-allowed;
 }
 
+.template-preview-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.template-body {
+  align-items: stretch;
+}
+
+.template-grid {
+  flex-shrink: 0;
+}
+
+.template-preview-header-row {
+  flex-shrink: 0;
+}
+
+.template-file-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-bottom: 0;
+}
+
+.template-preview-desc {
+  flex-shrink: 0;
+  margin-top: 16px;
+}
+
 @media (max-width: 720px) {
   .modal-overlay.active {
     align-items: flex-start;
