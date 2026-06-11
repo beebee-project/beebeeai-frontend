@@ -876,10 +876,6 @@ function renderTemplateFileInfo() {
         })
         .join("")}
     </div>
-
-    <div class="template-preview-desc">
-      선택한 파일을 기반으로 데이터 분석, 자동화 템플릿, PPT 보고서를 생성합니다.
-    </div>
   `;
 
   panel.querySelectorAll(".template-file-checkbox").forEach((checkbox) => {
