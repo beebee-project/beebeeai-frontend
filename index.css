@@ -2114,6 +2114,24 @@ body.toss-result-page {
   line-height: 1.6;
 }
 
+.template-preview-file {
+  margin: 18px 0;
+  padding: 14px 16px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  border: 1px solid rgba(255, 200, 0, 0.15);
+
+  color: #ffc800;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  word-break: break-word;
+}
+
 @media (max-width: 720px) {
   .modal-overlay.active {
     align-items: flex-start;

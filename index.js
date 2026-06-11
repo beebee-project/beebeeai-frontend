@@ -4,6 +4,7 @@ let lastSelectedFile = null;
 let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
+let currentTemplateFileName = "";
 
 const API_BASE_URL =
   window.location.hostname === "localhost"
@@ -285,6 +286,8 @@ function initializePopups() {
   document.querySelectorAll("[data-template-action]").forEach((card) => {
     card.addEventListener("click", () => {
       setTemplatePreview(card.dataset.templateAction);
+
+      renderTemplateFileInfo();
     });
   });
 
@@ -407,8 +410,12 @@ function initializePopups() {
 
   const openTemplateModal = (event) => {
     event?.preventDefault?.();
+
     templateModalOverlay?.classList.add("active");
+
     setTemplatePreview("template");
+
+    renderTemplateFileInfo();
   };
 
   const closeTemplateModal = () => {
@@ -817,6 +824,42 @@ function updateLoginState() {
   setupLink(mobileLoginLink, !!token);
 }
 
+function renderTemplateFileInfo() {
+  const panel = document.getElementById("template-preview-panel");
+
+  if (!panel) return;
+
+  if (!currentTemplateFileName) {
+    panel.innerHTML = `
+      <div class="template-preview-title">
+        파일이 없습니다
+      </div>
+
+      <div class="template-preview-desc">
+        분석할 엑셀 또는 CSV 파일을 업로드해 주세요.
+      </div>
+    `;
+
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="template-preview-title">
+      현재 업로드 파일
+    </div>
+
+    <div class="template-preview-file">
+      📄 ${escapeHtml(currentTemplateFileName)}
+    </div>
+
+    <div class="template-preview-desc">
+      이 파일을 기반으로
+      데이터 분석, 자동화 템플릿,
+      PPT 보고서를 생성합니다.
+    </div>
+  `;
+}
+
 // ==========================================
 // 파일 관리 API 호출 함수
 // ==========================================
@@ -913,6 +956,7 @@ async function handleFileUpload(file) {
     uploadedFiles = data; // data가 updatedFiles 역할
     lastSelectedFile = file.name;
     renderFiles();
+    currentTemplateFileName = uploadedFile.fileName || uploadedFile.name || "";
     await updateSubscriptionBadge();
   } catch (error) {
     alert(error.message);
