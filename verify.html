@@ -63,12 +63,9 @@
         >로그인 페이지로 이동</a
       >
     </div>
-
+    <script src="config.js"></script>
     <script>
-      const API_BASE_URL =
-        window.location.hostname === "localhost"
-          ? "http://localhost:3000"
-          : "https://beebeeai-backend-production.up.railway.app";
+      const API_BASE_URL = window.BEEBEE_CONFIG.API_BASE_URL;
       window.onload = async () => {
         const messageElement = document.getElementById("message");
         const loginLink = document.getElementById("login-link");

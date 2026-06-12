@@ -1,9 +1,5 @@
-const TOSS_CLIENT_KEY = "live_ck_LkKEypNArW2BE0KLKwAaVlmeaxYG";
-
-const API_BASE =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://beebeeai-backend-production.up.railway.app";
+const TOSS_CLIENT_KEY = window.BEEBEE_CONFIG.TOSS_CLIENT_KEY;
+const API_BASE = window.BEEBEE_CONFIG.API_BASE_URL;
 
 // ===== 위젯 상태 =====
 async function openTossWidget() {

@@ -6,10 +6,7 @@ let lastUserMessage = "";
 let originalSendButtonHtml = null;
 let currentTemplateFileName = "";
 
-const API_BASE_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://beebeeai-backend-production.up.railway.app";
+const API_BASE_URL = window.BEEBEE_CONFIG.API_BASE_URL;
 
 const CONVERSION_TYPE_VBA = "Excel VBA";
 const CONVERSION_TYPE_APPS_SCRIPT = "Google Apps Script";

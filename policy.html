@@ -290,10 +290,7 @@
       // =========================
       // API
       // =========================
-      const API_BASE =
-        window.location.hostname === "localhost"
-          ? "http://localhost:3000"
-          : "https://beebeeai-backend-production.up.railway.app";
+      const API_BASE = window.BEEBEE_CONFIG.API_BASE_URL;
 
       // Legacy UX 정리: token/accessToken/jwt 모두 허용
       const getToken = () =>
@@ -542,5 +539,6 @@
         }
       });
     </script>
+    <script src="config.js"></script>
   </body>
 </html>

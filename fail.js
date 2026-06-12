@@ -1,7 +1,4 @@
-const API_BASE =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://beebeeai-backend-production.up.railway.app";
+const API_BASE = window.BEEBEE_CONFIG.API_BASE_URL;
 
 const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get("code");
