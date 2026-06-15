@@ -7,6 +7,10 @@ let originalSendButtonHtml = null;
 let currentTemplateFileName = "";
 let currentAutomationCandidates = [];
 let currentQueryTablesKey = null;
+let currentAutomationExecution = null;
+let currentSelectedAutomationCandidate = null;
+
+const templateQueryKeyCache = new Map();
 
 const API_BASE_URL = window.BEEBEE_CONFIG.API_BASE_URL;
 
@@ -145,6 +149,28 @@ async function authFetch(path, options = {}) {
   }
 
   return { res, json };
+}
+
+async function getOrCreateTemplateQueryTablesKey(fileName) {
+  if (!fileName) return null;
+
+  if (templateQueryKeyCache.has(fileName)) {
+    return templateQueryKeyCache.get(fileName);
+  }
+
+  const { res, json } = await authFetch("/api/automation/query-save", {
+    method: "POST",
+    body: JSON.stringify({ fileName }),
+  });
+
+  if (!res.ok || !json.ok || !json.queryTablesKey) {
+    throw new Error(
+      json.error || json.message || "쿼리 테이블 생성에 실패했습니다.",
+    );
+  }
+
+  templateQueryKeyCache.set(fileName, json.queryTablesKey);
+  return json.queryTablesKey;
 }
 
 function clearAuthTokens() {
@@ -970,25 +996,15 @@ async function loadAutomationCandidatesForTemplate() {
     `;
   }
 
-  const { res: saveRes, json: saveJson } = await authFetch(
-    "/api/automation/query-save",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        fileName: currentTemplateFileName,
-      }),
-    },
-  );
-
-  if (!saveRes.ok || !saveJson.queryTablesKey) {
-    alert(
-      saveJson.error || saveJson.message || "쿼리 테이블 생성에 실패했습니다.",
+  try {
+    currentQueryTablesKey = await getOrCreateTemplateQueryTablesKey(
+      currentTemplateFileName,
     );
+  } catch (error) {
+    alert(error.message || "쿼리 테이블 생성에 실패했습니다.");
     renderTemplateFileInfo();
     return;
   }
-
-  currentQueryTablesKey = saveJson.queryTablesKey;
 
   const { res, json } = await authFetch("/api/automation/analysis-candidates", {
     method: "POST",
@@ -1042,6 +1058,164 @@ function renderAutomationCandidateList(candidates = []) {
       executeAutomationCandidate(index);
     });
   });
+}
+
+async function executeAutomationCandidate(index) {
+  const selected = currentAutomationCandidates[index];
+
+  if (!selected || !selected.candidate) {
+    alert("선택한 자동화 후보 정보를 찾을 수 없습니다.");
+    return;
+  }
+
+  if (!currentQueryTablesKey) {
+    alert("쿼리 테이블 정보가 없습니다. 다시 시도해주세요.");
+    return;
+  }
+
+  const panel = document.getElementById("template-preview-panel");
+  if (panel) {
+    panel.innerHTML = `
+      <div class="template-preview-title">자동화 실행 중...</div>
+      <div class="template-preview-desc">${escapeHtml(
+        selected.title || "선택한 자동화를 실행하고 있습니다.",
+      )}</div>
+    `;
+  }
+
+  const { res, json } = await authFetch(
+    "/api/automation/execute-analysis-candidate",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        queryTablesKey: currentQueryTablesKey,
+        candidate: selected.candidate,
+      }),
+    },
+  );
+
+  if (!res.ok || !json.ok) {
+    alert(json.error || json.message || "자동화 실행에 실패했습니다.");
+    renderAutomationCandidateList(currentAutomationCandidates);
+    return;
+  }
+
+  currentAutomationExecution = json;
+  currentSelectedAutomationCandidate = selected;
+  renderAutomationExecutionResult(json, selected);
+}
+
+function renderAutomationExecutionResult(resultJson, selected) {
+  const panel = document.getElementById("template-preview-panel");
+  if (!panel) return;
+
+  const result = resultJson.result || resultJson;
+  const rows = Array.isArray(result.rows) ? result.rows : [];
+  const previewRows = rows.slice(0, 5);
+
+  panel.innerHTML = `
+    <div class="template-preview-title">${escapeHtml(
+      selected.title || "자동화 실행 완료",
+    )}</div>
+    <div class="template-preview-desc">자동화 실행이 완료되었습니다.</div>
+
+    ${
+      previewRows.length
+        ? `
+        <div class="automation-result-preview">
+          ${previewRows
+            .map(
+              (row) => `
+                <div class="automation-result-row">
+                  ${escapeHtml(JSON.stringify(row))}
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+      `
+        : `<div class="template-preview-desc">미리보기 행이 없습니다.</div>`
+    }
+
+    <div class="template-action-row">
+      <button id="automation-export-xlsx-btn" class="template-primary-button">
+        요약 시트 포함 엑셀 생성
+      </button>
+      <button id="automation-back-btn" class="template-secondary-button">
+        후보 다시 보기
+      </button>
+    </div>
+  `;
+
+  document
+    .getElementById("automation-back-btn")
+    ?.addEventListener("click", () => {
+      renderAutomationCandidateList(currentAutomationCandidates);
+    });
+
+  document
+    .getElementById("automation-export-xlsx-btn")
+    ?.addEventListener("click", async () => {
+      await exportAutomationWorkbook(selected);
+    });
+}
+
+function resolveAutomationDownloadUrl(json = {}) {
+  return (
+    json.downloadUrl ||
+    json.fileUrl ||
+    json.url ||
+    json.result?.downloadUrl ||
+    json.result?.fileUrl ||
+    null
+  );
+}
+
+function buildAutomationDownloadMessage(json = {}) {
+  if (json.fileName)
+    return `엑셀 자동화 파일이 생성되었습니다.\n파일명: ${json.fileName}`;
+  if (json.filePath)
+    return `엑셀 자동화 파일이 생성되었습니다.\n경로: ${json.filePath}`;
+  return "엑셀 자동화 파일이 생성되었습니다.";
+}
+
+async function exportAutomationWorkbook(selected) {
+  if (!currentQueryTablesKey) {
+    alert("쿼리 테이블 정보가 없습니다.");
+    return;
+  }
+
+  const message =
+    currentAutomationExecution?.message ||
+    selected?.candidate?.message ||
+    selected?.candidate?.title ||
+    selected?.title ||
+    "자동화 분석";
+
+  const { res, json } = await authFetch("/api/automation/export-xlsx", {
+    method: "POST",
+    body: JSON.stringify({
+      queryTablesKey: currentQueryTablesKey,
+      message,
+      candidate: selected?.candidate || null,
+      executionResult: currentAutomationExecution?.result || null,
+    }),
+  });
+
+  if (!res.ok || !json.ok) {
+    alert(json.error || json.message || "엑셀 생성에 실패했습니다.");
+    return;
+  }
+  console.log("[automation export-xlsx]", json);
+
+  const downloadUrl = resolveAutomationDownloadUrl(json);
+
+  if (downloadUrl) {
+    window.location.href = downloadUrl;
+    return;
+  }
+
+  alert(buildAutomationDownloadMessage(json));
 }
 
 // ==========================================
