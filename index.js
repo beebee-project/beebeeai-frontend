@@ -5,6 +5,8 @@ let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
 let currentTemplateFileName = "";
+let currentAutomationCandidates = [];
+let currentQueryTablesKey = null;
 
 const API_BASE_URL = window.BEEBEE_CONFIG.API_BASE_URL;
 
@@ -117,6 +119,32 @@ function getAuthToken() {
     localStorage.getItem("accessToken") ||
     localStorage.getItem("jwt")
   );
+}
+
+async function authFetch(path, options = {}) {
+  const token = getAuthToken();
+
+  const headers = {
+    "Content-Type": "application/json; charset=utf-8",
+    ...(options.headers || {}),
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
+
+  const json = await res.json().catch(() => ({}));
+
+  if (res.status === 401) {
+    handleUnauthorized();
+  }
+
+  return { res, json };
 }
 
 function clearAuthTokens() {
@@ -281,10 +309,15 @@ function initializePopups() {
 
   // 템플릿 공용 폼
   document.querySelectorAll("[data-template-action]").forEach((card) => {
-    card.addEventListener("click", () => {
-      setTemplatePreview(card.dataset.templateAction);
+    card.addEventListener("click", async () => {
+      const action = card.dataset.templateAction;
 
+      setTemplatePreview(action);
       renderTemplateFileInfo();
+
+      if (action === "template") {
+        await loadAutomationCandidatesForTemplate();
+      }
     });
   });
 
@@ -921,6 +954,94 @@ function renderTemplateFileInfo() {
         fileName,
       });
     });
+}
+
+async function loadAutomationCandidatesForTemplate() {
+  if (!currentTemplateFileName) {
+    alert("먼저 파일을 선택해주세요.");
+    return;
+  }
+
+  const panel = document.getElementById("template-preview-panel");
+  if (panel) {
+    panel.innerHTML = `
+      <div class="template-preview-title">자동화 후보 생성 중...</div>
+      <div class="template-preview-desc">선택한 파일 구조를 분석하고 있습니다.</div>
+    `;
+  }
+
+  const { res: saveRes, json: saveJson } = await authFetch(
+    "/api/automation/query-save",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        fileName: currentTemplateFileName,
+      }),
+    },
+  );
+
+  if (!saveRes.ok || !saveJson.queryTablesKey) {
+    alert(
+      saveJson.error || saveJson.message || "쿼리 테이블 생성에 실패했습니다.",
+    );
+    renderTemplateFileInfo();
+    return;
+  }
+
+  currentQueryTablesKey = saveJson.queryTablesKey;
+
+  const { res, json } = await authFetch("/api/automation/analysis-candidates", {
+    method: "POST",
+    body: JSON.stringify({
+      queryTablesKey: currentQueryTablesKey,
+    }),
+  });
+
+  if (!res.ok || !json.ok) {
+    alert(json.error || json.message || "자동화 후보 조회에 실패했습니다.");
+    renderTemplateFileInfo();
+    return;
+  }
+
+  currentAutomationCandidates = json.candidates || [];
+  renderAutomationCandidateList(currentAutomationCandidates);
+}
+
+function renderAutomationCandidateList(candidates = []) {
+  const panel = document.getElementById("template-preview-panel");
+  if (!panel) return;
+
+  if (!candidates.length) {
+    panel.innerHTML = `
+      <div class="template-preview-title">생성 가능한 자동화가 없습니다</div>
+      <div class="template-preview-desc">선택한 파일에서 추천 가능한 자동화 후보를 찾지 못했습니다.</div>
+    `;
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="template-preview-title">생성 가능한 자동화</div>
+    <div class="template-preview-desc">원하는 자동화 후보를 선택하세요.</div>
+    <div class="automation-candidate-list">
+      ${candidates
+        .map(
+          (item, index) => `
+            <button class="automation-candidate-card" data-candidate-index="${index}">
+              <div class="automation-candidate-title">${escapeHtml(item.title || `자동화 후보 ${index + 1}`)}</div>
+              <div class="automation-candidate-desc">${escapeHtml(item.description || "")}</div>
+            </button>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+
+  panel.querySelectorAll("[data-candidate-index]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const index = Number(btn.dataset.candidateIndex);
+      executeAutomationCandidate(index);
+    });
+  });
 }
 
 // ==========================================
