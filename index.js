@@ -1162,7 +1162,7 @@ async function sendApiRequest(message, fileName, conversionType) {
     macroTarget = "appsScript";
 
   const payload = macroTarget
-    ? { prompt: message, target: macroTarget }
+    ? { prompt: message, target: macroTarget, fileName }
     : { message, fileName, conversionType };
 
   lastUserMessage = message;
