@@ -1202,6 +1202,63 @@ function buildAutomationDownloadMessage(json = {}) {
   return "엑셀 자동화 파일이 생성되었습니다.";
 }
 
+function resolveTemplateGeneratedFilePath(json = {}) {
+  return json.filePath || json.localName || json.gcsName || "";
+}
+
+function renderTemplateGeneratedResult({
+  title,
+  desc,
+  json,
+  backLabel = "파일 선택으로 돌아가기",
+}) {
+  const panel = document.getElementById("template-preview-panel");
+  if (!panel) return;
+
+  const filePath = resolveTemplateGeneratedFilePath(json);
+  const downloadUrl = resolveAutomationDownloadUrl(json);
+
+  panel.innerHTML = `
+    <div class="template-preview-title">${escapeHtml(title)}</div>
+    <div class="template-preview-desc">${escapeHtml(desc)}</div>
+
+    ${
+      filePath
+        ? `<div class="automation-result-row">${escapeHtml(filePath)}</div>`
+        : ""
+    }
+
+    <div class="template-action-row">
+      ${
+        downloadUrl
+          ? `<button class="template-primary-button" type="button" id="template-download-btn">다운로드</button>`
+          : ""
+      }
+      <button class="template-secondary-button" type="button" id="template-back-file-btn">
+        ${escapeHtml(backLabel)}
+      </button>
+    </div>
+  `;
+
+  document
+    .getElementById("template-download-btn")
+    ?.addEventListener("click", () => {
+      window.location.href = downloadUrl;
+    });
+
+  document
+    .getElementById("template-back-file-btn")
+    ?.addEventListener("click", () => {
+      if (backLabel.includes("후보") && currentAutomationCandidates.length) {
+        renderAutomationCandidateList(currentAutomationCandidates);
+        return;
+      }
+
+      resetTemplateRunState();
+      renderTemplateFileInfo();
+    });
+}
+
 async function exportAutomationWorkbook(selected) {
   if (!currentQueryTablesKey) {
     alert("쿼리 테이블 정보가 없습니다.");
@@ -1231,14 +1288,12 @@ async function exportAutomationWorkbook(selected) {
   }
   console.log("[automation export-xlsx]", json);
 
-  const downloadUrl = resolveAutomationDownloadUrl(json);
-
-  if (downloadUrl) {
-    window.location.href = downloadUrl;
-    return;
-  }
-
-  alert(buildAutomationDownloadMessage(json));
+  renderTemplateGeneratedResult({
+    title: "자동화 시트 생성 완료",
+    desc: buildAutomationDownloadMessage(json),
+    json,
+    backLabel: "후보 다시 보기",
+  });
 }
 
 async function exportTemplateAnalysis(fileName) {
@@ -1270,17 +1325,11 @@ async function exportTemplateAnalysis(fileName) {
       return;
     }
 
-    if (panel) {
-      panel.innerHTML = `
-        <div class="template-preview-title">데이터 분석 생성 완료</div>
-        <div class="template-preview-desc">인사이트 파일이 생성되었습니다.</div>
-        <div class="template-action-row">
-          <button class="template-primary-button" type="button" id="template-analysis-done-btn">
-            확인
-          </button>
-        </div>
-      `;
-    }
+    renderTemplateGeneratedResult({
+      title: "데이터 분석 생성 완료",
+      desc: "인사이트 파일이 생성되었습니다.",
+      json,
+    });
   } catch (error) {
     alert(error.message || "데이터 분석 생성에 실패했습니다.");
     renderTemplateFileInfo();
@@ -1314,17 +1363,11 @@ async function exportTemplatePpt(fileName) {
       return;
     }
 
-    if (panel) {
-      panel.innerHTML = `
-        <div class="template-preview-title">PPT 보고서 생성 완료</div>
-        <div class="template-preview-desc">PPT 파일이 생성되었습니다.</div>
-        <div class="template-action-row">
-          <button class="template-primary-button" type="button" id="template-ppt-done-btn">
-            확인
-          </button>
-        </div>
-      `;
-    }
+    renderTemplateGeneratedResult({
+      title: "PPT 보고서 생성 완료",
+      desc: "PPT 파일이 생성되었습니다.",
+      json,
+    });
   } catch (error) {
     alert(error.message || "PPT 생성에 실패했습니다.");
     renderTemplateFileInfo();
