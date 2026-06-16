@@ -9,6 +9,7 @@ let currentAutomationCandidates = [];
 let currentQueryTablesKey = null;
 let currentAutomationExecution = null;
 let currentSelectedAutomationCandidate = null;
+let currentTemplateAction = "template";
 
 const templateQueryKeyCache = new Map();
 
@@ -335,15 +336,10 @@ function initializePopups() {
 
   // 템플릿 공용 폼
   document.querySelectorAll("[data-template-action]").forEach((card) => {
-    card.addEventListener("click", async () => {
-      const action = card.dataset.templateAction;
+    card.addEventListener("click", () => {
+      currentTemplateAction = card.dataset.templateAction || "template";
 
-      setTemplatePreview(action);
-      renderTemplateFileInfo();
-
-      if (action === "template") {
-        await loadAutomationCandidatesForTemplate();
-      }
+      setTemplatePreview(currentTemplateAction);
     });
   });
 
@@ -968,11 +964,23 @@ function renderTemplateFileInfo() {
 
   panel
     .querySelector("#template-start-button")
-    ?.addEventListener("click", () => {
+    ?.addEventListener("click", async () => {
       const fileName = getCurrentTemplateFileName();
 
-      if (!fileName) {
-        alert("파일을 먼저 선택해 주세요.");
+      currentTemplateFileName = fileName;
+
+      if (currentTemplateAction === "template") {
+        await loadAutomationCandidatesForTemplate();
+        return;
+      }
+
+      if (currentTemplateAction === "automation") {
+        await exportTemplateAnalysis(fileName);
+        return;
+      }
+
+      if (currentTemplateAction === "ppt") {
+        await exportTemplatePpt(fileName);
         return;
       }
 
