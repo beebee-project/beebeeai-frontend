@@ -9,7 +9,6 @@ let currentAutomationCandidates = [];
 let currentQueryTablesKey = null;
 let currentAutomationExecution = null;
 let currentSelectedAutomationCandidate = null;
-let currentTemplateAction = "template";
 
 const templateQueryKeyCache = new Map();
 
@@ -339,6 +338,7 @@ function initializePopups() {
     card.addEventListener("click", () => {
       currentTemplateAction = card.dataset.templateAction || "template";
 
+      resetTemplateRunState();
       setTemplatePreview(currentTemplateAction);
       renderTemplateFileInfo();
     });
@@ -464,9 +464,11 @@ function initializePopups() {
   const openTemplateModal = async (event) => {
     event?.preventDefault?.();
 
+    resetTemplateAllState();
+
     templateModalOverlay?.classList.add("active");
 
-    setTemplatePreview("template");
+    setTemplatePreview(currentTemplateAction);
 
     if (!uploadedFiles.length) {
       await loadUserFiles();
@@ -476,6 +478,7 @@ function initializePopups() {
   };
 
   const closeTemplateModal = () => {
+    resetTemplateAllState();
     templateModalOverlay?.classList.remove("active");
   };
 
@@ -883,6 +886,19 @@ function updateLoginState() {
   setupLink(mobileLoginLink, !!token);
 }
 
+function resetTemplateRunState() {
+  currentAutomationCandidates = [];
+  currentQueryTablesKey = null;
+  currentAutomationExecution = null;
+  currentSelectedAutomationCandidate = null;
+}
+
+function resetTemplateAllState() {
+  currentTemplateAction = "template";
+  currentTemplateFileName = lastSelectedFile || "";
+  resetTemplateRunState();
+}
+
 function getCurrentTemplateFileName() {
   return currentTemplateFileName || lastSelectedFile || "";
 }
@@ -959,6 +975,7 @@ function renderTemplateFileInfo() {
         lastSelectedFile = null;
       }
 
+      resetTemplateRunState();
       renderTemplateFileInfo();
     });
   });
@@ -967,6 +984,7 @@ function renderTemplateFileInfo() {
     .querySelector("#template-start-button")
     ?.addEventListener("click", async () => {
       const fileName = getCurrentTemplateFileName();
+      if (!fileName) return;
 
       currentTemplateFileName = fileName;
 
@@ -984,10 +1002,6 @@ function renderTemplateFileInfo() {
         await exportTemplatePpt(fileName);
         return;
       }
-
-      console.log("template start:", {
-        fileName,
-      });
     });
 }
 
@@ -1225,6 +1239,96 @@ async function exportAutomationWorkbook(selected) {
   }
 
   alert(buildAutomationDownloadMessage(json));
+}
+
+async function exportTemplateAnalysis(fileName) {
+  try {
+    currentQueryTablesKey = await getOrCreateTemplateQueryTablesKey(fileName);
+
+    const panel = document.getElementById("template-preview-panel");
+    if (panel) {
+      panel.innerHTML = `
+        <div class="template-preview-title">데이터 분석 생성 중...</div>
+        <div class="template-preview-desc">선택한 파일의 인사이트를 생성하고 있습니다.</div>
+      `;
+    }
+
+    const { res, json } = await authFetch(
+      "/api/automation/export-report-json",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          queryTablesKey: currentQueryTablesKey,
+          message: "데이터 분석 및 인사이트 생성",
+        }),
+      },
+    );
+
+    if (!res.ok || !json.ok) {
+      alert(json.error || json.message || "데이터 분석 생성에 실패했습니다.");
+      renderTemplateFileInfo();
+      return;
+    }
+
+    if (panel) {
+      panel.innerHTML = `
+        <div class="template-preview-title">데이터 분석 생성 완료</div>
+        <div class="template-preview-desc">인사이트 파일이 생성되었습니다.</div>
+        <div class="template-action-row">
+          <button class="template-primary-button" type="button" id="template-analysis-done-btn">
+            확인
+          </button>
+        </div>
+      `;
+    }
+  } catch (error) {
+    alert(error.message || "데이터 분석 생성에 실패했습니다.");
+    renderTemplateFileInfo();
+  }
+}
+
+async function exportTemplatePpt(fileName) {
+  try {
+    currentQueryTablesKey = await getOrCreateTemplateQueryTablesKey(fileName);
+
+    const panel = document.getElementById("template-preview-panel");
+    if (panel) {
+      panel.innerHTML = `
+        <div class="template-preview-title">PPT 보고서 생성 중...</div>
+        <div class="template-preview-desc">선택한 파일 기반 발표 자료를 생성하고 있습니다.</div>
+      `;
+    }
+
+    const { res, json } = await authFetch("/api/automation/export-pptx", {
+      method: "POST",
+      body: JSON.stringify({
+        queryTablesKey: currentQueryTablesKey,
+        message: "PPT 보고서 생성",
+        template: "default",
+      }),
+    });
+
+    if (!res.ok || !json.ok) {
+      alert(json.error || json.message || "PPT 생성에 실패했습니다.");
+      renderTemplateFileInfo();
+      return;
+    }
+
+    if (panel) {
+      panel.innerHTML = `
+        <div class="template-preview-title">PPT 보고서 생성 완료</div>
+        <div class="template-preview-desc">PPT 파일이 생성되었습니다.</div>
+        <div class="template-action-row">
+          <button class="template-primary-button" type="button" id="template-ppt-done-btn">
+            확인
+          </button>
+        </div>
+      `;
+    }
+  } catch (error) {
+    alert(error.message || "PPT 생성에 실패했습니다.");
+    renderTemplateFileInfo();
+  }
 }
 
 // ==========================================
