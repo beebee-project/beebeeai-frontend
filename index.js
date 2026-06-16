@@ -1042,7 +1042,28 @@ async function loadAutomationCandidatesForTemplate() {
     return;
   }
 
-  currentAutomationCandidates = json.candidates || [];
+  currentAutomationCandidates =
+    json.candidates ||
+    (json.analysisRecipeCandidates || []).map((candidate, index) => ({
+      candidateId:
+        candidate.candidateId ||
+        candidate.id ||
+        candidate.recipeId ||
+        candidate.type ||
+        `candidate_${index + 1}`,
+      title:
+        candidate.title ||
+        candidate.name ||
+        candidate.label ||
+        `자동화 후보 ${index + 1}`,
+      description:
+        candidate.description ||
+        candidate.reason ||
+        candidate.summary ||
+        "업로드된 파일 구조를 기반으로 생성 가능한 자동화입니다.",
+      candidate,
+    }));
+
   renderAutomationCandidateList(currentAutomationCandidates);
 }
 
@@ -1272,7 +1293,7 @@ async function exportAutomationWorkbook(selected) {
     selected?.title ||
     "자동화 분석";
 
-  const { res, json } = await authFetch("/api/automation/export-xlsx", {
+  const { res, json } = await authFetch("/api/automation/summary-sheet", {
     method: "POST",
     body: JSON.stringify({
       queryTablesKey: currentQueryTablesKey,
@@ -1290,7 +1311,7 @@ async function exportAutomationWorkbook(selected) {
 
   renderTemplateGeneratedResult({
     title: "자동화 시트 생성 완료",
-    desc: buildAutomationDownloadMessage(json),
+    desc: "자동화 템플릿 엑셀 파일이 생성되었습니다.",
     json,
     backLabel: "후보 다시 보기",
   });
