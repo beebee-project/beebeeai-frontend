@@ -340,6 +340,7 @@ function initializePopups() {
       currentTemplateAction = card.dataset.templateAction || "template";
 
       setTemplatePreview(currentTemplateAction);
+      renderTemplateFileInfo();
     });
   });
 
