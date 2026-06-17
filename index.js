@@ -1042,35 +1042,40 @@ async function loadAutomationCandidatesForTemplate() {
     return;
   }
 
-  currentAutomationCandidates =
-    json.candidates ||
-    (json.analysisRecipeCandidates || []).map((candidate, index) => ({
-      candidateId:
-        candidate.candidateId ||
-        candidate.id ||
-        candidate.recipeId ||
-        candidate.type ||
-        `candidate_${index + 1}`,
-      title:
-        candidate.title ||
-        candidate.name ||
-        candidate.label ||
-        `자동화 후보 ${index + 1}`,
-      description:
-        candidate.description ||
-        candidate.reason ||
-        candidate.summary ||
-        "업로드된 파일 구조를 기반으로 생성 가능한 자동화입니다.",
-      category:
-        candidate.category ||
-        candidate.type ||
-        candidate.recipeId ||
-        "automation",
-      priority: Number.isFinite(candidate.priority)
-        ? candidate.priority
-        : index + 1,
-      candidate,
-    }));
+  const normalizedCandidates =
+    Array.isArray(json.candidates) && json.candidates.length
+      ? json.candidates
+      : (json.analysisRecipeCandidates || []).map((candidate, index) => ({
+          candidateId:
+            candidate.candidateId ||
+            candidate.id ||
+            candidate.recipeId ||
+            candidate.type ||
+            candidate.recipeType ||
+            `candidate_${index + 1}`,
+          title:
+            candidate.title ||
+            candidate.name ||
+            candidate.label ||
+            `자동화 후보 ${index + 1}`,
+          description:
+            candidate.description ||
+            candidate.reason ||
+            candidate.summary ||
+            "업로드된 파일 구조를 기반으로 생성 가능한 자동화입니다.",
+          category:
+            candidate.category ||
+            candidate.type ||
+            candidate.recipeType ||
+            candidate.recipeId ||
+            "automation",
+          priority: Number.isFinite(candidate.priority)
+            ? candidate.priority
+            : index + 1,
+          candidate,
+        }));
+
+  currentAutomationCandidates = normalizedCandidates;
 
   renderAutomationCategoryList(json.categoryCandidates || []);
 }
@@ -1139,6 +1144,7 @@ function renderAutomationCategoryList(categories = []) {
 }
 
 function renderAutomationCandidateList(candidates = []) {
+  currentAutomationCandidates = candidates;
   const panel = document.getElementById("template-preview-panel");
   if (!panel) return;
 
