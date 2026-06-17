@@ -1061,10 +1061,81 @@ async function loadAutomationCandidatesForTemplate() {
         candidate.reason ||
         candidate.summary ||
         "업로드된 파일 구조를 기반으로 생성 가능한 자동화입니다.",
+      category:
+        candidate.category ||
+        candidate.type ||
+        candidate.recipeId ||
+        "automation",
+      priority: Number.isFinite(candidate.priority)
+        ? candidate.priority
+        : index + 1,
       candidate,
     }));
 
-  renderAutomationCandidateList(currentAutomationCandidates);
+  renderAutomationCategoryList(json.categoryCandidates || []);
+}
+
+function renderAutomationCategoryList(categories = []) {
+  const panel = document.getElementById("template-preview-panel");
+  if (!panel) return;
+
+  if (!categories.length) {
+    renderAutomationCandidateList(currentAutomationCandidates);
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="template-preview-title">생성 가능한 자동화 유형</div>
+    <div class="template-preview-desc">선택한 데이터 구조를 분석해 추천 가능한 자동화 유형을 찾았습니다.</div>
+    <div class="automation-candidate-list">
+      ${categories
+        .map(
+          (item, index) => `
+            <button class="automation-candidate-card" data-category-index="${index}">
+              <div class="automation-candidate-title">${escapeHtml(item.title)}</div>
+              <div class="automation-candidate-desc">${escapeHtml(item.description || "")}</div>
+              <div class="automation-candidate-desc">
+                ${escapeHtml((item.examples || []).join(" · "))}
+              </div>
+            </button>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+
+  panel.querySelectorAll("[data-category-index]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const index = Number(btn.dataset.categoryIndex);
+      const category = categories[index];
+      const mapped = (category.candidates || []).map((candidate, idx) => ({
+        candidateId:
+          candidate.candidateId ||
+          candidate.id ||
+          candidate.recipeId ||
+          candidate.type ||
+          `${category.categoryId}_${idx + 1}`,
+        title:
+          candidate.title ||
+          candidate.name ||
+          candidate.label ||
+          `${category.title} ${idx + 1}`,
+        description:
+          candidate.description ||
+          candidate.reason ||
+          candidate.summary ||
+          category.description ||
+          "",
+        category: category.categoryId,
+        priority: Number.isFinite(candidate.priority)
+          ? candidate.priority
+          : idx + 1,
+        candidate,
+      }));
+
+      renderAutomationCandidateList(mapped);
+    });
+  });
 }
 
 function renderAutomationCandidateList(candidates = []) {
