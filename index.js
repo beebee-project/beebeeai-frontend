@@ -4,6 +4,7 @@ let lastSelectedFile = null;
 let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
+let currentTemplateAction = "template";
 let currentTemplateFileName = "";
 let currentAutomationCandidates = [];
 let currentQueryTablesKey = null;
