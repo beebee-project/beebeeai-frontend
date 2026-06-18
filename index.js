@@ -1313,7 +1313,7 @@ function renderAutomationExecutionResult(resultJson, selected) {
 
   const exportButtonLabel =
     currentTemplateAction === "template"
-      ? "요약 시트 포함 엑셀 생성"
+      ? "자동화 시트 생성"
       : currentTemplateAction === "automation"
         ? "데이터 분석 생성"
         : "PPT 보고서 생성";
