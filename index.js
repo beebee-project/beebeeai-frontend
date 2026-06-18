@@ -989,18 +989,12 @@ function renderTemplateFileInfo() {
 
       currentTemplateFileName = fileName;
 
-      if (currentTemplateAction === "template") {
+      if (
+        currentTemplateAction === "template" ||
+        currentTemplateAction === "automation" ||
+        currentTemplateAction === "ppt"
+      ) {
         await loadAutomationCandidatesForTemplate();
-        return;
-      }
-
-      if (currentTemplateAction === "automation") {
-        await exportTemplateAnalysis(fileName);
-        return;
-      }
-
-      if (currentTemplateAction === "ppt") {
-        await exportTemplatePpt(fileName);
         return;
       }
     });
@@ -1227,6 +1221,88 @@ async function executeAutomationCandidate(index) {
   renderAutomationExecutionResult(json, selected);
 }
 
+async function exportTemplateResultFromCandidate(selected) {
+  if (currentTemplateAction === "template") {
+    await exportAutomationWorkbook(selected);
+    return;
+  }
+
+  if (currentTemplateAction === "automation") {
+    await exportTemplateAnalysisFromCandidate(selected);
+    return;
+  }
+
+  if (currentTemplateAction === "ppt") {
+    await exportTemplatePptFromCandidate(selected);
+    return;
+  }
+}
+
+async function exportTemplateAnalysisFromCandidate(selected) {
+  if (!currentQueryTablesKey) {
+    alert("쿼리 테이블 정보가 없습니다.");
+    return;
+  }
+
+  const message =
+    selected?.candidate?.title ||
+    selected?.title ||
+    "데이터 분석 및 인사이트 생성";
+
+  const { res, json } = await authFetch("/api/automation/export-report-json", {
+    method: "POST",
+    body: JSON.stringify({
+      queryTablesKey: currentQueryTablesKey,
+      message,
+      candidate: selected?.candidate || null,
+      executionResult: currentAutomationExecution?.result || null,
+    }),
+  });
+
+  if (!res.ok || !json.ok) {
+    alert(json.error || json.message || "데이터 분석 생성에 실패했습니다.");
+    return;
+  }
+
+  renderTemplateGeneratedResult({
+    title: "데이터 분석 생성 완료",
+    desc: "선택한 후보 기반 인사이트 파일이 생성되었습니다.",
+    json,
+  });
+}
+
+async function exportTemplatePptFromCandidate(selected) {
+  if (!currentQueryTablesKey) {
+    alert("쿼리 테이블 정보가 없습니다.");
+    return;
+  }
+
+  const message =
+    selected?.candidate?.title || selected?.title || "PPT 보고서 생성";
+
+  const { res, json } = await authFetch("/api/automation/export-pptx", {
+    method: "POST",
+    body: JSON.stringify({
+      queryTablesKey: currentQueryTablesKey,
+      message,
+      template: "default",
+      candidate: selected?.candidate || null,
+      executionResult: currentAutomationExecution?.result || null,
+    }),
+  });
+
+  if (!res.ok || !json.ok) {
+    alert(json.error || json.message || "PPT 생성에 실패했습니다.");
+    return;
+  }
+
+  renderTemplateGeneratedResult({
+    title: "PPT 보고서 생성 완료",
+    desc: "선택한 후보 기반 PPT 파일이 생성되었습니다.",
+    json,
+  });
+}
+
 function renderAutomationExecutionResult(resultJson, selected) {
   const panel = document.getElementById("template-preview-panel");
   if (!panel) return;
@@ -1234,6 +1310,13 @@ function renderAutomationExecutionResult(resultJson, selected) {
   const result = resultJson.result || resultJson;
   const rows = Array.isArray(result.rows) ? result.rows : [];
   const previewRows = rows.slice(0, 5);
+
+  const exportButtonLabel =
+    currentTemplateAction === "template"
+      ? "요약 시트 포함 엑셀 생성"
+      : currentTemplateAction === "automation"
+        ? "데이터 분석 생성"
+        : "PPT 보고서 생성";
 
   panel.innerHTML = `
     <div class="template-preview-title">${escapeHtml(
@@ -1261,7 +1344,7 @@ function renderAutomationExecutionResult(resultJson, selected) {
 
     <div class="template-action-row">
       <button id="automation-export-xlsx-btn" class="template-primary-button">
-        요약 시트 포함 엑셀 생성
+        ${escapeHtml(exportButtonLabel)}
       </button>
       <button id="automation-back-btn" class="template-secondary-button">
         후보 다시 보기
@@ -1278,7 +1361,7 @@ function renderAutomationExecutionResult(resultJson, selected) {
   document
     .getElementById("automation-export-xlsx-btn")
     ?.addEventListener("click", async () => {
-      await exportAutomationWorkbook(selected);
+      await exportTemplateResultFromCandidate(selected);
     });
 }
 
