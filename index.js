@@ -10,6 +10,7 @@ let currentAutomationCandidates = [];
 let currentQueryTablesKey = null;
 let currentAutomationExecution = null;
 let currentSelectedAutomationCandidate = null;
+let currentBusinessTemplateCandidates = [];
 
 const templateQueryKeyCache = new Map();
 
@@ -61,6 +62,49 @@ const TEMPLATE_PREVIEW_MAP = {
     desc: "분석된 데이터를 기반으로 차트와 인사이트가 포함된 발표용 PPT 자료를 생성합니다.",
   },
 };
+
+function normalizeTemplateCandidates(json = {}) {
+  const businessTemplates = Array.isArray(json.businessTemplateCandidates)
+    ? json.businessTemplateCandidates
+    : [];
+
+  if (businessTemplates.length) {
+    return businessTemplates.map((t) => ({
+      type: "businessTemplate",
+      templateId: t.templateId,
+      title: t.title,
+      description: t.description,
+      confidence: t.confidence,
+      matchedCount: Array.isArray(t.candidates) ? t.candidates.length : 0,
+      candidate: t.primaryCandidate || t.candidates?.[0] || null,
+      candidates: t.candidates || [],
+      outputTypes: t.outputTypes || [],
+    }));
+  }
+
+  const categories = Array.isArray(json.categoryCandidates)
+    ? json.categoryCandidates
+    : [];
+
+  if (categories.length) {
+    return categories.flatMap((cat) =>
+      (cat.candidates || []).map((c) => ({
+        type: "categoryCandidate",
+        categoryId: cat.categoryId,
+        title: c.title || cat.title,
+        description: c.description || cat.description,
+        candidate: c,
+      })),
+    );
+  }
+
+  return (json.candidates || []).map((c) => ({
+    type: "analysisCandidate",
+    title: c.title,
+    description: c.description,
+    candidate: c,
+  }));
+}
 
 function getExamplesForConversionType(conversionType) {
   const hasUploadedFile = !!lastSelectedFile;
@@ -889,6 +933,7 @@ function updateLoginState() {
 
 function resetTemplateRunState() {
   currentAutomationCandidates = [];
+  currentBusinessTemplateCandidates = [];
   currentQueryTablesKey = null;
   currentAutomationExecution = null;
   currentSelectedAutomationCandidate = null;
@@ -1037,42 +1082,16 @@ async function loadAutomationCandidatesForTemplate() {
     return;
   }
 
-  const normalizedCandidates =
-    Array.isArray(json.candidates) && json.candidates.length
-      ? json.candidates
-      : (json.analysisRecipeCandidates || []).map((candidate, index) => ({
-          candidateId:
-            candidate.candidateId ||
-            candidate.id ||
-            candidate.recipeId ||
-            candidate.type ||
-            candidate.recipeType ||
-            `candidate_${index + 1}`,
-          title:
-            candidate.title ||
-            candidate.name ||
-            candidate.label ||
-            `자동화 후보 ${index + 1}`,
-          description:
-            candidate.description ||
-            candidate.reason ||
-            candidate.summary ||
-            "업로드된 파일 구조를 기반으로 생성 가능한 자동화입니다.",
-          category:
-            candidate.category ||
-            candidate.type ||
-            candidate.recipeType ||
-            candidate.recipeId ||
-            "automation",
-          priority: Number.isFinite(candidate.priority)
-            ? candidate.priority
-            : index + 1,
-          candidate,
-        }));
+  currentBusinessTemplateCandidates = json.businessTemplateCandidates || [];
+  currentAutomationCandidates = normalizeTemplateCandidates(json);
 
-  currentAutomationCandidates = normalizedCandidates;
+  if (!currentAutomationCandidates.length) {
+    alert("생성 가능한 업무 템플릿 후보가 없습니다.");
+    renderTemplateFileInfo();
+    return;
+  }
 
-  renderAutomationCategoryList(json.categoryCandidates || []);
+  renderAutomationCandidateList(currentAutomationCandidates);
 }
 
 function renderAutomationCategoryList(categories = []) {
@@ -1145,15 +1164,15 @@ function renderAutomationCandidateList(candidates = []) {
 
   if (!candidates.length) {
     panel.innerHTML = `
-      <div class="template-preview-title">생성 가능한 자동화가 없습니다</div>
-      <div class="template-preview-desc">선택한 파일에서 추천 가능한 자동화 후보를 찾지 못했습니다.</div>
+      <div class="template-preview-title">생성 가능한 업무 템플릿이 없습니다</div>
+      <div class="template-preview-desc">선택한 파일에서 추천 가능한 업무 템플릿 후보를 찾지 못했습니다.</div>
     `;
     return;
   }
 
   panel.innerHTML = `
-    <div class="template-preview-title">생성 가능한 자동화</div>
-    <div class="template-preview-desc">원하는 자동화 후보를 선택하세요.</div>
+    <div class="template-preview-title">생성 가능한 업무 템플릿</div>
+    <div class="template-preview-desc">생성할 보고서 또는 자동화 템플릿을 선택하세요.</div>
     <div class="automation-candidate-list">
       ${candidates
         .map(
@@ -1161,6 +1180,18 @@ function renderAutomationCandidateList(candidates = []) {
             <button class="automation-candidate-card" data-candidate-index="${index}">
               <div class="automation-candidate-title">${escapeHtml(item.title || `자동화 후보 ${index + 1}`)}</div>
               <div class="automation-candidate-desc">${escapeHtml(item.description || "")}</div>
+              ${
+                item.type === "businessTemplate"
+                  ? `<div class="automation-candidate-desc">
+                              ${escapeHtml((item.outputTypes || []).join(" · "))}
+                              ${
+                                item.matchedCount
+                                  ? ` · 매칭 ${escapeHtml(String(item.matchedCount))}개`
+                                  : ""
+                              }
+                            </div>`
+                  : ""
+              }            
             </button>
           `,
         )
