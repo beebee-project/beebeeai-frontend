@@ -1210,7 +1210,7 @@ function renderAutomationCandidateList(candidates = []) {
 async function executeAutomationCandidate(index) {
   const selected = currentAutomationCandidates[index];
 
-  if (!selected || !selected.candidate) {
+  if (!selected || (!selected.candidate && !selected.templateId)) {
     alert("선택한 자동화 후보 정보를 찾을 수 없습니다.");
     return;
   }
@@ -1230,14 +1230,25 @@ async function executeAutomationCandidate(index) {
     `;
   }
 
+  const isBusinessTemplate = selected.type === "businessTemplate";
+
   const { res, json } = await authFetch(
-    "/api/automation/execute-analysis-candidate",
+    isBusinessTemplate
+      ? "/api/automation/execute-business-template"
+      : "/api/automation/execute-analysis-candidate",
     {
       method: "POST",
-      body: JSON.stringify({
-        queryTablesKey: currentQueryTablesKey,
-        candidate: selected.candidate,
-      }),
+      body: JSON.stringify(
+        isBusinessTemplate
+          ? {
+              queryTablesKey: currentQueryTablesKey,
+              templateCandidate: selected,
+            }
+          : {
+              queryTablesKey: currentQueryTablesKey,
+              candidate: selected.candidate,
+            },
+      ),
     },
   );
 
@@ -1285,8 +1296,16 @@ async function exportTemplateAnalysisFromCandidate(selected) {
     body: JSON.stringify({
       queryTablesKey: currentQueryTablesKey,
       message,
-      candidate: selected?.candidate || null,
-      executionResult: currentAutomationExecution?.result || null,
+      candidate:
+        selected?.type === "businessTemplate"
+          ? null
+          : selected?.candidate || null,
+      templateCandidate:
+        selected?.type === "businessTemplate" ? selected : null,
+      executionResult:
+        currentAutomationExecution?.result ||
+        currentAutomationExecution ||
+        null,
     }),
   });
 
@@ -1317,8 +1336,16 @@ async function exportTemplatePptFromCandidate(selected) {
       queryTablesKey: currentQueryTablesKey,
       message,
       template: "default",
-      candidate: selected?.candidate || null,
-      executionResult: currentAutomationExecution?.result || null,
+      candidate:
+        selected?.type === "businessTemplate"
+          ? null
+          : selected?.candidate || null,
+      templateCandidate:
+        selected?.type === "businessTemplate" ? selected : null,
+      executionResult:
+        currentAutomationExecution?.result ||
+        currentAutomationExecution ||
+        null,
     }),
   });
 
@@ -1340,6 +1367,7 @@ function renderAutomationExecutionResult(resultJson, selected) {
 
   const result = resultJson.result || resultJson;
   const rows = Array.isArray(result.rows) ? result.rows : [];
+  const sections = Array.isArray(result.sections) ? result.sections : [];
   const previewRows = rows.slice(0, 5);
 
   const exportButtonLabel =
@@ -1349,6 +1377,23 @@ function renderAutomationExecutionResult(resultJson, selected) {
         ? "데이터 분석 생성"
         : "PPT 보고서 생성";
 
+  const sectionPreviewHtml = sections.length
+    ? `
+    <div class="automation-result-preview">
+      ${sections
+        .map(
+          (section) => `
+            <div class="automation-result-row">
+              ${escapeHtml(section.title || section.sectionId || "섹션")}
+              · ${escapeHtml(String(section.result?.rows?.length || 0))}행
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `
+    : "";
+
   panel.innerHTML = `
     <div class="template-preview-title">${escapeHtml(
       selected.title || "자동화 실행 완료",
@@ -1356,21 +1401,22 @@ function renderAutomationExecutionResult(resultJson, selected) {
     <div class="template-preview-desc">자동화 실행이 완료되었습니다.</div>
 
     ${
-      previewRows.length
+      sectionPreviewHtml ||
+      (previewRows.length
         ? `
-        <div class="automation-result-preview">
-          ${previewRows
-            .map(
-              (row) => `
-                <div class="automation-result-row">
-                  ${escapeHtml(JSON.stringify(row))}
-                </div>
-              `,
-            )
-            .join("")}
-        </div>
-      `
-        : `<div class="template-preview-desc">미리보기 행이 없습니다.</div>`
+      <div class="automation-result-preview">
+        ${previewRows
+          .map(
+            (row) => `
+              <div class="automation-result-row">
+                ${escapeHtml(JSON.stringify(row))}
+              </div>
+            `,
+          )
+          .join("")}
+      </div>
+    `
+        : `<div class="template-preview-desc">미리보기 행이 없습니다.</div>`)
     }
 
     <div class="template-action-row">
@@ -1490,8 +1536,16 @@ async function exportAutomationWorkbook(selected) {
     body: JSON.stringify({
       queryTablesKey: currentQueryTablesKey,
       message,
-      candidate: selected?.candidate || null,
-      executionResult: currentAutomationExecution?.result || null,
+      candidate:
+        selected?.type === "businessTemplate"
+          ? null
+          : selected?.candidate || null,
+      templateCandidate:
+        selected?.type === "businessTemplate" ? selected : null,
+      executionResult:
+        currentAutomationExecution?.result ||
+        currentAutomationExecution ||
+        null,
     }),
   });
 
