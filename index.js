@@ -63,6 +63,21 @@ const TEMPLATE_PREVIEW_MAP = {
   },
 };
 
+const OUTPUT_TYPE_LABEL_MAP = {
+  summarySheet: "자동화 시트",
+  analysisReport: "데이터 분석",
+  ppt: "PPT 생성",
+};
+
+function normalizeOutputTypes(outputTypes = []) {
+  const aliases = { reportJson: "analysisReport", json: "analysisReport" };
+  const source = Array.isArray(outputTypes) ? outputTypes : [outputTypes];
+  const normalized = source
+    .map((type) => aliases[type] || type)
+    .filter((type) => OUTPUT_TYPE_LABEL_MAP[type]);
+  return [...new Set(normalized)];
+}
+
 function normalizeTemplateCandidates(json = {}) {
   const businessTemplates = Array.isArray(json.businessTemplateCandidates)
     ? json.businessTemplateCandidates
@@ -78,7 +93,7 @@ function normalizeTemplateCandidates(json = {}) {
       matchedCount: Array.isArray(t.candidates) ? t.candidates.length : 0,
       candidate: t.primaryCandidate || t.candidates?.[0] || null,
       candidates: t.candidates || [],
-      outputTypes: t.outputTypes || [],
+      outputTypes: normalizeOutputTypes(t.outputTypes || []),
     }));
   }
 
@@ -1291,23 +1306,26 @@ async function exportTemplateAnalysisFromCandidate(selected) {
     selected?.title ||
     "데이터 분석 및 인사이트 생성";
 
-  const { res, json } = await authFetch("/api/automation/export-report-json", {
-    method: "POST",
-    body: JSON.stringify({
-      queryTablesKey: currentQueryTablesKey,
-      message,
-      candidate:
-        selected?.type === "businessTemplate"
-          ? null
-          : selected?.candidate || null,
-      templateCandidate:
-        selected?.type === "businessTemplate" ? selected : null,
-      executionResult:
-        currentAutomationExecution?.result ||
-        currentAutomationExecution ||
-        null,
-    }),
-  });
+  const { res, json } = await authFetch(
+    "/api/automation/export-analysis-report",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        queryTablesKey: currentQueryTablesKey,
+        message,
+        candidate:
+          selected?.type === "businessTemplate"
+            ? null
+            : selected?.candidate || null,
+        templateCandidate:
+          selected?.type === "businessTemplate" ? selected : null,
+        executionResult:
+          currentAutomationExecution?.result ||
+          currentAutomationExecution ||
+          null,
+      }),
+    },
+  );
 
   if (!res.ok || !json.ok) {
     alert(json.error || json.message || "데이터 분석 생성에 실패했습니다.");
@@ -1576,7 +1594,7 @@ async function exportTemplateAnalysis(fileName) {
     }
 
     const { res, json } = await authFetch(
-      "/api/automation/export-report-json",
+      "/api/automation/export-analysis-report",
       {
         method: "POST",
         body: JSON.stringify({
