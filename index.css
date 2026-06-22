@@ -2191,7 +2191,49 @@ body.toss-result-page {
 }
 
 .template-modal-header {
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-right: 48px;
+}
+
+.template-modal-header p {
+  margin: 0;
+}
+
+.template-modal-upload-button {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 200, 0, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 200, 0, 0.12);
+  color: #ffc800;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.template-modal-upload-button:hover {
+  background: rgba(255, 200, 0, 0.2);
+  border-color: rgba(255, 200, 0, 0.9);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .template-modal-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-right: 40px;
+  }
+
+  .template-modal-upload-button {
+    width: 100%;
+  }
 }
 
 .template-modal-header h2 {

@@ -526,6 +526,27 @@ function initializePopups() {
     .getElementById("template-close-btn")
     ?.addEventListener("click", closeTemplateModal);
 
+  document
+    .getElementById("template-modal-upload-btn")
+    ?.addEventListener("click", () => {
+      document.getElementById("upload-popup-overlay")?.classList.add("active");
+      loadUserFiles();
+
+      const fileTypeSelect = document.getElementById("file-type-select");
+      const uploadFileInput = document.getElementById("upload-file-input");
+      const hiddenAttachInput = document.getElementById("file-input");
+
+      const map = {
+        all: ".xlsx,.xls,.csv",
+        xlsx: ".xlsx,.xls",
+        csv: ".csv",
+      };
+
+      const accept = map[fileTypeSelect?.value || "all"] || map.all;
+      uploadFileInput?.setAttribute("accept", accept);
+      hiddenAttachInput?.setAttribute("accept", accept);
+    });
+
   templateModalOverlay?.addEventListener("click", (e) => {
     if (e.target === templateModalOverlay) {
       closeTemplateModal();
@@ -776,7 +797,7 @@ function initializeFileUpload() {
     e.target.value = "";
   });
 
-  startUploadBtn.addEventListener("click", () => {
+  startUploadBtn.addEventListener("click", async () => {
     if (!lastSelectedFile) return;
 
     currentTemplateFileName = lastSelectedFile;
@@ -784,6 +805,7 @@ function initializeFileUpload() {
     currentTemplateAction = "template";
     document.getElementById("template-modal-overlay")?.classList.add("active");
     setTemplatePreview(currentTemplateAction);
+    await loadUserFiles();
     renderTemplateFileInfo();
   });
 
