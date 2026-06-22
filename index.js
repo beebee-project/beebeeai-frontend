@@ -1485,14 +1485,40 @@ function basenameFromStoragePath(value = "") {
   return raw.split(/[\\/]/).pop();
 }
 
+function stripStoragePrefix(value = "") {
+  let name = String(value || "").trim();
+  if (!name) return "";
+
+  name = name.split(/[\\/]/).pop() || name;
+
+  name = name.replace(
+    /^(?:summary-sheets|reports|ppt|automation|generated|query-tables)[_-][^_-]+[_-][a-f0-9]{16,}[_-]/i,
+    "",
+  );
+
+  name = name.replace(
+    /^(?:summary-sheets|reports|ppt|automation|generated)[_-][a-f0-9]{16,}[_-][a-f0-9]{16,}[_-]/i,
+    "",
+  );
+
+  return name;
+}
+
 function resolveTemplateGeneratedFilePath(json = {}) {
-  return (
+  const preferred =
     json.displayName ||
-    json.fileName ||
+    json.outputFileName ||
     json.result?.displayName ||
     json.result?.fileName ||
-    basenameFromStoragePath(json.filePath || json.localName || json.gcsName) ||
-    ""
+    json.fileName ||
+    "";
+
+  if (preferred) {
+    return stripStoragePrefix(preferred);
+  }
+
+  return stripStoragePrefix(
+    json.filePath || json.localName || json.gcsName || "",
   );
 }
 
