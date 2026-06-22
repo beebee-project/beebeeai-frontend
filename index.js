@@ -1479,8 +1479,21 @@ function buildAutomationDownloadMessage(json = {}) {
   return "엑셀 자동화 파일이 생성되었습니다.";
 }
 
+function basenameFromStoragePath(value = "") {
+  const raw = String(value || "");
+  if (!raw) return "";
+  return raw.split(/[\\/]/).pop();
+}
+
 function resolveTemplateGeneratedFilePath(json = {}) {
-  return json.filePath || json.localName || json.gcsName || "";
+  return (
+    json.displayName ||
+    json.fileName ||
+    json.result?.displayName ||
+    json.result?.fileName ||
+    basenameFromStoragePath(json.filePath || json.localName || json.gcsName) ||
+    ""
+  );
 }
 
 function renderTemplateGeneratedResult({
