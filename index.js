@@ -595,18 +595,17 @@ function highlightElement(el, text) {
   if (currentGuideStep === 1) {
     infoHTML = `
       <div class="guide-info-content">
-        <strong>💡 다이렉트 함수</strong><br />
-        파일 업로드 없이도 <b>다이렉트 함수</b>를 통해<br />
-        간단한 수식을 바로 생성할 수 있습니다.<br />
-        ex) <b>A1부터 A10까지의 평균</b>
+        <strong>💡 템플릿 생성</strong><br />
+        파일을 선택하면 데이터 구조를 분석해<br />
+        생성 가능한 업무 템플릿을 추천합니다.
       </div>`;
     position = "bottom";
   } else if (currentGuideStep === 2) {
     infoHTML = `
       <div class="guide-info-row">
         <div class="guide-info-content">
-          <strong>⚙️ 자동 변환</strong><br />
-          파일을 업로드하면 자동으로 타입이 <b>변환</b>됩니다.
+          <strong>⚙️ 자동화 시트</strong><br />
+          업로드 데이터를 기준으로 요약표와 분석 시트를 생성합니다.
         </div>
         <div class="guide-info-content">
           <strong>📁 업로드 제한</strong><br />
@@ -705,8 +704,11 @@ function initializeTemplateHome() {
     "template-modal-overlay",
   );
 
-  startButton?.addEventListener("click", async () => {
+  const openTemplateHomeModal = async (action = "template") => {
+    currentTemplateAction = action || "template";
     resetTemplateAllState();
+    currentTemplateAction = action || "template";
+
     templateModalOverlay?.classList.add("active");
     setTemplatePreview(currentTemplateAction);
 
@@ -715,6 +717,16 @@ function initializeTemplateHome() {
     }
 
     renderTemplateFileInfo();
+  };
+
+  startButton?.addEventListener("click", () => {
+    openTemplateHomeModal("template");
+  });
+
+  document.querySelectorAll("[data-home-template-action]").forEach((card) => {
+    card.addEventListener("click", () => {
+      openTemplateHomeModal(card.dataset.homeTemplateAction || "template");
+    });
   });
 }
 
