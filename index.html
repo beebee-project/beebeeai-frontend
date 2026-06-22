@@ -296,48 +296,47 @@
     <div class="guide-overlay" id="guide-overlay"></div>
 
     <main>
-      <!-- 수식 변환기 콘텐츠 섹션 -->
-      <div id="chat-content" class="main-content-section">
-        <div class="conversion-type-selector">
-          <label for="conversion-type-select">변환 타입:</label>
-          <select id="conversion-type-select">
-            <option value="">-- 선택 --</option>
-            <option value="Excel/Google Sheets">
-              엑셀/구글시트 수식 만들기
-            </option>
-            <option value="Excel VBA">엑셀 매크로 만들기</option>
-            <option value="Google Apps Script">구글시트 매크로 만들기</option>
-          </select>
+      <!-- 템플릿 생성 메인 화면 -->
+      <section
+        id="template-home"
+        class="main-content-section template-home-section"
+      >
+        <div class="template-home-copy">
+          <p class="template-home-kicker">BeeBee AI</p>
+          <h1>엑셀 데이터를 자동화 시트, 데이터 분석, PPT로 변환하세요.</h1>
+          <p>
+            수식·매크로 직접 생성 기능은 종료하고, 업로드된 파일을 기반으로
+            업무용 템플릿을 자동 생성합니다.
+          </p>
         </div>
-        <div class="chat-messages" id="chat-messages"></div>
-        <div class="chat-input-area">
-          <div class="input-field-wrapper">
-            <textarea
-              id="user-input"
-              placeholder="BeeBee AI에게 물어보기"
-            ></textarea>
-            <div class="input-actions">
-              <button
-                class="attach-button"
-                id="attach-button"
-                aria-label="파일 업로드"
-                title="파일 업로드"
-              >
-                +
-              </button>
-              <button class="send-button" id="send-button">
-                <i class="fas fa-paper-plane" aria-hidden="true"></i>
-              </button>
-            </div>
-          </div>
+
+        <div class="template-home-actions">
+          <button
+            type="button"
+            class="main-action-button"
+            id="template-home-start-btn"
+          >
+            템플릿 시작하기
+          </button>
+
+          <button
+            type="button"
+            class="attach-button template-upload-button"
+            id="attach-button"
+            aria-label="파일 업로드"
+            title="파일 업로드"
+          >
+            파일 업로드
+          </button>
         </div>
+
         <input
           type="file"
           id="file-input"
           style="display: none"
-          accept=".xlsx, .csv"
+          accept=".xlsx, .xls, .csv"
         />
-      </div>
+      </section>
     </main>
     <script src="config.js"></script>
     <script src="index.js"></script>

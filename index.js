@@ -1,7 +1,6 @@
 // --- 전역 변수 ---
 let uploadedFiles = [];
 let lastSelectedFile = null;
-let selectedConversionType = null;
 let lastUserMessage = "";
 let originalSendButtonHtml = null;
 let currentTemplateAction = "template";
@@ -16,37 +15,8 @@ const templateQueryKeyCache = new Map();
 
 const API_BASE_URL = window.BEEBEE_CONFIG.API_BASE_URL;
 
-const CONVERSION_TYPE_VBA = "Excel VBA";
-const CONVERSION_TYPE_APPS_SCRIPT = "Google Apps Script";
-const CONVERSION_TYPE_LABEL_MAP = {
-  "Excel/Google Sheets": "엑셀/구글시트 수식 만들기",
-  "Excel VBA": "엑셀 매크로 만들기",
-  "Google Apps Script": "구글시트 매크로 만들기",
-};
-const CONVERSION_TYPE_EXAMPLE_MAP = {
-  "Excel/Google Sheets": ["A1:A10 합계", "B1:B20의 평균", "C1:C15의 최대값"],
-  "Excel VBA": [
-    "A1에 '합계'라고 입력해줘",
-    "B열을 굵게 표시해줘",
-    "C열 기준으로 내림차순 정렬해줘",
-    "2행을 삽입해줘",
-  ],
-  "Google Apps Script": [
-    "A1에 '완료'라고 입력해줘",
-    "B열 배경을 노란색으로 바꿔줘",
-    "C열 기준으로 오름차순 정렬해줘",
-    "3행을 삭제해줘",
-  ],
-};
-
-const CONVERSION_TYPE_UPLOADED_EXAMPLE_MAP = {
-  "Excel/Google Sheets": [
-    "개발 부서의 직원 수를 계산해줘",
-    "성적이 3.5 이상인 학생 수",
-    "2023년 이후 입사 직원 수를 계산해줘",
-    "방문일이 2024-03-01 이후인 환자 수",
-  ],
-};
+// Direct formula/macro generation UX has been removed.
+// Main flow is now template generation only.
 
 const TEMPLATE_PREVIEW_MAP = {
   template: {
@@ -122,21 +92,23 @@ function normalizeTemplateCandidates(json = {}) {
 }
 
 function getExamplesForConversionType(conversionType) {
-  const hasUploadedFile = !!lastSelectedFile;
-  const sourceMap = hasUploadedFile
-    ? CONVERSION_TYPE_UPLOADED_EXAMPLE_MAP
-    : CONVERSION_TYPE_EXAMPLE_MAP;
+  const type = findLegacyConversionType(conversionType);
+  if (!type) return [];
 
-  return (
-    sourceMap[conversionType] ||
-    CONVERSION_TYPE_EXAMPLE_MAP[conversionType] ||
-    []
-  );
+  const examples = lastSelectedFile
+    ? type.uploadedExamples || type.examples || []
+    : type.examples || [];
+
+  return Array.isArray(examples) ? examples : [];
+}
+
+function getConversionTypeLabel(conversionType) {
+  const type = findLegacyConversionType(conversionType);
+  return type?.label || conversionType || "";
 }
 
 function buildConversionTypeGuideMessage(conversionType) {
-  const selectedLabel =
-    CONVERSION_TYPE_LABEL_MAP[conversionType] || conversionType;
+  const selectedLabel = getConversionTypeLabel(conversionType);
   const examples = getExamplesForConversionType(conversionType);
   const exampleLines =
     examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
@@ -253,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initializePopups();
   handleLegacyUxParams();
   initializeLayout();
-  initializeChat();
+  initializeTemplateHome();
   initializeFileUpload();
   updateLoginState();
   handlePostSubscribeUX();
@@ -567,16 +539,16 @@ const guideOverlay = document.getElementById("guide-overlay");
 
 const guideSteps = [
   {
-    el: document.querySelector(".conversion-type-selector"),
-    text: "1단계: 여기에서 변환할 타입을 선택합니다.",
+    el: document.getElementById("template-home-start-btn"),
+    text: "1단계: 템플릿 시작하기를 눌러 자동화 시트, 데이터 분석, PPT 생성을 시작합니다.",
   },
   {
     el: document.getElementById("attach-button"),
-    text: "2단계: + 버튼을 눌러 파일을 업로드할 수 있습니다.",
+    text: "2단계: 파일 업로드 버튼으로 엑셀 또는 CSV 파일을 추가합니다.",
   },
   {
-    el: document.querySelector(".chat-input-area"),
-    text: "3단계: 이 영역에서 BeeBee AI에게 변환 요청을 입력합니다.",
+    el: document.querySelector(".template-grid"),
+    text: "3단계: 자동화 시트, 데이터 분석, PPT 중 원하는 작업을 선택합니다.",
   },
 ];
 let currentGuideStep = 0;
@@ -727,41 +699,23 @@ function initializeLayout() {
   });
 }
 
-function initializeChat() {
-  const userInput = document.getElementById("user-input");
-  const sendButton = document.getElementById("send-button");
-  const conversionTypeSelect = document.getElementById(
-    "conversion-type-select",
+function initializeTemplateHome() {
+  const startButton = document.getElementById("template-home-start-btn");
+  const templateModalOverlay = document.getElementById(
+    "template-modal-overlay",
   );
 
-  originalSendButtonHtml = sendButton.innerHTML;
-  sendButton.disabled = true;
+  startButton?.addEventListener("click", async () => {
+    resetTemplateAllState();
+    templateModalOverlay?.classList.add("active");
+    setTemplatePreview(currentTemplateAction);
 
-  userInput.addEventListener("input", () => {
-    sendButton.disabled = userInput.value.trim() === "";
-    userInput.style.height = "24px";
-    userInput.style.height = `${userInput.scrollHeight}px`;
-  });
-
-  userInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleUserInput();
+    if (!uploadedFiles.length) {
+      await loadUserFiles();
     }
+
+    renderTemplateFileInfo();
   });
-
-  sendButton.addEventListener("click", handleUserInput);
-
-  // 변환 타입 선택 로직
-  conversionTypeSelect.addEventListener("change", (e) => {
-    selectedConversionType = e.target.value || null;
-    if (selectedConversionType) {
-      addMessage(buildConversionTypeGuideMessage(selectedConversionType), "ai");
-    }
-  });
-
-  // 처음 안내 문구
-  addMessage("무엇을 하고 싶나요 ? 변환할 타입을 선택해 주세요 : ", "ai");
 }
 
 function initializeFileUpload() {
@@ -811,13 +765,14 @@ function initializeFileUpload() {
   });
 
   startUploadBtn.addEventListener("click", () => {
-    if (lastSelectedFile) {
-      const type = getConversionTypeFromFileExtension(lastSelectedFile);
-      document.getElementById("conversion-type-select").value = type;
-      selectedConversionType = type;
-      addMessage(buildUploadedFileGuideMessage(lastSelectedFile, type), "ai");
-      uploadPopupOverlay.classList.remove("active");
-    }
+    if (!lastSelectedFile) return;
+
+    currentTemplateFileName = lastSelectedFile;
+    uploadPopupOverlay.classList.remove("active");
+    currentTemplateAction = "template";
+    document.getElementById("template-modal-overlay")?.classList.add("active");
+    setTemplatePreview(currentTemplateAction);
+    renderTemplateFileInfo();
   });
 
   uploadArea.addEventListener("click", (e) => {
@@ -1915,151 +1870,14 @@ function getFileIconClass(fileName) {
   return "fas fa-file";
 }
 
-function getConversionTypeFromFileExtension(fileName) {
-  const extension = fileName.split(".").pop().toLowerCase();
-  if (["xlsx", "csv", "xls"].includes(extension)) return "Excel/Google Sheets";
-  return "";
-}
+// Direct conversion type selection has been removed.
 
 // ==========================================
-// 채팅 관련 함수
+// Legacy direct formula/macro generation has been removed.
+// Template generation is the only user-facing creation flow.
 // ==========================================
-async function sendApiRequest(message, fileName, conversionType) {
-  const userInput = document.getElementById("user-input");
-  const token = getAuthToken();
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  // ✅ 매크로 타겟 매핑
-  let macroTarget = null;
-  if (conversionType === CONVERSION_TYPE_VBA) macroTarget = "vba";
-  else if (conversionType === CONVERSION_TYPE_APPS_SCRIPT)
-    macroTarget = "appsScript";
-
-  const payload = macroTarget
-    ? { prompt: message, target: macroTarget, fileName }
-    : { message, fileName, conversionType };
-
-  lastUserMessage = message;
-  addMessage(message, "user");
-
-  userInput.value = "";
-  userInput.style.height = "24px";
-  toggleLoadingState(true);
-
-  let data = {};
-  try {
-    const endpoint = macroTarget ? "/api/macro/generate" : "/api/convert";
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload),
-    });
-
-    data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        handleUnauthorized();
-        return;
-      }
-      addMessage(
-        data?.message ||
-          data?.error ||
-          "죄송합니다. API 호출 중 오류가 발생했습니다.",
-        "ai",
-      );
-      return;
-    }
-
-    // ✅ 변환 API는 excelFormula / sheetsFormula 구조,
-    // ✅ 매크로 API는 code / result / script / output 구조를 사용
-    const isFormulaResponse =
-      typeof data?.excelFormula === "string" ||
-      typeof data?.sheetsFormula === "string";
-
-    if (isFormulaResponse) {
-      addMessage(
-        {
-          type: "formula_result",
-          excelFormula: data?.excelFormula || "",
-          sheetsFormula: data?.sheetsFormula || "",
-          compatibility: data?.compatibility || null,
-          debugMeta: data?.debugMeta || null,
-        },
-        "ai",
-        {
-          userMessage: lastUserMessage,
-          result: data?.excelFormula || data?.sheetsFormula || "",
-        },
-      );
-    } else {
-      const resultText =
-        data?.code ??
-        data?.result ??
-        data?.script ??
-        data?.output ??
-        data?.message ??
-        "";
-
-      const isMacroResponse =
-        typeof data?.code === "string" ||
-        typeof data?.result === "string" ||
-        typeof data?.script === "string" ||
-        typeof data?.output === "string";
-
-      if (isMacroResponse) {
-        addMessage(
-          {
-            type: "macro_result",
-            label:
-              data?.target === "appsScript"
-                ? "App Script"
-                : data?.target === "vba"
-                  ? "VBA"
-                  : macroTarget === "appsScript"
-                    ? "App Script"
-                    : "VBA",
-            code: resultText || "",
-          },
-          "ai",
-          {
-            userMessage: lastUserMessage,
-            result: resultText ?? "",
-          },
-        );
-      } else {
-        addMessage(resultText || "결과를 생성하지 못했습니다.", "ai", {
-          userMessage: lastUserMessage,
-          result: resultText ?? "",
-        });
-      }
-    }
-
-    // 실시간 반영
-    await updateSubscriptionBadge();
-  } catch (error) {
-    console.error("API 호출 중 오류 발생:", error);
-    addMessage(
-      error?.message || "죄송합니다. API 호출 중 오류가 발생했습니다.",
-      "ai",
-    );
-  } finally {
-    toggleLoadingState(false);
-  }
-}
-
 function handleUserInput() {
-  const userInput = document.getElementById("user-input");
-  const messageText = userInput.value.trim();
-  if (!messageText) return;
-
-  if (!selectedConversionType) {
-    addMessage("변환할 타입을 먼저 선택해주세요.", "ai");
-    return;
-  }
-
-  sendApiRequest(messageText, lastSelectedFile, selectedConversionType);
+  return null;
 }
 
 function escapeHtml(text = "") {
@@ -2107,6 +1925,8 @@ function addMessage(text, sender, feedbackMeta = null) {
         : "";
 
   const chatMessages = document.getElementById("chat-messages");
+  if (!chatMessages) return;
+
   const messageBubble = document.createElement("div");
   messageBubble.classList.add("message-bubble", sender);
 
@@ -2354,7 +2174,7 @@ async function sendFeedback(
               ? false
               : null,
         reason: feedback === "incorrect" ? (feedbackText || "").trim() : "",
-        conversionType: selectedConversionType,
+        conversionType: null,
       }),
     });
 
@@ -2394,6 +2214,7 @@ async function sendFeedback(
 
 function toggleLoadingState(isLoading) {
   const sendButton = document.getElementById("send-button");
+  if (!sendButton) return;
   sendButton.disabled = isLoading;
   if (isLoading) {
     sendButton.innerHTML = `<svg class="spinner" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle></svg>`;
