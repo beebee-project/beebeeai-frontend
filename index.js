@@ -526,10 +526,6 @@ function initializePopups() {
     .getElementById("template-close-btn")
     ?.addEventListener("click", closeTemplateModal);
 
-  document
-    .getElementById("template-modal-upload-btn")
-    ?.addEventListener("click", openNativeUploadFilePicker);
-
   templateModalOverlay?.addEventListener("click", (e) => {
     if (e.target === templateModalOverlay) {
       closeTemplateModal();
@@ -763,6 +759,9 @@ function initializeFileUpload() {
   const attachButton = document.getElementById("attach-button");
   const uploadButton = document.getElementById("upload-button");
   const uploadFileInput = document.getElementById("upload-file-input");
+  const templateNativeUploadInput = document.getElementById(
+    "template-native-upload-input",
+  );
   const uploadArea = document.querySelector(".upload-area");
   const startUploadBtn = document.getElementById("start-upload-btn");
   const cancelUploadBtn = document.getElementById("cancel-upload-btn");
@@ -800,6 +799,28 @@ function initializeFileUpload() {
         renderTemplateFileInfo();
       }
     }
+    e.target.value = "";
+  });
+
+  templateNativeUploadInput?.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      e.target.value = "";
+      return;
+    }
+
+    await handleFileUpload(file);
+
+    if (
+      document
+        .getElementById("template-modal-overlay")
+        ?.classList.contains("active")
+    ) {
+      await loadUserFiles();
+      currentTemplateFileName = lastSelectedFile || currentTemplateFileName;
+      renderTemplateFileInfo();
+    }
+
     e.target.value = "";
   });
 

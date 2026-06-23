@@ -267,13 +267,19 @@
       <div class="template-modal-content">
         <div class="template-modal-header">
           <p>원하는 작업 예시를 선택해 빠르게 시작하세요.</p>
-          <button
-            type="button"
+          <label
             class="template-modal-upload-button"
-            id="template-modal-upload-btn"
+            id="template-native-upload-label"
+            for="template-native-upload-input"
           >
             파일 업로드
-          </button>
+            <input
+              type="file"
+              id="template-native-upload-input"
+              class="template-native-upload-input"
+              accept=".xlsx,.xls,.csv"
+            />
+          </label>
         </div>
 
         <div class="template-body">

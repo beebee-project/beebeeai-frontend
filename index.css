@@ -2236,6 +2236,21 @@ body.toss-result-page {
   }
 }
 
+.template-modal-upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.template-native-upload-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .template-modal-header h2 {
   font-size: 28px;
   margin-bottom: 8px;
