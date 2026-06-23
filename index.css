@@ -269,6 +269,71 @@ a {
   background-color: #e0a800;
 }
 
+/* ==================== 템플릿 공통 CTA 버튼 ==================== */
+.template-cta-button,
+.template-start-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: #ffc800;
+  color: #272522;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 10px 24px rgba(255, 200, 0, 0.18);
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.template-cta-button:hover,
+.template-start-button:hover:not(:disabled) {
+  background: #ffd21a;
+  box-shadow: 0 14px 30px rgba(255, 200, 0, 0.26);
+  transform: translateY(-1px);
+}
+
+.template-cta-button:active,
+.template-start-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.template-cta-button--home {
+  min-width: 204px;
+  height: 58px;
+  padding: 0 32px;
+  font-size: 18px;
+}
+
+.template-cta-button--upload {
+  min-width: 150px;
+  height: 50px;
+  padding: 0 22px;
+  font-size: 15px;
+}
+
+.template-start-button {
+  min-width: 122px;
+  height: 48px;
+  padding: 0 22px;
+  font-size: 15px;
+}
+
+.template-start-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 /* ==================== 가격 팝업 스타일 ==================== */
 .pricing-card {
   background-color: #ffffff;
@@ -549,16 +614,8 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: min(260px, 100%);
+  width: 100%;
   margin: 34px auto 0;
-}
-
-.template-home-actions .main-action-button {
-  width: auto;
-  min-width: 180px;
-  margin-top: 0;
-  padding: 14px 22px;
-  border-radius: 999px;
 }
 
 @media (max-width: 900px) {
@@ -570,8 +627,8 @@ main {
     flex-direction: column;
   }
 
-  .template-home-actions .main-action-button {
-    width: 100%;
+  .template-home-actions .template-cta-button {
+    width: min(100%, 260px);
   }
 }
 
@@ -1169,28 +1226,6 @@ body.toss-result-page {
   margin: 0;
 }
 
-.template-modal-upload-button {
-  flex: 0 0 auto;
-  border: 1px solid rgba(255, 200, 0, 0.55);
-  border-radius: 999px;
-  background: rgba(255, 200, 0, 0.12);
-  color: #ffc800;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.template-modal-upload-button:hover {
-  background: rgba(255, 200, 0, 0.2);
-  border-color: rgba(255, 200, 0, 0.9);
-  transform: translateY(-1px);
-}
-
 @media (max-width: 768px) {
   .template-modal-header {
     align-items: flex-start;
@@ -1198,15 +1233,9 @@ body.toss-result-page {
     padding-right: 40px;
   }
 
-  .template-modal-upload-button {
+  .template-modal-header .template-cta-button {
     width: 100%;
   }
-}
-
-.template-modal-upload-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .template-native-upload-input {
@@ -1402,28 +1431,6 @@ body.toss-result-page {
   accent-color: #ffc800;
   cursor: pointer;
   flex-shrink: 0;
-}
-
-.template-start-button {
-  min-width: 108px;
-  height: 42px;
-  border: none;
-  border-radius: 10px;
-  background: #ffc800;
-  color: #272522;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.template-start-button:hover {
-  opacity: 0.9;
-}
-
-.template-start-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 @media (max-width: 720px) {
