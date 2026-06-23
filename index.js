@@ -547,12 +547,6 @@ function initializeTemplateHome() {
   startButton?.addEventListener("click", () => {
     openTemplateHomeModal("template");
   });
-
-  document.querySelectorAll("[data-home-template-action]").forEach((card) => {
-    card.addEventListener("click", () => {
-      openTemplateHomeModal(card.dataset.homeTemplateAction || "template");
-    });
-  });
 }
 
 function initializeFileUpload() {
