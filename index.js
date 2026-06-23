@@ -1638,11 +1638,11 @@ const openLoginModal = (event) => {
   document.getElementById("login-modal-overlay")?.classList.add("active");
 };
 
-function applyBetaLocks(betaMode) {
-  document.querySelectorAll("[data-beta-lock]").forEach((el) => {
-    el.classList.toggle("beta-disabled", betaMode);
-  });
-} // false로 변경 시 제거
+// function applyBetaLocks(betaMode) {
+//   document.querySelectorAll("[data-beta-lock]").forEach((el) => {
+//     el.classList.toggle("beta-disabled", betaMode);
+//   });
+// } // false로 변경 시 제거
 
 async function applyBetaLocksFromPlans() {
   try {
