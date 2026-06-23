@@ -1018,17 +1018,33 @@ function renderTemplateFileInfo() {
           const checked = selectedFileName === fileName ? "checked" : "";
 
           return `
-            <label class="template-file-item">
-              <span class="template-file-name">
-                📄 ${escapeHtml(fileName)}
-              </span>
-              <input
-                type="checkbox"
-                class="template-file-checkbox"
-                data-template-file-name="${escapeHtml(fileName)}"
-                ${checked}
-              />
-            </label>
+            <div
+              class="template-file-item"
+              data-template-file-name="${escapeHtml(fileName)}"
+            >
+              <div class="template-file-left">
+                <input
+                  type="checkbox"
+                  class="template-file-checkbox"
+                  data-template-file-name="${escapeHtml(fileName)}"
+                  ${checked}
+                />
+
+                <span class="template-file-name">
+                  📄 ${escapeHtml(fileName)}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                class="template-file-delete-btn"
+                data-template-delete-file-name="${escapeHtml(fileName)}"
+                title="파일 삭제"
+                aria-label="파일 삭제"
+              >
+                <i class="fas fa-trash-alt" aria-hidden="true"></i>
+              </button>
+            </div>
           `;
         })
         .join("")}
@@ -1053,6 +1069,24 @@ function renderTemplateFileInfo() {
       }
 
       resetTemplateRunState();
+      renderTemplateFileInfo();
+    });
+  });
+
+  panel.querySelectorAll(".template-file-delete-btn").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const fileName =
+        button.dataset.templateDeleteFileName ||
+        button.closest(".template-file-item")?.dataset.templateFileName ||
+        "";
+
+      if (!fileName) return;
+
+      await handleFileDelete(fileName);
+      await loadUserFiles();
       renderTemplateFileInfo();
     });
   });
