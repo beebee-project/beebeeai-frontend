@@ -1,8 +1,6 @@
 // --- 전역 변수 ---
 let uploadedFiles = [];
 let lastSelectedFile = null;
-let lastUserMessage = "";
-let originalSendButtonHtml = null;
 let currentTemplateAction = "template";
 let currentTemplateFileName = "";
 let currentAutomationCandidates = [];
@@ -89,39 +87,6 @@ function normalizeTemplateCandidates(json = {}) {
     description: c.description,
     candidate: c,
   }));
-}
-
-function getExamplesForConversionType(conversionType) {
-  const type = findLegacyConversionType(conversionType);
-  if (!type) return [];
-
-  const examples = lastSelectedFile
-    ? type.uploadedExamples || type.examples || []
-    : type.examples || [];
-
-  return Array.isArray(examples) ? examples : [];
-}
-
-function getConversionTypeLabel(conversionType) {
-  const type = findLegacyConversionType(conversionType);
-  return type?.label || conversionType || "";
-}
-
-function buildConversionTypeGuideMessage(conversionType) {
-  const selectedLabel = getConversionTypeLabel(conversionType);
-  const examples = getExamplesForConversionType(conversionType);
-  const exampleLines =
-    examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
-
-  return `✨ '${selectedLabel}' 타입이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}\n\n⚠️ 복잡한 요청은 나눠서 입력하면 더 정확합니다.`;
-}
-
-function buildUploadedFileGuideMessage(fileName, conversionType) {
-  const examples = getExamplesForConversionType(conversionType);
-  const exampleLines =
-    examples.length > 0 ? `\n\n💡 예시\n- ${examples.join("\n- ")}` : "";
-
-  return `✨ '${fileName}' 파일이 선택되었습니다. 관련된 질문을 입력해주세요.${exampleLines}\n\n⚠️ 복잡한 요청은 나눠서 입력하면 더 정확합니다.`;
 }
 
 function handlePostSubscribeUX() {
@@ -533,146 +498,6 @@ function initializePopups() {
   });
 }
 
-// 5. 가이드 투어
-const guideModalOverlay = document.getElementById("guide-modal-overlay");
-const guideOverlay = document.getElementById("guide-overlay");
-
-const guideSteps = [
-  {
-    el: document.getElementById("template-home-start-btn"),
-    text: "1단계: 템플릿 시작하기를 눌러 자동화 시트, 데이터 분석, PPT 생성을 시작합니다.",
-  },
-  {
-    el: document.getElementById("attach-button"),
-    text: "2단계: 파일 업로드 버튼으로 엑셀 또는 CSV 파일을 추가합니다.",
-  },
-  {
-    el: document.querySelector(".template-grid"),
-    text: "3단계: 자동화 시트, 데이터 분석, PPT 중 원하는 작업을 선택합니다.",
-  },
-];
-let currentGuideStep = 0;
-
-function clearGuideHighlight() {
-  document
-    .querySelectorAll(".guide-highlight")
-    .forEach((el) => el.classList.remove("guide-highlight"));
-  document.querySelectorAll(".guide-tooltip").forEach((t) => t.remove());
-  document.querySelectorAll(".guide-info-box").forEach((b) => b.remove());
-}
-
-function highlightElement(el, text) {
-  if (!el || !guideOverlay) return;
-
-  clearGuideHighlight();
-  guideOverlay.classList.add("active");
-  el.classList.add("guide-highlight");
-
-  const rect = el.getBoundingClientRect();
-
-  // 공통 툴팁 생성
-  const tooltip = document.createElement("div");
-  tooltip.className = "guide-tooltip";
-  tooltip.textContent = text;
-  document.body.appendChild(tooltip);
-
-  const tooltipRect = tooltip.getBoundingClientRect();
-  let top = rect.bottom + 12;
-  let left = rect.left;
-
-  if (top + tooltipRect.height > window.innerHeight - 16)
-    top = rect.top - tooltipRect.height - 12;
-  if (left + tooltipRect.width > window.innerWidth - 16)
-    left = window.innerWidth - tooltipRect.width - 16;
-
-  tooltip.style.top = `${top}px`;
-  tooltip.style.left = `${left}px`;
-
-  // --------------- 추가 정보 안내 (단계별 조건)
-  // 단계별 안내 문구
-  let infoHTML = "";
-  let position = "bottom";
-  if (currentGuideStep === 1) {
-    infoHTML = `
-      <div class="guide-info-content">
-        <strong>💡 템플릿 생성</strong><br />
-        파일을 선택하면 데이터 구조를 분석해<br />
-        생성 가능한 업무 템플릿을 추천합니다.
-      </div>`;
-    position = "bottom";
-  } else if (currentGuideStep === 2) {
-    infoHTML = `
-      <div class="guide-info-row">
-        <div class="guide-info-content">
-          <strong>⚙️ 자동화 시트</strong><br />
-          업로드 데이터를 기준으로 요약표와 분석 시트를 생성합니다.
-        </div>
-        <div class="guide-info-content">
-          <strong>📁 업로드 제한</strong><br />
-          파일 업로드는 최대 <b>4개</b> 까지만 가능합니다.
-        </div>
-      </div>`;
-    position = "top";
-  }
-
-  if (infoHTML) {
-    const infoBox = document.createElement("div");
-    infoBox.className = "guide-info-box";
-    infoBox.innerHTML = infoHTML;
-    document.body.appendChild(infoBox);
-
-    const infoRect = infoBox.getBoundingClientRect();
-
-    if (position === "bottom") {
-      infoBox.style.top = `${top + tooltipRect.height + 10}px`;
-    } else {
-      const tooltipTop = parseFloat(tooltip.style.top);
-      const spacing = 14;
-      infoBox.style.top = `${tooltipTop - infoRect.height - spacing}px`;
-    }
-
-    infoBox.style.left = `${left}px`;
-  }
-}
-
-function startGuideTour() {
-  currentGuideStep = 0;
-  guideModalOverlay.classList.add("active");
-  guideOverlay.classList.add("active");
-  nextGuideStep();
-}
-
-function nextGuideStep() {
-  if (currentGuideStep >= guideSteps.length) {
-    endGuideTour();
-    return;
-  }
-  const step = guideSteps[currentGuideStep];
-  currentGuideStep += 1;
-  highlightElement(step.el, step.text);
-}
-
-function endGuideTour() {
-  guideModalOverlay.classList.remove("active");
-  guideOverlay.classList.remove("active");
-  clearGuideHighlight();
-}
-
-// 가이드 메뉴 클릭 시 시작
-document
-  .getElementById("desktop-guide-link")
-  ?.addEventListener("click", (e) => {
-    e.preventDefault();
-    startGuideTour();
-  });
-document.getElementById("mobile-guide-link")?.addEventListener("click", (e) => {
-  e.preventDefault();
-  startGuideTour();
-});
-
-// 클릭으로 다음 단계 진행
-guideOverlay?.addEventListener("click", nextGuideStep);
-
 function initializeLayout() {
   const menuIcon = document.querySelector(".menu-icon");
   const popupOverlay = document.getElementById("popup-overlay");
@@ -730,75 +555,10 @@ function initializeTemplateHome() {
   });
 }
 
-function syncUploadAcceptFromFilter() {
-  const fileTypeSelect = document.getElementById("file-type-select");
-  const uploadFileInput = document.getElementById("upload-file-input");
-
-  const map = {
-    all: ".xlsx,.xls,.csv",
-    xlsx: ".xlsx,.xls",
-    csv: ".csv",
-  };
-
-  const accept = map[fileTypeSelect?.value || "all"] || map.all;
-
-  uploadFileInput?.setAttribute("accept", accept);
-
-  return accept;
-}
-
-function openNativeUploadFilePicker() {
-  syncUploadAcceptFromFilter();
-  document.getElementById("upload-file-input")?.click();
-}
-
 function initializeFileUpload() {
-  const uploadPopupOverlay = document.getElementById("upload-popup-overlay");
-  const attachButton = document.getElementById("attach-button");
-  const uploadButton = document.getElementById("upload-button");
-  const uploadFileInput = document.getElementById("upload-file-input");
   const templateNativeUploadInput = document.getElementById(
     "template-native-upload-input",
   );
-  const uploadArea = document.querySelector(".upload-area");
-  const startUploadBtn = document.getElementById("start-upload-btn");
-  const cancelUploadBtn = document.getElementById("cancel-upload-btn");
-  const fileTypeSelect = document.getElementById("file-type-select");
-
-  attachButton?.addEventListener("click", () => {
-    uploadPopupOverlay.classList.add("active");
-    loadUserFiles();
-    syncUploadAcceptFromFilter();
-  });
-
-  fileTypeSelect?.addEventListener("change", () => {
-    syncUploadAcceptFromFilter();
-    renderFiles(); // 목록 필터 반영
-  });
-
-  cancelUploadBtn.addEventListener("click", () => {
-    uploadPopupOverlay.classList.remove("active");
-  });
-
-  uploadButton.addEventListener("click", () => uploadFileInput.click());
-
-  uploadFileInput.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      await handleFileUpload(file);
-
-      if (
-        document
-          .getElementById("template-modal-overlay")
-          ?.classList.contains("active")
-      ) {
-        await loadUserFiles();
-        currentTemplateFileName = lastSelectedFile || currentTemplateFileName;
-        renderTemplateFileInfo();
-      }
-    }
-    e.target.value = "";
-  });
 
   templateNativeUploadInput?.addEventListener("change", async (e) => {
     const file = e.target.files[0];
@@ -820,44 +580,6 @@ function initializeFileUpload() {
     }
 
     e.target.value = "";
-  });
-
-  startUploadBtn.addEventListener("click", async () => {
-    if (!lastSelectedFile) return;
-
-    currentTemplateFileName = lastSelectedFile;
-    uploadPopupOverlay.classList.remove("active");
-    currentTemplateAction = "template";
-    document.getElementById("template-modal-overlay")?.classList.add("active");
-    setTemplatePreview(currentTemplateAction);
-    await loadUserFiles();
-    renderTemplateFileInfo();
-  });
-
-  uploadArea.addEventListener("click", (e) => {
-    const target = e.target;
-    const fileDisplay = target.closest(".uploaded-file-display");
-    if (!fileDisplay) return;
-
-    const fileName = fileDisplay.dataset.filename;
-
-    if (target.closest(".delete-icon")) {
-      handleFileDelete(fileName);
-    } else if (target.closest(".download-icon")) {
-      handleFileDownload(fileName);
-    } else if (target.matches(".file-checkbox")) {
-      if (target.checked) {
-        lastSelectedFile = fileName;
-        currentTemplateFileName = fileName;
-        uploadArea.querySelectorAll(".file-checkbox").forEach((box) => {
-          if (box !== target) box.checked = false;
-        });
-      } else {
-        lastSelectedFile = null;
-        currentTemplateFileName = "";
-      }
-      updateStartButtonState();
-    }
   });
 }
 
@@ -1754,7 +1476,7 @@ async function loadUserFiles() {
   const token = getAuthToken();
   if (!token) {
     uploadedFiles = [];
-    renderFiles();
+    renderTemplateFileInfo();
     return;
   }
   try {
@@ -1772,11 +1494,11 @@ async function loadUserFiles() {
       throw new Error("파일 목록 로딩 실패");
     }
     uploadedFiles = await response.json();
-    renderFiles();
+    renderTemplateFileInfo();
   } catch (error) {
     console.error(error.message);
     uploadedFiles = [];
-    renderFiles();
+    renderTemplateFileInfo();
   }
 }
 
@@ -1841,7 +1563,7 @@ async function handleFileUpload(file) {
     // ✅ 성공 처리
     uploadedFiles = data; // data가 updatedFiles 역할
     lastSelectedFile = file.name;
-    renderFiles();
+    renderTemplateFileInfo();
     currentTemplateFileName = lastSelectedFile;
     await updateSubscriptionBadge();
   } catch (error) {
@@ -1893,7 +1615,7 @@ async function handleFileDelete(originalName) {
       lastSelectedFile = null;
       currentTemplateFileName = "";
     }
-    renderFiles();
+    renderTemplateFileInfo();
   } catch (error) {
     alert(error.message);
   }
@@ -1902,418 +1624,12 @@ async function handleFileDelete(originalName) {
 // ==========================================
 // UI 렌더링 및 동적 처리 함수
 // ==========================================
-
-function renderFiles() {
-  const uploadArea = document.querySelector(".upload-area");
-  if (!uploadArea) return;
-
-  const filterSelect = document.getElementById("file-type-select");
-  const filterVal = filterSelect ? filterSelect.value : "all";
-  const list = uploadedFiles.filter((f) => {
-    const ext = f.originalName.split(".").pop().toLowerCase();
-    if (filterVal === "all") return true;
-    if (filterVal === "xlsx") return ["xlsx", "xls"].includes(ext);
-    if (filterVal === "csv") return ext === "csv";
-    return true;
-  });
-
-  if (list.length === 0) {
-    uploadArea.innerHTML = `
-      <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-4H8l4-4 4 4h-3v4z"/>
-      </svg>
-      <p>시작하려면 파일을 추가하세요</p>
-    `;
-    uploadArea.classList.remove("has-file");
-  } else {
-    uploadArea.innerHTML = list
-      .map((file) => {
-        const isChecked =
-          lastSelectedFile === file.originalName ? "checked" : "";
-
-        return `
-        <div class="uploaded-file-display" data-filename="${file.originalName}">
-          <div class="file-details">
-            <input type="checkbox" class="file-checkbox" ${isChecked} />
-            <i class="${getFileIconClass(file.originalName)} file-icon"></i>
-            <span class="file-name">${file.originalName}</span>
-          </div>
-          <div class="file-actions">
-            <button class="action-icon delete-icon" title="파일 삭제"><i class="fas fa-trash-alt"></i></button>
-          </div>
-        </div>
-      `;
-      })
-      .join("");
-    uploadArea.classList.add("has-file");
-  }
-  updateStartButtonState();
-}
-
-function updateStartButtonState() {
-  const startUploadBtn = document.getElementById("start-upload-btn");
-  if (startUploadBtn) {
-    startUploadBtn.disabled = !lastSelectedFile;
-  }
-}
-
-function getFileIconClass(fileName) {
-  const extension = fileName.split(".").pop().toLowerCase();
-  if (["xlsx", "csv", "xls"].includes(extension)) return "fas fa-file-excel";
-  return "fas fa-file";
-}
-
-// Direct conversion type selection has been removed.
-
-// ==========================================
-// Legacy direct formula/macro generation has been removed.
-// Template generation is the only user-facing creation flow.
-// ==========================================
-function handleUserInput() {
-  return null;
-}
-
 function escapeHtml(text = "") {
   return String(text)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-function buildLabeledCodeBlock(label, code, copyValue) {
-  return `
-    <div class="formula-card">
-      <div class="formula-card-header">
-        <span class="formula-card-label">${escapeHtml(label)}</span>
-        <button
-          class="copy-button"
-          type="button"
-          title="클립보드에 복사"
-          data-copy="${escapeHtml(copyValue)}"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-          </svg>
-        </button>
-      </div>
-      <div class="code-block">
-        <pre>${escapeHtml(code)}</pre>
-      </div>
-    </div>
-  `;
-}
-
-function addMessage(text, sender, feedbackMeta = null) {
-  const feedbackUserMessage =
-    typeof feedbackMeta === "string"
-      ? feedbackMeta
-      : feedbackMeta?.userMessage || "";
-
-  const feedbackResult =
-    typeof feedbackMeta === "object" && feedbackMeta
-      ? feedbackMeta.result || (typeof text === "string" ? text.trim() : "")
-      : typeof text === "string"
-        ? text.trim()
-        : "";
-
-  const chatMessages = document.getElementById("chat-messages");
-  if (!chatMessages) return;
-
-  const messageBubble = document.createElement("div");
-  messageBubble.classList.add("message-bubble", sender);
-
-  const isStructuredFormulaResult =
-    sender === "ai" &&
-    text &&
-    typeof text === "object" &&
-    text.type === "formula_result";
-
-  const isStructuredMacroResult =
-    sender === "ai" &&
-    text &&
-    typeof text === "object" &&
-    text.type === "macro_result";
-
-  const plainText = typeof text === "string" ? text : "";
-
-  const isFormula =
-    sender === "ai" &&
-    !isStructuredFormulaResult &&
-    !isStructuredMacroResult &&
-    (plainText.trim().startsWith("=") ||
-      plainText.toUpperCase().startsWith("SELECT") ||
-      plainText.includes("prop(") ||
-      plainText.includes("ExcelScript.Workbook") ||
-      /^function\s+[A-Za-z_][A-Za-z0-9_]*\s*\(/m.test(plainText) ||
-      /^Sub\s+[A-Za-z_][A-Za-z0-9_]*\s*\(\s*\)/im.test(plainText));
-
-  if (isStructuredFormulaResult) {
-    const excelFormula = text.excelFormula || "";
-    const sheetsFormula = text.sheetsFormula || "";
-
-    const sameFormula =
-      excelFormula &&
-      sheetsFormula &&
-      excelFormula.trim() === sheetsFormula.trim();
-
-    let blocksHtml = "";
-
-    if (sameFormula) {
-      blocksHtml = buildLabeledCodeBlock("Common", excelFormula, excelFormula);
-    } else {
-      if (excelFormula) {
-        blocksHtml += buildLabeledCodeBlock(
-          "Excel",
-          excelFormula,
-          excelFormula,
-        );
-      }
-      if (sheetsFormula) {
-        blocksHtml += buildLabeledCodeBlock(
-          "Google Sheets",
-          sheetsFormula,
-          sheetsFormula,
-        );
-      }
-    }
-
-    messageBubble.innerHTML = `
-      <div class="formula-result-group">
-        ${blocksHtml}
-      </div>
-      <div class="feedback-container"></div>
-    `;
-
-    messageBubble.querySelectorAll(".copy-button").forEach((copyBtn) => {
-      copyBtn.addEventListener("click", async () => {
-        const value = copyBtn.getAttribute("data-copy") || "";
-        try {
-          await navigator.clipboard.writeText(value);
-          copyBtn.innerHTML = `<i class="fas fa-check"></i>`;
-          setTimeout(() => {
-            copyBtn.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-              </svg>
-            `;
-          }, 1500);
-        } catch (err) {
-          console.error("복사 실패:", err);
-        }
-      });
-    });
-
-    renderFeedbackUI(
-      messageBubble.querySelector(".feedback-container"),
-      feedbackUserMessage,
-      feedbackResult,
-    );
-  } else if (isStructuredMacroResult) {
-    const label = text.label || "VBA";
-    const code = text.code || "";
-
-    messageBubble.innerHTML = `
-      <div class="formula-result-group">
-        ${buildLabeledCodeBlock(label, code, code)}
-      </div>
-      <div class="feedback-container"></div>
-    `;
-
-    const copyBtn = messageBubble.querySelector(".copy-button");
-    if (copyBtn) {
-      copyBtn.addEventListener("click", () => {
-        navigator.clipboard.writeText(code.trim()).then(() => {
-          copyBtn.innerHTML = `<i class="fas fa-check"></i>`;
-          setTimeout(() => {
-            copyBtn.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-              </svg>
-            `;
-          }, 2000);
-        });
-      });
-    }
-
-    renderFeedbackUI(
-      messageBubble.querySelector(".feedback-container"),
-      feedbackUserMessage,
-      feedbackResult,
-    );
-  } else if (isFormula) {
-    messageBubble.innerHTML = `
-      <div class="code-block">
-        <pre>${escapeHtml(plainText.trim())}</pre>
-        <button class="copy-button" type="button" title="클립보드에 복사">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-          </svg>
-        </button>
-      </div>
-      <div class="feedback-container"></div>
-    `;
-
-    const copyButton = messageBubble.querySelector(".copy-button");
-    copyButton.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(plainText.trim());
-        copyButton.innerHTML = `<i class="fas fa-check"></i>`;
-        setTimeout(() => {
-          copyButton.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M16 1H6c-1.1 0-2 .9-2 2v12h2V3h10V1zm3 4H10c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H10V7h9v14z"/>
-            </svg>
-          `;
-        }, 1500);
-      } catch (err) {
-        console.error("복사 실패:", err);
-      }
-    });
-
-    renderFeedbackUI(
-      messageBubble.querySelector(".feedback-container"),
-      feedbackUserMessage,
-      feedbackResult,
-    );
-  } else {
-    messageBubble.textContent = plainText;
-    if (sender === "ai") {
-      messageBubble.style.whiteSpace = "pre-line";
-    }
-  }
-
-  chatMessages.appendChild(messageBubble);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function renderFeedbackUI(container, userMessage, aiResponse) {
-  container.innerHTML = `
-        <p>이 답변이 정확한가요?</p>
-        <button class="feedback-btn feedback-correct">정확함</button>
-        <button class="feedback-btn feedback-incorrect">수정 필요</button>
-    `;
-
-  container.querySelector(".feedback-correct").addEventListener("click", () => {
-    sendFeedback(userMessage, aiResponse, "correct", "", container);
-  });
-
-  container
-    .querySelector(".feedback-incorrect")
-    .addEventListener("click", () => {
-      container.innerHTML = `
-            <div class="feedback-form">
-                <textarea class="feedback-textarea" placeholder="어떤 부분이 잘못되었는지 알려주세요."></textarea>
-                <div class="feedback-actions">
-                    <button class="feedback-submit-btn">제출</button>
-                    <button class="feedback-cancel-btn">취소</button>
-                </div>
-            </div>
-        `;
-      container
-        .querySelector(".feedback-submit-btn")
-        .addEventListener("click", () => {
-          const feedbackText =
-            container.querySelector(".feedback-textarea").value;
-          sendFeedback(
-            userMessage,
-            aiResponse,
-            "incorrect",
-            feedbackText,
-            container,
-          );
-        });
-      container
-        .querySelector(".feedback-cancel-btn")
-        .addEventListener("click", () => {
-          renderFeedbackUI(container, userMessage, aiResponse); // 초기 상태로 복원
-        });
-    });
-}
-
-async function sendFeedback(
-  userMessage,
-  aiResponse,
-  feedback,
-  feedbackText,
-  container,
-) {
-  const token = getAuthToken();
-  if (!token) {
-    alert("로그인이 필요합니다.");
-    document.getElementById("login-modal-overlay")?.classList.add("active");
-    document.getElementById("login-tab")?.click();
-    return;
-  }
-
-  // 로딩 UI (성공/실패 확인 전에는 '감사합니다'를 띄우지 않음)
-  container.innerHTML = `<p class="feedback-thanks">저장 중...</p>`;
-
-  let data = {};
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/convert/feedback`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        message: userMessage,
-        result: aiResponse,
-        isHelpful:
-          feedback === "correct"
-            ? true
-            : feedback === "incorrect"
-              ? false
-              : null,
-        reason: feedback === "incorrect" ? (feedbackText || "").trim() : "",
-        conversionType: null,
-      }),
-    });
-
-    data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        // 토큰 만료/무효 처리
-        clearAuthTokens();
-        window.dispatchEvent(
-          new CustomEvent("auth:changed", { detail: { isLoggedIn: false } }),
-        );
-        updateLoginState();
-
-        alert("로그인이 필요합니다. 다시 로그인해주세요.");
-        document.getElementById("login-modal-overlay")?.classList.add("active");
-        document.getElementById("login-tab")?.click();
-
-        // UI 복구(다시 피드백 가능하게)
-        renderFeedbackUI(container, userMessage, aiResponse);
-        return;
-      }
-
-      // 기타 오류: 메시지 보여주고 UI 복구
-      alert(data?.message || data?.error || "피드백 저장에 실패했습니다.");
-      renderFeedbackUI(container, userMessage, aiResponse);
-      return;
-    }
-
-    // ✅ 성공
-    container.innerHTML = `<p class="feedback-thanks">피드백 감사합니다!</p>`;
-  } catch (e) {
-    alert("네트워크 오류로 피드백 저장에 실패했습니다.");
-    renderFeedbackUI(container, userMessage, aiResponse);
-  }
-}
-
-function toggleLoadingState(isLoading) {
-  const sendButton = document.getElementById("send-button");
-  if (!sendButton) return;
-  sendButton.disabled = isLoading;
-  if (isLoading) {
-    sendButton.innerHTML = `<svg class="spinner" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle></svg>`;
-  } else {
-    sendButton.innerHTML = originalSendButtonHtml;
-  }
 }
 
 // openLoginModal 함수 정의 (updateLoginState에서 사용)

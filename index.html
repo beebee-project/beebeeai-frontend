@@ -63,10 +63,9 @@
 
       <nav class="header-nav">
         <a href="policy.html" id="desktop-policy-link">약관</a>
-        <!-- <a href="#" id="desktop-pricing-link">구독</a> false 변경 시 주석 해지 -->
-        <!-- <a href="#" id="desktop-pricing-link" data-beta-lock="subscribe"
+        <a href="#" id="desktop-pricing-link" data-beta-lock="subscribe"
           >구독</a
-        > -->
+        >
         <a href="#" id="desktop-login-link">로그인</a>
       </nav>
 
@@ -76,54 +75,10 @@
         <button class="close-button" id="popup-close">✕</button>
         <div class="popup-menu">
           <a href="policy.html" id="mobile-policy-link">약관</a>
-          <!-- <a href="#" id="mobile-pricing-link">구독</a> false 변경 시 주석 해지 -->
-          <!-- <a href="#" id="mobile-pricing-link" data-beta-lock="subscribe"
+          <a href="#" id="mobile-pricing-link" data-beta-lock="subscribe"
             >구독</a
-          > -->
-          <a href="#" id="mobile-login-link">로그인</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- 파일 업로드 팝업 오버레이 -->
-    <div id="upload-popup-overlay" class="popup-overlay">
-      <div class="upload-popup">
-        <div class="upload-options-top">
-          <button id="upload-button" class="upload-button">파일 업로드</button>
-          <div class="upload-options-group">
-            <select id="file-type-select">
-              <option value="all">전체</option>
-              <option value="xlsx">xlsx</option>
-              <option value="csv">CSV</option>
-            </select>
-          </div>
-        </div>
-        <div class="upload-area">
-          <svg
-            class="upload-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            viewbox="0 0 24 24"
-            fill="currentColor"
           >
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-4H8l4-4 4 4h-3v4z"
-            />
-          </svg>
-          <p>시작하려면 파일을 추가하세요</p>
-          <input
-            type="file"
-            id="upload-file-input"
-            style="display: none"
-            accept=".xlsx, .csv"
-          />
-        </div>
-        <div class="popup-actions">
-          <button id="cancel-upload-btn" class="cancel-upload-btn">
-            돌아가기
-          </button>
-          <button id="start-upload-btn" class="start-upload-btn" disabled>
-            시작하기
-          </button>
+          <a href="#" id="mobile-login-link">로그인</a>
         </div>
       </div>
     </div>
@@ -224,13 +179,14 @@
       <div class="pricing-modal-content">
         <button class="close-button" id="pricing-close-btn">✕</button>
         <div class="pricing-card">
-          <div class="plan-price">₩5900<span>/월</span></div>
+          <div class="plan-price">₩12,900<span>/월</span></div>
           <p class="plan-description">
-            복잡한 수식은 BeeBee AI에게 맡기고, 업무 시간을 단축하세요.
+            복잡한 시트 작업은 BeeBee AI에게 맡기고, 업무 시간을 단축하세요.
           </p>
           <ul class="plan-features">
-            <li><i class="fas fa-check"></i> 무제한 수식 생성</li>
-            <li><i class="fas fa-check"></i> 무제한 매크로 생성</li>
+            <li><i class="fas fa-check"></i> 무제한 자동화 시트 생성</li>
+            <li><i class="fas fa-check"></i> 무제한 데이터 분석</li>
+            <li><i class="fas fa-check"></i> 무제한 PPT 보고서 생성</li>
             <li><i class="fas fa-check"></i> 파일 업로드 4개</li>
           </ul>
           <button class="cta-button pro-button">구독하기</button>
@@ -299,10 +255,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 가이드 -->
-    <div class="modal-overlay" id="guide-modal-overlay"></div>
-    <div class="guide-overlay" id="guide-overlay"></div>
 
     <main>
       <!-- 템플릿 생성 메인 화면 -->
