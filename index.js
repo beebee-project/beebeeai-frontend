@@ -733,7 +733,6 @@ function initializeTemplateHome() {
 function syncUploadAcceptFromFilter() {
   const fileTypeSelect = document.getElementById("file-type-select");
   const uploadFileInput = document.getElementById("upload-file-input");
-  const hiddenAttachInput = document.getElementById("file-input");
 
   const map = {
     all: ".xlsx,.xls,.csv",
@@ -744,7 +743,6 @@ function syncUploadAcceptFromFilter() {
   const accept = map[fileTypeSelect?.value || "all"] || map.all;
 
   uploadFileInput?.setAttribute("accept", accept);
-  hiddenAttachInput?.setAttribute("accept", accept);
 
   return accept;
 }
@@ -767,7 +765,7 @@ function initializeFileUpload() {
   const cancelUploadBtn = document.getElementById("cancel-upload-btn");
   const fileTypeSelect = document.getElementById("file-type-select");
 
-  attachButton.addEventListener("click", () => {
+  attachButton?.addEventListener("click", () => {
     uploadPopupOverlay.classList.add("active");
     loadUserFiles();
     syncUploadAcceptFromFilter();
