@@ -1468,25 +1468,20 @@ body.toss-result-page {
   }
 
   .template-grid {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
     max-width: none;
     gap: 0;
-    overflow-x: auto;
+    overflow: visible;
     padding: 0 2px;
-    scrollbar-width: none;
-  }
-
-  .template-grid::-webkit-scrollbar {
-    display: none;
   }
 
   .template-card {
-    flex: 1 0 33.333%;
-    min-width: 112px;
+    width: 100%;
+    min-width: 0;
     min-height: 48px;
-    padding: 12px 10px;
+    padding: 12px 6px;
     border-radius: 12px 12px 0 0;
     border-bottom: none;
     display: flex;
@@ -1495,11 +1490,12 @@ body.toss-result-page {
   }
 
   .template-card h3 {
-    font-size: 14px;
+    font-size: clamp(12px, 3.4vw, 14px);
     line-height: 1.2;
     margin: 0;
     text-align: center;
     word-break: keep-all;
+    white-space: nowrap;
   }
 
   .template-card p {
