@@ -1543,8 +1543,8 @@ async function handleFileUpload(file) {
         const label =
           field === "fileUploads"
             ? "파일 업로드"
-            : field === "formulaConversions"
-              ? "AI 변환"
+            : field === "templateGenerations" || field === "formulaConversions"
+              ? "템플릿 생성"
               : "사용량";
 
         alert(
@@ -1688,17 +1688,22 @@ async function updateSubscriptionBadge() {
 
     // FREE(비구독): 사용량 표시
     // 서버 응답 필드명에 맞춰 안전하게 처리 (둘 중 하나로 올 수 있어서 방어)
-    const formulaUsed =
-      data.usage?.formulaConversions ?? data.formulaConversions ?? 0;
+    const templateUsed =
+      data.usage?.templateGenerations ??
+      data.templateGenerations ??
+      data.usage?.formulaConversions ??
+      data.formulaConversions ??
+      0;
     const fileUsed = data.usage?.fileUploads ?? data.fileUploads ?? 0;
 
-    // 비구독 한도: 수식 10회, 업로드 1회
-    const formulaLimit = 10;
-    const fileLimit = 1;
+    // 비구독 한도: 템플릿 생성 5회, 업로드 1회
+    const templateLimit =
+      data.limits?.templateGenerations ?? data.limits?.formulaConversions ?? 5;
+    const fileLimit = data.limits?.fileUploads ?? 1;
 
     if (usageBadge) {
       usageBadge.innerHTML = `
-        <div class="usage-line">AI 변환 ${formulaUsed}/${formulaLimit}회</div>
+        <div class="usage-line">템플릿 생성 ${templateUsed}/${templateLimit}회</div>
         <div class="usage-line">파일 업로드 ${fileUsed}/${fileLimit}회</div>
       `;
       usageBadge.style.display = "inline-block";
