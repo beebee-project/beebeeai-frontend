@@ -1225,14 +1225,46 @@ function renderAutomationExecutionResult(resultJson, selected) {
 }
 
 function resolveAutomationDownloadUrl(json = {}) {
-  return (
+  const direct =
     json.downloadUrl ||
     json.fileUrl ||
     json.url ||
     json.result?.downloadUrl ||
     json.result?.fileUrl ||
-    null
-  );
+    "";
+
+  if (direct) return direct;
+
+  const displayName = resolveTemplateGeneratedFilePath(json);
+  const outputType = json.outputType || json.result?.outputType || "";
+  const storageKey =
+    json.storageKey ||
+    json.summarySheetKey ||
+    json.internalFileKey ||
+    json.result?.storageKey ||
+    json.result?.summarySheetKey ||
+    "";
+
+  if (storageKey) {
+    const params = new URLSearchParams({
+      storageKey,
+      displayName,
+      outputType,
+    });
+    return `/api/automation/download?${params.toString()}`;
+  }
+
+  const filePath = json.filePath || json.result?.filePath || "";
+  if (filePath) {
+    const params = new URLSearchParams({
+      filePath,
+      displayName,
+      outputType,
+    });
+    return `/api/automation/download?${params.toString()}`;
+  }
+
+  return null;
 }
 
 function buildAutomationDownloadMessage(json = {}) {
@@ -1286,6 +1318,62 @@ function resolveTemplateGeneratedFilePath(json = {}) {
   );
 }
 
+function toAbsoluteApiUrl(url = "") {
+  const raw = String(url || "");
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `${API_BASE_URL}${raw.startsWith("/") ? raw : `/${raw}`}`;
+}
+
+async function downloadGeneratedArtifact(json = {}) {
+  const downloadUrl = resolveAutomationDownloadUrl(json);
+  const displayName =
+    resolveTemplateGeneratedFilePath(json) ||
+    json.displayName ||
+    json.fileName ||
+    "download";
+
+  if (!downloadUrl) {
+    alert("다운로드할 파일 정보를 찾을 수 없습니다.");
+    return;
+  }
+
+  const token = getAuthToken();
+  const headers = {};
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(toAbsoluteApiUrl(downloadUrl), {
+    method: "GET",
+    headers,
+  });
+
+  if (res.status === 401) {
+    handleUnauthorized();
+    return;
+  }
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    alert(text || "파일 다운로드에 실패했습니다.");
+    return;
+  }
+
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = objectUrl;
+  a.download = displayName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(objectUrl);
+}
+
 function renderTemplateGeneratedResult({
   title,
   desc,
@@ -1322,8 +1410,8 @@ function renderTemplateGeneratedResult({
 
   document
     .getElementById("template-download-btn")
-    ?.addEventListener("click", () => {
-      window.location.href = downloadUrl;
+    ?.addEventListener("click", async () => {
+      await downloadGeneratedArtifact(json);
     });
 
   document
