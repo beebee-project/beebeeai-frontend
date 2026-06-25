@@ -31,18 +31,53 @@ const TEMPLATE_PREVIEW_MAP = {
   },
 };
 
-const OUTPUT_TYPE_LABEL_MAP = {
-  summarySheet: "자동화 시트",
-  analysisReport: "데이터 분석",
-  ppt: "PPT 생성",
-};
+const OUTPUT_ARTIFACTS = Object.freeze({
+  summarySheet: Object.freeze({
+    outputType: "summarySheet",
+    uiLabel: "자동화 시트",
+    extension: "xlsx",
+  }),
+  analysisReport: Object.freeze({
+    outputType: "analysisReport",
+    uiLabel: "데이터 분석",
+    extension: "json",
+  }),
+  ppt: Object.freeze({
+    outputType: "ppt",
+    uiLabel: "PPT 생성",
+    extension: "pptx",
+  }),
+});
+
+const OUTPUT_TYPE_ALIASES = Object.freeze({
+  reportJson: "analysisReport",
+  reportJSON: "analysisReport",
+  report_json: "analysisReport",
+  json: "analysisReport",
+  analysis: "analysisReport",
+  analysisJson: "analysisReport",
+  template: "summarySheet",
+  workbook: "summarySheet",
+  xlsx: "summarySheet",
+  powerpoint: "ppt",
+  pptx: "ppt",
+});
+
+function normalizeOutputType(outputType = "") {
+  const raw = String(outputType || "").trim();
+  if (!raw) return null;
+  const aliased = OUTPUT_TYPE_ALIASES[raw] || raw;
+  return OUTPUT_ARTIFACTS[aliased] ? aliased : null;
+}
+
+function getOutputTypeUiLabel(outputType = "") {
+  const normalized = normalizeOutputType(outputType);
+  return normalized ? OUTPUT_ARTIFACTS[normalized].uiLabel : "";
+}
 
 function normalizeOutputTypes(outputTypes = []) {
-  const aliases = { reportJson: "analysisReport", json: "analysisReport" };
   const source = Array.isArray(outputTypes) ? outputTypes : [outputTypes];
-  const normalized = source
-    .map((type) => aliases[type] || type)
-    .filter((type) => OUTPUT_TYPE_LABEL_MAP[type]);
+  const normalized = source.map(normalizeOutputType).filter(Boolean);
   return [...new Set(normalized)];
 }
 
@@ -962,7 +997,12 @@ function renderAutomationCandidateList(candidates = []) {
               ${
                 item.type === "businessTemplate"
                   ? `<div class="automation-candidate-desc">
-                              ${escapeHtml((item.outputTypes || []).join(" · "))}
+                              ${escapeHtml(
+                                (item.outputTypes || [])
+                                  .map(getOutputTypeUiLabel)
+                                  .filter(Boolean)
+                                  .join(" · "),
+                              )}
                               ${
                                 item.matchedCount
                                   ? ` · 매칭 ${escapeHtml(String(item.matchedCount))}개`
@@ -1268,11 +1308,14 @@ function resolveAutomationDownloadUrl(json = {}) {
 }
 
 function buildAutomationDownloadMessage(json = {}) {
+  const outputType = json.outputType || json.result?.outputType || "";
+  const label = getOutputTypeUiLabel(outputType) || "결과";
+
   if (json.fileName)
-    return `엑셀 자동화 파일이 생성되었습니다.\n파일명: ${json.fileName}`;
+    return `${label} 파일이 생성되었습니다.\n파일명: ${json.fileName}`;
   if (json.filePath)
-    return `엑셀 자동화 파일이 생성되었습니다.\n경로: ${json.filePath}`;
-  return "엑셀 자동화 파일이 생성되었습니다.";
+    return `${label} 파일이 생성되었습니다.\n경로: ${json.filePath}`;
+  return `${label} 파일이 생성되었습니다.`;
 }
 
 function basenameFromStoragePath(value = "") {
