@@ -22,8 +22,8 @@ const TEMPLATE_PREVIEW_MAP = {
     desc: "업로드된 데이터를 쿼리화하고, 반복 업무에 사용할 수 있는 자동화 시트를 생성합니다.",
   },
   automation: {
-    title: "데이터 분석",
-    desc: "업로드된 데이터를 구조화해 핵심 지표, 요약, 추이, 인사이트를 자동으로 분석합니다.",
+    title: "분석 보고서",
+    desc: "자동화 결과를 핵심 요약, 표, 인사이트가 포함된 보고서 데이터로 정리합니다.",
   },
   ppt: {
     title: "PPT 보고서",
@@ -39,7 +39,7 @@ const OUTPUT_ARTIFACTS = Object.freeze({
   }),
   analysisReport: Object.freeze({
     outputType: "analysisReport",
-    uiLabel: "데이터 분석",
+    uiLabel: "분석 보고서",
     extension: "json",
   }),
   ppt: Object.freeze({
@@ -81,6 +81,49 @@ function normalizeOutputTypes(outputTypes = []) {
   return [...new Set(normalized)];
 }
 
+function formatConfidencePercent(confidence) {
+  const n = Number(confidence);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  const pct = n <= 1 ? Math.round(n * 100) : Math.round(n);
+  return pct >= 70 ? `${pct}%` : "";
+}
+
+function renderCandidateBadges(item = {}) {
+  const badges = [];
+
+  if (item.aiAssisted) {
+    badges.push(
+      `<span class="automation-candidate-badge automation-candidate-badge--ai">AI 보조 매칭</span>`,
+    );
+  }
+
+  const confidence = formatConfidencePercent(item.confidence);
+  if (confidence) {
+    badges.push(
+      `<span class="automation-candidate-badge">신뢰도 ${escapeHtml(confidence)}</span>`,
+    );
+  }
+
+  if (!badges.length) return "";
+  return `<div class="automation-candidate-badges">${badges.join("")}</div>`;
+}
+
+function renderCandidateRecommendation(item = {}) {
+  const reason = String(item.recommendationReason || "").trim();
+  if (!reason) return "";
+  return `<div class="automation-candidate-reason">${escapeHtml(reason)}</div>`;
+}
+
+function renderCandidateMatchedHeaders(item = {}) {
+  const headers = Array.isArray(item.matchedHeaders)
+    ? item.matchedHeaders.filter(Boolean).slice(0, 6)
+    : [];
+
+  if (!headers.length) return "";
+
+  return `<div class="automation-candidate-matched-headers">매칭 헤더: ${escapeHtml(headers.join(" · "))}</div>`;
+}
+
 function normalizeTemplateCandidates(json = {}) {
   const businessTemplates = Array.isArray(json.businessTemplateCandidates)
     ? json.businessTemplateCandidates
@@ -93,6 +136,9 @@ function normalizeTemplateCandidates(json = {}) {
       title: t.title,
       description: t.description,
       confidence: t.confidence,
+      aiAssisted: !!t.aiAssisted,
+      recommendationReason: t.recommendationReason || "",
+      matchedHeaders: Array.isArray(t.matchedHeaders) ? t.matchedHeaders : [],
       matchedCount: Array.isArray(t.candidates) ? t.candidates.length : 0,
       candidate: t.primaryCandidate || t.candidates?.[0] || null,
       candidates: t.candidates || [],
@@ -992,8 +1038,12 @@ function renderAutomationCandidateList(candidates = []) {
         .map(
           (item, index) => `
             <button class="automation-candidate-card" data-candidate-index="${index}">
-              <div class="automation-candidate-title">${escapeHtml(item.title || `자동화 후보 ${index + 1}`)}</div>
+              <div class="automation-candidate-title-row">
+                <div class="automation-candidate-title">${escapeHtml(item.title || `자동화 후보 ${index + 1}`)}</div>
+                ${renderCandidateBadges(item)}
+              </div>
               <div class="automation-candidate-desc">${escapeHtml(item.description || "")}</div>
+              ${renderCandidateRecommendation(item)}
               ${
                 item.type === "businessTemplate"
                   ? `<div class="automation-candidate-desc">
@@ -1008,9 +1058,10 @@ function renderAutomationCandidateList(candidates = []) {
                                   ? ` · 매칭 ${escapeHtml(String(item.matchedCount))}개`
                                   : ""
                               }
-                            </div>`
+                            </div>
+                            ${renderCandidateMatchedHeaders(item)}`
                   : ""
-              }            
+              }
             </button>
           `,
         )
@@ -1106,9 +1157,7 @@ async function exportTemplateAnalysisFromCandidate(selected) {
   }
 
   const message =
-    selected?.candidate?.title ||
-    selected?.title ||
-    "데이터 분석 및 인사이트 생성";
+    selected?.candidate?.title || selected?.title || "분석 보고서 생성";
 
   const { res, json } = await authFetch(
     "/api/automation/export-analysis-report",
@@ -1132,13 +1181,13 @@ async function exportTemplateAnalysisFromCandidate(selected) {
   );
 
   if (!res.ok || !json.ok) {
-    alert(json.error || json.message || "데이터 분석 생성에 실패했습니다.");
+    alert(json.error || json.message || "분석 보고서 생성에 실패했습니다.");
     return;
   }
 
   renderTemplateGeneratedResult({
-    title: "데이터 분석 생성 완료",
-    desc: "선택한 후보 기반 인사이트 파일이 생성되었습니다.",
+    title: "분석 보고서 생성 완료",
+    desc: "선택한 후보 기반 분석 보고서 파일이 생성되었습니다.",
     json,
   });
 }
@@ -1196,7 +1245,7 @@ function renderAutomationExecutionResult(resultJson, selected) {
     currentTemplateAction === "template"
       ? "자동화 시트 생성"
       : currentTemplateAction === "automation"
-        ? "데이터 분석 생성"
+        ? "분석 보고서 생성"
         : "PPT 보고서 생성";
 
   const sectionPreviewHtml = sections.length
@@ -1522,8 +1571,8 @@ async function exportTemplateAnalysis(fileName) {
     const panel = document.getElementById("template-preview-panel");
     if (panel) {
       panel.innerHTML = `
-        <div class="template-preview-title">데이터 분석 생성 중...</div>
-        <div class="template-preview-desc">선택한 파일의 인사이트를 생성하고 있습니다.</div>
+        <div class="template-preview-title">분석 보고서 생성 중...</div>
+        <div class="template-preview-desc">선택한 파일의 핵심 요약과 인사이트를 보고서로 정리하고 있습니다.</div>
       `;
     }
 
@@ -1533,24 +1582,24 @@ async function exportTemplateAnalysis(fileName) {
         method: "POST",
         body: JSON.stringify({
           queryTablesKey: currentQueryTablesKey,
-          message: "데이터 분석 및 인사이트 생성",
+          message: "분석 보고서 생성",
         }),
       },
     );
 
     if (!res.ok || !json.ok) {
-      alert(json.error || json.message || "데이터 분석 생성에 실패했습니다.");
+      alert(json.error || json.message || "분석 보고서 생성에 실패했습니다.");
       renderTemplateFileInfo();
       return;
     }
 
     renderTemplateGeneratedResult({
-      title: "데이터 분석 생성 완료",
-      desc: "인사이트 파일이 생성되었습니다.",
+      title: "분석 보고서 생성 완료",
+      desc: "분석 보고서 파일이 생성되었습니다.",
       json,
     });
   } catch (error) {
-    alert(error.message || "데이터 분석 생성에 실패했습니다.");
+    alert(error.message || "분석 보고서 생성에 실패했습니다.");
     renderTemplateFileInfo();
   }
 }
